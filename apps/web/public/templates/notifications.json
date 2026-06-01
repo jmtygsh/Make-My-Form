@@ -1,0 +1,184 @@
+{
+  "notifications": {
+    "components": [
+      {
+        "id": "text-0",
+        "label": "Text block",
+        "label_info": "WYSIWYG Editor",
+        "type": "text",
+        "content": "<p class=\"leading-7 not-first:mt-6\"><span class=\"text-lg font-semibold\">Notifications</span><br><span class=\"text-sm text-muted-foreground\">Configure how you receive notifications.</span></p>",
+        "category": "content",
+        "icon": "Text",
+        "properties": {"style": {"asCard": "no", "showLabel": "yes", "visible": "yes", "labelPosition": "top", "labelAlign": "start", "textAlign": "left", "colSpan": "12", "colStart": "auto"}, "variant": "default"},
+        "attributes": {"id": "text-0"}
+      },
+      {
+        "id": "radio-0",
+        "label": "Notify me about...",
+        "label_info": "Group of radio buttons",
+        "type": "radio",
+        "value": "all",
+        "options": [
+          {"value": "all", "label": "All new messages"},
+          {"value": "direct", "label": " Direct messages and mentions"},
+          {"label": "Nothing", "value": "none", "checked": false}
+        ],
+        "category": "form",
+        "icon": "CircleDotIcon",
+        "properties": {"style": {"asCard": "no", "showLabel": "yes", "visible": "yes", "labelPosition": "top", "labelAlign": "start", "textAlign": "left", "colSpan": "12", "colStart": "auto"}, "variant": "default"},
+        "attributes": {"id": "radio-0"}
+      },
+      {
+        "id": "text-1",
+        "label": "Text block",
+        "label_info": "WYSIWYG Editor",
+        "type": "text",
+        "content": "<p class=\"leading-7 not-first:mt-6\"><span class=\"text-lg font-semibold\">Email Notifications</span></p>",
+        "category": "content",
+        "icon": "Text",
+        "properties": {"style": {"asCard": "no", "showLabel": "yes", "visible": "yes", "labelPosition": "top", "labelAlign": "start", "textAlign": "left", "colSpan": "12", "colStart": "auto"}, "variant": "default"},
+        "attributes": {"id": "text-1"}
+      },
+      {
+        "id": "switch-0",
+        "label": "Communication emails",
+        "label_info": "Toggle switch",
+        "label_description": "Receive emails about your account activity.",
+        "type": "switch",
+        "value": true,
+        "description": "",
+        "category": "form",
+        "icon": "ToggleLeftIcon",
+        "properties": {"style": {"asCard": "yes", "showLabel": "no", "visible": "yes", "labelPosition": "top", "labelAlign": "start", "textAlign": "left", "colSpan": "12", "colStart": "auto"}, "variant": "default"},
+        "attributes": {"id": "switch-0"}
+      },
+      {
+        "id": "switch-1",
+        "label": "Marketing emails",
+        "label_info": "Toggle switch",
+        "label_description": "Receive emails about new products, features, and more.",
+        "type": "switch",
+        "category": "form",
+        "icon": "ToggleLeftIcon",
+        "properties": {"style": {"asCard": "yes", "showLabel": "no", "visible": "yes", "labelPosition": "top", "labelAlign": "start", "textAlign": "left", "colSpan": "12", "colStart": "auto"}, "variant": "default"},
+        "attributes": {"id": "switch-1"}
+      },
+      {
+        "id": "switch-2",
+        "label": "Social Emails",
+        "label_info": "Toggle switch",
+        "label_description": "Receive emails for friend requests, follows, and more.",
+        "type": "switch",
+        "category": "form",
+        "icon": "ToggleLeftIcon",
+        "properties": {"style": {"asCard": "yes", "showLabel": "no", "visible": "yes", "labelPosition": "top", "labelAlign": "start", "textAlign": "left", "colSpan": "12", "colStart": "auto"}, "variant": "default"},
+        "attributes": {"id": "switch-2"}
+      },
+      {
+        "id": "switch-3",
+        "label": "Security Emails",
+        "label_info": "Toggle switch",
+        "label_description": "Receive emails about your account activity and security.",
+        "type": "switch",
+        "value": true,
+        "category": "form",
+        "icon": "ToggleLeftIcon",
+        "properties": {"style": {"asCard": "yes", "showLabel": "no", "visible": "yes", "labelPosition": "top", "labelAlign": "start", "textAlign": "left", "colSpan": "12", "colStart": "auto"}, "variant": "default"},
+        "attributes": {"id": "switch-3"}
+      },
+      {
+        "id": "checkbox-0",
+        "label": "Use different settings for my mobile devices",
+        "label_info": "Checkbox input",
+        "label_description": "You can manage your mobile notifications in the mobile settings page.",
+        "type": "checkbox",
+        "value": false,
+        "category": "form",
+        "icon": "CheckSquareIcon",
+        "properties": {"style": {"asCard": "no", "showLabel": "no", "visible": "yes", "labelPosition": "top", "labelAlign": "start", "textAlign": "left", "colSpan": "12", "colStart": "auto"}, "variant": "default"},
+        "attributes": {"id": "checkbox-0"},
+        "overrides": {"md": {"value": true, "properties": {"style": {"asCard": "no"}}}}
+      },
+      {
+        "id": "submit-button-0",
+        "label": "Submit",
+        "label_info": "Button to submit form",
+        "type": "submit-button",
+        "content": "Update Nottifications",
+        "category": "form",
+        "icon": "SquareMousePointer",
+        "properties": {"style": {"asCard": "no", "showLabel": "no", "visible": "yes", "labelPosition": "top", "labelAlign": "start", "textAlign": "left", "colSpan": "12", "colStart": "auto"}, "variant": "default"},
+        "overrides": {"md": {"properties": {"style": {"colSpan": "3"}}}},
+        "attributes": {"type": "submit", "id": "submit-button-0"}
+      }
+    ],
+    "formTitle": "Notifications",
+    "formDescription": "Configure how you receive notifications.",
+    "tags": ["notifications", "email"],
+    "image": "/templates/images/notifications.png",
+    "category": "user-account"
+  },
+  "notification_preferences": {
+    "components": [
+      {"id": "text-0", "label": "Text block", "label_info": "WYSIWYG Editor", "type": "text", "content": "<p class=\"leading-7 not-first:mt-6\"><span class=\"text-lg font-semibold\">Notification Preferences</span><br><span class=\"text-sm text-muted-foreground\">Customize how and when you receive notifications.</span></p>", "category": "content", "icon": "Text", "properties": {"style": {"asCard": "no", "showLabel": "yes", "visible": "yes", "labelPosition": "top", "labelAlign": "start", "textAlign": "left", "colSpan": "12", "colStart": "auto"}, "variant": "default"}, "attributes": {"id": "text-0"}},
+      {"id": "email-input-0", "label": "Email Address", "label_info": "Input field for email addresses", "type": "email", "category": "form", "icon": "Mail", "properties": {"style": {"asCard": "no", "showLabel": "yes", "visible": "yes", "labelPosition": "top", "labelAlign": "start", "textAlign": "left", "colSpan": "12", "colStart": "auto"}, "variant": "default"}, "attributes": {"type": "email", "id": "email-input-0", "placeholder": "Your email address"}, "validations": {"required": "yes", "email": true}},
+      {"id": "checkbox-group-0", "label": "Email Notifications", "label_info": "Group of checkboxes", "type": "checkbox-group", "options": [{"value": "security", "label": "Security Alerts"}, {"value": "updates", "label": "Product Updates"}, {"value": "newsletter", "label": "Newsletter"}, {"value": "promotions", "label": "Promotions & Offers"}, {"value": "reminders", "label": "Appointment Reminders"}], "category": "form", "icon": "Mail", "properties": {"style": {"asCard": "yes", "showLabel": "yes", "visible": "yes", "labelPosition": "top", "labelAlign": "start", "textAlign": "left", "colSpan": "6", "colStart": "auto"}, "variant": "default"}, "attributes": {"id": "checkbox-group-0"}},
+      {"id": "checkbox-group-1", "label": "SMS Notifications", "label_info": "Group of checkboxes", "type": "checkbox-group", "options": [{"value": "urgent", "label": "Urgent Alerts"}, {"value": "appointments", "label": "Appointment Confirmations"}, {"value": "delivery", "label": "Delivery Updates"}, {"value": "account", "label": "Account Changes"}], "category": "form", "icon": "Smartphone", "properties": {"style": {"asCard": "yes", "showLabel": "yes", "visible": "yes", "labelPosition": "top", "labelAlign": "start", "textAlign": "left", "colSpan": "6", "colStart": "auto"}, "variant": "default"}, "attributes": {"id": "checkbox-group-1"}},
+      {"id": "tel-input-0", "label": "Mobile Number", "label_info": "Input field for telephone numbers", "type": "tel", "category": "form", "icon": "Phone", "properties": {"style": {"asCard": "no", "showLabel": "yes", "visible": "yes", "labelPosition": "top", "labelAlign": "start", "textAlign": "left", "colSpan": "12", "colStart": "auto"}, "variant": "default"}, "attributes": {"type": "tel", "id": "tel-input-0", "placeholder": "Mobile number for SMS"}},
+      {"id": "radio-group-0", "label": "Notification Frequency", "label_info": "Radio button group", "type": "radio", "options": [{"value": "immediate", "label": "Immediate"}, {"value": "daily", "label": "Daily Digest"}, {"value": "weekly", "label": "Weekly Summary"}, {"value": "monthly", "label": "Monthly Summary"}], "category": "form", "icon": "Clock", "properties": {"style": {"asCard": "yes", "showLabel": "yes", "visible": "yes", "labelPosition": "top", "labelAlign": "start", "textAlign": "left", "colSpan": "12", "colStart": "auto"}, "variant": "default"}, "attributes": {"id": "radio-group-0"}, "validations": {"required": "yes"}},
+      {"id": "checkbox-0", "label": "Enable push notifications on mobile devices", "label_info": "Checkbox input", "type": "checkbox", "category": "form", "icon": "Smartphone", "properties": {"style": {"asCard": "no", "showLabel": "no", "visible": "yes", "labelPosition": "top", "labelAlign": "start", "textAlign": "left", "colSpan": "12", "colStart": "auto"}, "variant": "default"}, "attributes": {"id": "checkbox-0"}},
+      {"id": "submit-button-0", "label": "Submit", "label_info": "Button to submit form", "type": "submit-button", "content": "Save Preferences", "category": "form", "icon": "SquareMousePointer", "properties": {"style": {"asCard": "no", "showLabel": "no", "visible": "yes", "labelPosition": "top", "labelAlign": "start", "textAlign": "left", "colSpan": "12", "colStart": "auto"}, "variant": "default"}, "attributes": {"type": "submit", "id": "submit-button-0"}}
+    ],
+    "formTitle": "Notification Preferences",
+    "formDescription": "Customize how and when you receive notifications",
+    "tags": ["notifications", "preferences", "settings"],
+    "category": "notifications",
+    "image": "/templates/images/notification_preferences.png"
+  },
+  "email_frequency": {
+    "components": [
+      {"id": "text-0", "label": "Text block", "label_info": "WYSIWYG Editor", "type": "text", "content": "<p class=\"leading-7 not-first:mt-6\"><span class=\"text-lg font-semibold\">Email Frequency Settings</span><br><span class=\"text-sm text-muted-foreground\">Customize how often you receive different types of emails.</span></p>", "category": "content", "icon": "Text", "properties": {"style": {"asCard": "no", "showLabel": "yes", "visible": "yes", "labelPosition": "top", "labelAlign": "start", "textAlign": "left", "colSpan": "12", "colStart": "auto"}, "variant": "default"}, "attributes": {"id": "text-0"}},
+      {"id": "email-input-0", "label": "Email Address", "label_info": "Input field for email addresses", "type": "email", "category": "form", "icon": "Mail", "properties": {"style": {"asCard": "no", "showLabel": "yes", "visible": "yes", "labelPosition": "top", "labelAlign": "start", "textAlign": "left", "colSpan": "12", "colStart": "auto"}, "variant": "default"}, "attributes": {"type": "email", "id": "email-input-0", "placeholder": "Your email address"}, "validations": {"required": "yes", "email": true}},
+      {"id": "radio-group-0", "label": "Newsletter Frequency", "label_info": "Radio button group", "type": "radio", "options": [{"value": "daily", "label": "Daily"}, {"value": "weekly", "label": "Weekly"}, {"value": "monthly", "label": "Monthly"}, {"value": "never", "label": "Never"}], "category": "form", "icon": "Clock", "properties": {"style": {"asCard": "yes", "showLabel": "yes", "visible": "yes", "labelPosition": "top", "labelAlign": "start", "textAlign": "left", "colSpan": "6", "colStart": "auto"}, "variant": "default"}, "attributes": {"id": "radio-group-0"}, "validations": {"required": "yes"}},
+      {"id": "radio-group-1", "label": "Marketing Emails", "label_info": "Radio button group", "type": "radio", "options": [{"value": "weekly", "label": "Weekly"}, {"value": "monthly", "label": "Monthly"}, {"value": "quarterly", "label": "Quarterly"}, {"value": "never", "label": "Never"}], "category": "form", "icon": "Megaphone", "properties": {"style": {"asCard": "yes", "showLabel": "yes", "visible": "yes", "labelPosition": "top", "labelAlign": "start", "textAlign": "left", "colSpan": "6", "colStart": "auto"}, "variant": "default"}, "attributes": {"id": "radio-group-1"}, "validations": {"required": "yes"}},
+      {"id": "checkbox-group-0", "label": "Notification Types", "label_info": "Group of checkboxes", "type": "checkbox-group", "options": [{"value": "account-updates", "label": "Account Updates"}, {"value": "security-alerts", "label": "Security Alerts"}, {"value": "product-news", "label": "Product News"}, {"value": "special-offers", "label": "Special Offers"}, {"value": "event-invites", "label": "Event Invitations"}, {"value": "survey-requests", "label": "Survey Requests"}], "category": "form", "icon": "Bell", "properties": {"style": {"asCard": "yes", "showLabel": "yes", "visible": "yes", "labelPosition": "top", "labelAlign": "start", "textAlign": "left", "colSpan": "12", "colStart": "auto"}, "variant": "default"}, "attributes": {"id": "checkbox-group-0"}},
+      {"id": "submit-button-0", "label": "Submit", "label_info": "Button to submit form", "type": "submit-button", "content": "Update Preferences", "category": "form", "icon": "SquareMousePointer", "properties": {"style": {"asCard": "no", "showLabel": "no", "visible": "yes", "labelPosition": "top", "labelAlign": "start", "textAlign": "left", "colSpan": "12", "colStart": "auto"}, "variant": "default"}, "attributes": {"type": "submit", "id": "submit-button-0"}}
+    ],
+    "formTitle": "Email Frequency Settings",
+    "formDescription": "Customize how often you receive different types of emails",
+    "tags": ["email", "frequency", "settings"],
+    "category": "notifications",
+    "image": "/templates/images/email_frequency.png"
+  },
+  "push_notification_settings": {
+    "components": [
+      {"id": "text-0", "label": "Text block", "label_info": "WYSIWYG Editor", "type": "text", "content": "<p class=\"leading-7 not-first:mt-6\"><span class=\"text-lg font-semibold\">Push Notification Settings</span><br><span class=\"text-sm text-muted-foreground\">Configure your mobile and desktop push notifications.</span></p>", "category": "content", "icon": "Text", "properties": {"style": {"asCard": "no", "showLabel": "yes", "visible": "yes", "labelPosition": "top", "labelAlign": "start", "textAlign": "left", "colSpan": "12", "colStart": "auto"}, "variant": "default"}, "attributes": {"id": "text-0"}},
+      {"id": "text-input-0", "label": "Device Name", "label_info": "Single line text input", "type": "input", "category": "form", "icon": "Smartphone", "properties": {"style": {"asCard": "no", "showLabel": "yes", "visible": "yes", "labelPosition": "top", "labelAlign": "start", "textAlign": "left", "colSpan": "6", "colStart": "auto"}, "variant": "default"}, "attributes": {"type": "text", "id": "text-input-0", "placeholder": "My iPhone, Work Laptop, etc."}, "validations": {"required": "yes"}},
+      {"id": "select-0", "label": "Device Type", "label_info": "Dropdown select", "type": "select", "category": "form", "icon": "Monitor", "options": [{"value": "mobile", "label": "Mobile Device"}, {"value": "desktop", "label": "Desktop Computer"}, {"value": "tablet", "label": "Tablet"}, {"value": "browser", "label": "Web Browser"}], "properties": {"style": {"asCard": "no", "showLabel": "yes", "visible": "yes", "labelPosition": "top", "labelAlign": "start", "textAlign": "left", "colSpan": "6", "colStart": "auto"}, "variant": "default"}, "attributes": {"id": "select-0"}, "validations": {"required": "yes"}},
+      {"id": "checkbox-group-0", "label": "Notification Categories", "label_info": "Group of checkboxes", "type": "checkbox-group", "options": [{"value": "messages", "label": "Messages & Chats"}, {"value": "reminders", "label": "Reminders & Tasks"}, {"value": "updates", "label": "System Updates"}, {"value": "social", "label": "Social Activity"}, {"value": "news", "label": "Breaking News"}, {"value": "emergency", "label": "Emergency Alerts"}], "category": "form", "icon": "Bell", "properties": {"style": {"asCard": "yes", "showLabel": "yes", "visible": "yes", "labelPosition": "top", "labelAlign": "start", "textAlign": "left", "colSpan": "12", "colStart": "auto"}, "variant": "default"}, "attributes": {"id": "checkbox-group-0"}},
+      {"id": "radio-group-0", "label": "Quiet Hours", "label_info": "Radio button group", "type": "radio", "options": [{"value": "none", "label": "No Quiet Hours"}, {"value": "night", "label": "10 PM - 8 AM"}, {"value": "work", "label": "9 AM - 5 PM"}, {"value": "custom", "label": "Custom Schedule"}], "category": "form", "icon": "Moon", "properties": {"style": {"asCard": "yes", "showLabel": "yes", "visible": "yes", "labelPosition": "top", "labelAlign": "start", "textAlign": "left", "colSpan": "12", "colStart": "auto"}, "variant": "default"}, "attributes": {"id": "radio-group-0"}, "validations": {"required": "yes"}},
+      {"id": "submit-button-0", "label": "Submit", "label_info": "Button to submit form", "type": "submit-button", "content": "Save Settings", "category": "form", "icon": "SquareMousePointer", "properties": {"style": {"asCard": "no", "showLabel": "no", "visible": "yes", "labelPosition": "top", "labelAlign": "start", "textAlign": "left", "colSpan": "12", "colStart": "auto"}, "variant": "default"}, "attributes": {"type": "submit", "id": "submit-button-0"}}
+    ],
+    "formTitle": "Push Notification Settings",
+    "formDescription": "Configure your mobile and desktop push notifications",
+    "tags": ["push", "notifications", "mobile"],
+    "category": "notifications",
+    "image": "/templates/images/push_notification_settings.png"
+  },
+  "alert_subscription": {
+    "components": [
+      {"id": "text-0", "label": "Text block", "label_info": "WYSIWYG Editor", "type": "text", "content": "<p class=\"leading-7 not-first:mt-6\"><span class=\"text-lg font-semibold\">Alert Subscription</span><br><span class=\"text-sm text-muted-foreground\">Subscribe to specific alerts and notifications based on your interests.</span></p>", "category": "content", "icon": "Text", "properties": {"style": {"asCard": "no", "showLabel": "yes", "visible": "yes", "labelPosition": "top", "labelAlign": "start", "textAlign": "left", "colSpan": "12", "colStart": "auto"}, "variant": "default"}, "attributes": {"id": "text-0"}},
+      {"id": "text-input-0", "label": "Full Name", "label_info": "Single line text input", "type": "input", "category": "form", "icon": "User", "properties": {"style": {"asCard": "no", "showLabel": "yes", "visible": "yes", "labelPosition": "top", "labelAlign": "start", "textAlign": "left", "colSpan": "6", "colStart": "auto"}, "variant": "default"}, "attributes": {"type": "text", "id": "text-input-0", "placeholder": "Your full name"}, "validations": {"required": "yes"}},
+      {"id": "email-input-0", "label": "Email Address", "label_info": "Input field for email addresses", "type": "email", "category": "form", "icon": "Mail", "properties": {"style": {"asCard": "no", "showLabel": "yes", "visible": "yes", "labelPosition": "top", "labelAlign": "start", "textAlign": "left", "colSpan": "6", "colStart": "auto"}, "variant": "default"}, "attributes": {"type": "email", "id": "email-input-0", "placeholder": "your@email.com"}, "validations": {"required": "yes", "email": true}},
+      {"id": "checkbox-group-0", "label": "Alert Categories", "label_info": "Group of checkboxes", "type": "checkbox-group", "options": [{"value": "weather", "label": "Weather Alerts"}, {"value": "traffic", "label": "Traffic Updates"}, {"value": "stock", "label": "Stock Market"}, {"value": "sports", "label": "Sports Scores"}, {"value": "tech", "label": "Technology News"}, {"value": "health", "label": "Health Advisories"}], "category": "form", "icon": "AlertTriangle", "properties": {"style": {"asCard": "yes", "showLabel": "yes", "visible": "yes", "labelPosition": "top", "labelAlign": "start", "textAlign": "left", "colSpan": "12", "colStart": "auto"}, "variant": "default"}, "attributes": {"id": "checkbox-group-0"}, "validations": {"required": "yes"}},
+      {"id": "select-0", "label": "Delivery Method", "label_info": "Dropdown select", "type": "select", "category": "form", "icon": "Send", "options": [{"value": "email", "label": "Email Only"}, {"value": "sms", "label": "SMS Only"}, {"value": "both", "label": "Email + SMS"}, {"value": "push", "label": "Push Notifications"}], "properties": {"style": {"asCard": "no", "showLabel": "yes", "visible": "yes", "labelPosition": "top", "labelAlign": "start", "textAlign": "left", "colSpan": "6", "colStart": "auto"}, "variant": "default"}, "attributes": {"id": "select-0"}, "validations": {"required": "yes"}},
+      {"id": "tel-input-0", "label": "Phone Number", "label_info": "Input field for telephone numbers", "type": "tel", "category": "form", "icon": "Phone", "properties": {"style": {"asCard": "no", "showLabel": "yes", "visible": "yes", "labelPosition": "top", "labelAlign": "start", "textAlign": "left", "colSpan": "6", "colStart": "auto"}, "variant": "default"}, "attributes": {"type": "tel", "id": "tel-input-0", "placeholder": "For SMS alerts (optional)"}},
+      {"id": "submit-button-0", "label": "Submit", "label_info": "Button to submit form", "type": "submit-button", "content": "Subscribe to Alerts", "category": "form", "icon": "SquareMousePointer", "properties": {"style": {"asCard": "no", "showLabel": "no", "visible": "yes", "labelPosition": "top", "labelAlign": "start", "textAlign": "left", "colSpan": "12", "colStart": "auto"}, "variant": "default"}, "attributes": {"type": "submit", "id": "submit-button-0"}}
+    ],
+    "formTitle": "Alert Subscription",
+    "formDescription": "Subscribe to specific alerts and notifications based on your interests",
+    "tags": ["alerts", "subscription", "notifications"],
+    "category": "notifications",
+    "image": "/templates/images/alert_subscription.png"
+  }
+} 

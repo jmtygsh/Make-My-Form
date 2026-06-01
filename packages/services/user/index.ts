@@ -14,7 +14,7 @@ import {
   signInUserWithEmailAndPasswordInput,
   signInUserWithEmailAndPasswordInputType,
   verifyUserEmailWithTokenInput,
-  verifyUserEmailWithTokenInputType
+  verifyUserEmailWithTokenInputType,
 } from "./model";
 
 import EmailService from "../email";
@@ -23,16 +23,23 @@ import { env } from "../env";
 class UserService {
 
   private async getUserInfoById(id: string) {
-    const user = await db.select({
-      id: usersTable.id,
-      email: usersTable.email,
-      fullName: usersTable.fullName,
-      profileImageUrl: usersTable.profileImageUrl
-    }).from(usersTable).where(eq(usersTable.id, id))
+    const users = await db
+      .select({
+        id: usersTable.id,
+        email: usersTable.email,
+        fullName: usersTable.fullName,
+        profileImageUrl: usersTable.profileImageUrl,
+      })
+      .from(usersTable)
+      .where(eq(usersTable.id, id));
 
-    if (!user || user.length === 0) throw new Error(`user with id does not exist`);
+    const user = users[0];
 
-    return user[0];
+    if (!user) {
+      throw new Error(`User with id ${id} does not exist`);
+    }
+
+    return user;
   }
 
 
@@ -84,7 +91,6 @@ class UserService {
 
 
   public async createUserWithEmailAndPassword(payload: createUserWithEmailAndPasswordInputType) {
-    // TODO: implement user creation logic
 
     const { fullName, email, password } = await createUserWithEmailAndPasswordInput.parseAsync(payload);
 
@@ -188,7 +194,7 @@ class UserService {
     const { token: resetPasswordToken } = await this.generateUserToken({ id: userInfo.id });
 
     // insert password reset token to database
-    await db.insert(passwordResetTokensTable).values({
+    const newToken = await db.insert(passwordResetTokensTable).values({
       userId: userInfo.id,
       passwordResetToken: resetPasswordToken,
       passwordResetExpiresAt: new Date(Date.now() + 60 * 10 * 1000), // 10 minutes
@@ -197,8 +203,13 @@ class UserService {
     // send email for reset password
     await EmailService.sendResetPasswordEmail(email, resetPasswordToken);
 
-    const message = "Reset password token sent to your email address."
-    return { message };
+    const finalToken = newToken[0];
+
+    if (!finalToken) throw new Error("new token generation failed")
+
+    return {
+      id: finalToken.id
+    };
 
   }
 
@@ -230,6 +241,7 @@ class UserService {
 
     return { id: userInfo.id };
   }
+
 
 }
 

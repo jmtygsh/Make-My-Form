@@ -11,6 +11,7 @@ import {
     integer
 } from "drizzle-orm/pg-core";
 import { usersTable } from "./user";
+import { json } from "zod";
 
 
 // type check for json 
@@ -50,7 +51,7 @@ export const formTable = pgTable("form", {
     unlistedSlug: varchar("unlisted_slug", { length: 255 }).notNull().unique(),
 
 
-    visibility: visibilityEnum("visibility").default("public"),
+    visibility: visibilityEnum("visibility").default("public").notNull(),
     responseLimit: integer("response_limit"),
 
     // data 
@@ -66,6 +67,16 @@ export const formTable = pgTable("form", {
     updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
 });
 
+
+export const submissionFormTable = pgTable("submission_form", {
+    id: uuid("id").primaryKey().defaultRandom(),
+    formId: uuid("form_id").references(() => formTable.id, { onDelete: "cascade" }).notNull(),
+
+    submission: jsonb("submission").$type<FormPayload>(),
+
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
+})
 
 
 

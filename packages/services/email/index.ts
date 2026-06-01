@@ -3,11 +3,11 @@ import { env } from "../env";
 
 class EmailService {
 
-    public static async sendEmailVerificationEmail(email: string, token: string) {
-        const verificationUrl = `${env.BASE_URL}/verify-email?token=${token}`;
+  public static async sendEmailVerificationEmail(email: string, token: string) {
+    const verificationUrl = `${env.BASE_URL}/verify?token=${token}`;
 
-        const subject = "Verify your email address";
-        const html = `
+    const subject = "Verify your email address";
+    const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2>Welcome!</h2>
         <p>Thank you for registering. Please verify your email address by clicking the link below:</p>
@@ -22,14 +22,14 @@ class EmailService {
       </div>
     `;
 
-        await sendEmail(email, subject, html);
-    }
+    await sendEmail(email, subject, html);
+  }
 
-    public static async sendResetPasswordEmail(email: string, token: string) {
-        const resetUrl = `${env.BASE_URL}/reset-password?token=${token}`;
+  public static async sendResetPasswordEmail(email: string, token: string) {
+    const resetUrl = `${env.BASE_URL}/reset-password?token=${token}`;
 
-        const subject = "Reset your password";
-        const html = `
+    const subject = "Reset your password";
+    const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2>Password Reset Request</h2>
         <p>We received a request to reset your password. Click the link below to set a new password:</p>
@@ -45,8 +45,8 @@ class EmailService {
       </div>
     `;
 
-        await sendEmail(email, subject, html);
-    }
+    await sendEmail(email, subject, html);
+  }
 }
 
 export default EmailService;

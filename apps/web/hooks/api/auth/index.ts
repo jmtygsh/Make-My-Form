@@ -40,9 +40,6 @@ export const useSignUp = () => {
     }
 }
 
-
-
-
 export const useSignIn = () => {
 
     // refresh useUser again if sign up is complete (may be your cache is not updated so, refresh it) tell to useUser hook
@@ -83,22 +80,116 @@ export const useSignIn = () => {
     }
 }
 
+export const useForgotPassword = () => {
+    const {
+        mutateAsync: forgotPasswordAsync,
+        mutate: forgotPassword,
+        error,
+        failureCount,
+        isError,
+        isIdle,
+        isSuccess,
+        status,
+    } = trpc.auth.forgetPassword.useMutation();
 
-// to use
+    return {
+        forgotPasswordAsync,
+        forgotPassword,
+        error,
+        failureCount,
+        isError,
+        isIdle,
+        isSuccess,
+        status,
+    };
+};
 
-// const { signInUserWithEmailAndPasswordAsync } = useSignIn()
+export const useResetPassword = () => {
+    const {
+        mutateAsync: resetPasswordAsync,
+        mutate: resetPassword,
+        error,
+        failureCount,
+        isError,
+        isIdle,
+        isSuccess,
+        status,
+    } = trpc.auth.resetPassword.useMutation();
 
-// // then on submit funtion with asynce funtion
+    return {
+        resetPasswordAsync,
+        resetPassword,
+        error,
+        failureCount,
+        isError,
+        isIdle,
+        isSuccess,
+        status,
+    };
+};
 
-// const {id} = await signInUserWithEmailAndPasswordAsync({
-//     email,
-//     password
-// })
+export const useVerifyUserEmailWithToken = () => {
+    const utils = trpc.useUtils();
 
+    const {
+        mutateAsync: verifyUserEmailWithTokenAsync,
+        mutate: verifyUserEmailWithToken,
+        error,
+        failureCount,
+        isError,
+        isIdle,
+        isSuccess,
+        status,
+    } = trpc.auth.verifyUserEmailWithToken.useMutation({
+        // invalidate user cache since email verification changes user state
+        onSuccess: async () => {
+            await utils.auth.getLoggedInUserInfo.invalidate();
+        },
+    });
 
+    return {
+        verifyUserEmailWithTokenAsync,
+        verifyUserEmailWithToken,
+        error,
+        failureCount,
+        isError,
+        isIdle,
+        isSuccess,
+        status,
+    };
+};
 
+export const useLogout = () => {
+    const utils = trpc.useUtils();
 
-export const useUser = () => {
+    const {
+        mutateAsync: logoutAsync,
+        mutate: logout,
+        error,
+        failureCount,
+        isError,
+        isIdle,
+        isSuccess,
+        status,
+    } = trpc.auth.logout.useMutation({
+        onSuccess: async () => {
+            await utils.auth.getLoggedInUserInfo.invalidate();
+        },
+    });
+
+    return {
+        logoutAsync,
+        logout,
+        error,
+        failureCount,
+        isError,
+        isIdle,
+        isSuccess,
+        status,
+    };
+};
+
+export const useMe = () => {
     const { data: user, error, isFetched, isFetching, isLoading, status } = trpc.auth.getLoggedInUserInfo.useQuery()
     return {
         user,
@@ -109,3 +200,6 @@ export const useUser = () => {
         status
     }
 }
+
+
+

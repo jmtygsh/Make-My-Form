@@ -1,9 +1,24 @@
 import { userService } from "../../services";
-import { createUserWithEmailAndPasswordInputModel, createUserWithEmailAndPasswordOutputModel, forgetPasswordInputModel, forgetPasswordOutputModel, getLoggerInUserInfoInputModel, getLoggerInUserInfoOutput, signInUserWithEmailAndPasswordInputModel, signInUserWithEmailAndPasswordOutputModel, verifyUserEmailWithTokenInputModel, verifyUserEmailWithTokenOutputModel, resetPasswordInputModel, resetPasswordOutputModel } from "./model";
+import {
+  createUserWithEmailAndPasswordInputModel,
+  createUserWithEmailAndPasswordOutputModel,
+  forgetPasswordInputModel,
+  forgetPasswordOutputModel,
+  getLoggerInUserInfoInputModel,
+  getLoggerInUserInfoOutput,
+  signInUserWithEmailAndPasswordInputModel,
+  signInUserWithEmailAndPasswordOutputModel,
+  verifyUserEmailWithTokenInputModel,
+  verifyUserEmailWithTokenOutputModel,
+  resetPasswordInputModel,
+  resetPasswordOutputModel,
+  logoutInputModel,
+  logoutOutputModel
+} from "./model";
 
-import { publicProcedure, router } from "../../trpc";
+import { publicProcedure, protectedProcedure, router } from "../../trpc";
 import { generatePath } from "../../utils/path-generator";
-import { getAuthenticationCookie, setAuthenticationCookie } from "../../utils/cookie";
+import { clearAuthenticationCookie, getAuthenticationCookie, setAuthenticationCookie } from "../../utils/cookie";
 
 const TAGS = ["Authentication"];
 const getPath = generatePath("/authentication");
@@ -11,7 +26,7 @@ const getPath = generatePath("/authentication");
 export const authRouter = router({
 
   createUserWithEmailAndPassword: publicProcedure
-    .meta({ openapi: { method: "POST", path: getPath("/createUserWithEmailAndPassword"), tags: TAGS } })
+    .meta({ openapi: { method: "POST", path: getPath("/create-user-with-email-and-password"), tags: TAGS } })
     .input(createUserWithEmailAndPasswordInputModel)
     .output(createUserWithEmailAndPasswordOutputModel)
     .mutation(async ({ input, ctx }) => {
@@ -28,7 +43,7 @@ export const authRouter = router({
 
 
   signInUserWithEmailAndPassword: publicProcedure
-    .meta({ openapi: { method: "POST", path: getPath("/signInUserWithEmailAndPassword"), tags: TAGS } })
+    .meta({ openapi: { method: "POST", path: getPath("/sign-in-user-with-email-and-password"), tags: TAGS } })
     .input(signInUserWithEmailAndPasswordInputModel)
     .output(signInUserWithEmailAndPasswordOutputModel)
     .mutation(async ({ input, ctx }) => {
@@ -44,32 +59,24 @@ export const authRouter = router({
     }),
 
 
-  getLoggedInUserInfo: publicProcedure
-    .meta({ openapi: { method: "POST", path: getPath("/getLoggedInUserInfo"), tags: TAGS } })
+  getLoggedInUserInfo: protectedProcedure
+    .meta({ openapi: { method: "POST", path: getPath("/get-logged-in-user-info"), tags: TAGS } })
     .input(getLoggerInUserInfoInputModel)
     .output(getLoggerInUserInfoOutput)
     .query(async ({ ctx }) => {
-
-      const userToken = getAuthenticationCookie(ctx);
-      if (!userToken) throw new Error(`user is not logged in`)
-
-      const { id, email, fullName, profileImageUrl } = await userService.verifyAndDecoderUserToken(userToken)
-
-      if (!id || !email || !fullName) {
-        throw new Error("User data is incomplete");
-      }
-
+      const { id, email, fullName, profileImageUrl } = ctx.user;
       return {
         id,
         email,
         fullName,
         profileImageUrl
-      }
+      };
     }),
 
 
+
   verifyUserEmailWithToken: publicProcedure
-    .meta({ openapi: { method: "POST", path: getPath("/verifyUserEmailWithToken"), tags: TAGS } })
+    .meta({ openapi: { method: "POST", path: getPath("/verify-user-email-with-token"), tags: TAGS } })
     .input(verifyUserEmailWithTokenInputModel)
     .output(verifyUserEmailWithTokenOutputModel)
     .mutation(async ({ input }) => {
@@ -81,18 +88,18 @@ export const authRouter = router({
 
 
   forgetPassword: publicProcedure
-    .meta({ openapi: { method: "POST", path: getPath("/forgetPassword"), tags: TAGS } })
+    .meta({ openapi: { method: "POST", path: getPath("/forget-password"), tags: TAGS } })
     .input(forgetPasswordInputModel)
     .output(forgetPasswordOutputModel)
     .mutation(async ({ input }) => {
-      const { message } = await userService.forgetPassword({ email: input.email });
+      const { id } = await userService.forgetPassword({ email: input.email });
       return {
-        message
+        id
       };
     }),
 
   resetPassword: publicProcedure
-    .meta({ openapi: { method: "POST", path: getPath("/resetPassword"), tags: TAGS } })
+    .meta({ openapi: { method: "POST", path: getPath("/reset-password"), tags: TAGS } })
     .input(resetPasswordInputModel)
     .output(resetPasswordOutputModel)
     .mutation(async ({ input }) => {
@@ -104,5 +111,19 @@ export const authRouter = router({
         id
       };
     }),
+
+
+  logout: protectedProcedure
+    .meta({ openapi: { method: "POST", path: getPath("/logout"), tags: TAGS } })
+    .input(logoutInputModel)
+    .output(logoutOutputModel)
+    .mutation(async ({ ctx }) => {
+
+      clearAuthenticationCookie(ctx);
+      return {
+        message: "LOGGED_OUT"
+      };
+    }),
+
 
 });
