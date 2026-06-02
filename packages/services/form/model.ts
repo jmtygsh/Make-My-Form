@@ -49,3 +49,20 @@ export const showAllThePublicFormsInput = z.object({
 })
 
 export type showAllThePublicFormsInputType = z.infer<typeof showAllThePublicFormsInput>;
+
+
+
+// getAllMyForms (builder - list forms owned by current user)
+export const getAllMyFormsInput = z.object({
+    userId: z.string().uuid().describe("uuid of the user"),
+})
+export type getAllMyFormsInputType = z.infer<typeof getAllMyFormsInput>;
+
+
+
+// getMyFormById (builder - load one form's draft by id, ownership-checked)
+export const getMyFormByIdInput = z.object({
+    userId: z.string().uuid().describe("uuid of the user"),
+    formId: z.string().uuid().describe("uuid of the form to load for editing"),
+})
+export type getMyFormByIdInputType = z.infer<typeof getMyFormByIdInput>;

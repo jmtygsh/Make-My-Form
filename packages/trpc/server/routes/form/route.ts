@@ -10,6 +10,10 @@ import {
     storeFormSubmissionIntoDbOutputModel,
     showAllThePublicFormsInputModel,
     showAllThePublicFormsOutputModel,
+    getAllMyFormsInputModel,
+    getAllMyFormsOutputModel,
+    getMyFormByIdInputModel,
+    getMyFormByIdOutputModel,
 } from "./model";
 
 import { publicProcedure, protectedProcedure, router } from "../../trpc";
@@ -104,6 +108,35 @@ export const formRouter = router({
             });
 
             return result;
+        }),
+
+
+    // getAllMyForms - list all forms owned by the current user (form-builder "My Forms" list)
+    getAllMyForms: protectedProcedure
+        .meta({ openapi: { method: "GET", path: getPath("/get-all-my-forms"), tags: TAGS } })
+        .input(getAllMyFormsInputModel)
+        .output(getAllMyFormsOutputModel)
+        .query(async ({ ctx }) => {
+            const result = await formService.getAllMyForms({
+                userId: ctx.user.id,
+            });
+
+            return result;
+        }),
+
+
+    // getMyFormById - load one form's draft for editing (form-builder, ownership-checked)
+    getMyFormById: protectedProcedure
+        .meta({ openapi: { method: "GET", path: getPath("/get-my-form-by-id"), tags: TAGS } })
+        .input(getMyFormByIdInputModel)
+        .output(getMyFormByIdOutputModel)
+        .query(async ({ input, ctx }) => {
+            const form = await formService.getMyFormById({
+                userId: ctx.user.id,
+                formId: input.formId,
+            });
+
+            return form;
         }),
 
 });

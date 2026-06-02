@@ -11,7 +11,11 @@ import {
     showTheFormBySlugInputType,
     showTheFormBySlugInput,
     showAllThePublicFormsInputType,
-    showAllThePublicFormsInput
+    showAllThePublicFormsInput,
+    getAllMyFormsInput,
+    getAllMyFormsInputType,
+    getMyFormByIdInput,
+    getMyFormByIdInputType,
 } from "./model";
 import { formTable, submissionFormTable } from "../../database/models/form"
 
@@ -276,6 +280,69 @@ class FormService {
     }
 
 
+    // get all forms owned by the current user (for the form-builder "My Forms" list)
+    public async getAllMyForms(payload: getAllMyFormsInputType) {
+        const { userId } = await getAllMyFormsInput.parseAsync(payload);
+
+        const forms = await db
+            .select({
+                id: formTable.id,
+                title: formTable.title,
+                description: formTable.description,
+                visibility: formTable.visibility,
+                // boolean: true when the jsonb column holds a non-null payload
+                hasDraft: sql<boolean>`${formTable.draft} IS NOT NULL`,
+                hasPublished: sql<boolean>`${formTable.published} IS NOT NULL`,
+                createdAt: formTable.createdAt,
+            })
+            .from(formTable)
+            .where(
+                and(
+                    eq(formTable.userId, userId),
+                    eq(formTable.isDeleted, false)
+                )
+            )
+            .orderBy(desc(formTable.createdAt));
+
+        return { forms };
+    }
+
+
+    // get one form by id for editing (form-builder) - ownership-checked, returns draft
+    public async getMyFormById(payload: getMyFormByIdInputType) {
+        const { userId, formId } = await getMyFormByIdInput.parseAsync(payload);
+
+        const forms = await db
+            .select()
+            .from(formTable)
+            .where(
+                and(
+                    eq(formTable.id, formId),
+                    eq(formTable.userId, userId),
+                    eq(formTable.isDeleted, false)
+                )
+            )
+            .limit(1);
+
+        const foundForm = forms[0];
+        if (!foundForm) {
+            throw new Error("FORM_NOT_FOUND");
+        }
+
+        return {
+            id: foundForm.id,
+            title: foundForm.title,
+            description: foundForm.description,
+            visibility: foundForm.visibility,
+            draft: foundForm.draft,
+            publicSlug: foundForm.publicSlug,
+            unlistedSlug: foundForm.unlistedSlug,
+            responseLimit: foundForm.responseLimit,
+            createdAt: foundForm.createdAt,
+            updatedAt: foundForm.updatedAt,
+        };
+    }
 }
+
 
 export default FormService;

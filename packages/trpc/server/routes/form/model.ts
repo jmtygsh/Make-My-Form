@@ -53,6 +53,7 @@ export const showAllThePublicFormsInputModel = z.object({
     limit: z.number().int().min(1).max(100).default(10),
     search: z.string().optional(),
 });
+
 export const showAllThePublicFormsOutputModel = z.object({
     forms: z.array(
         z.object({
@@ -74,4 +75,43 @@ export const showAllThePublicFormsOutputModel = z.object({
         hasNextPage: z.boolean(),
         hasPrevPage: z.boolean(),
     }),
+});
+
+
+
+// getAllMyForms (builder - list forms owned by current user)
+export const getAllMyFormsInputModel = z.object({});
+
+export const getAllMyFormsOutputModel = z.object({
+    forms: z.array(
+        z.object({
+            id: z.string().uuid(),
+            title: z.string(),
+            description: z.string().nullable(),
+            visibility: z.enum(["public", "unlisted"]),
+            hasDraft: z.boolean(),
+            hasPublished: z.boolean(),
+            createdAt: z.date().nullable(),
+        }),
+    ),
+});
+
+
+
+// getMyFormById (builder - load one form's draft by id, ownership-checked)
+export const getMyFormByIdInputModel = z.object({
+    formId: z.string().uuid().describe("uuid of the form to load for editing"),
+});
+
+export const getMyFormByIdOutputModel = z.object({
+    id: z.string().uuid(),
+    title: z.string(),
+    description: z.string().nullable(),
+    visibility: z.enum(["public", "unlisted"]),
+    draft: z.record(z.string(), z.unknown()).nullable(),
+    publicSlug: z.string(),
+    unlistedSlug: z.string(),
+    responseLimit: z.number().nullable(),
+    createdAt: z.date().nullable(),
+    updatedAt: z.date().nullable(),
 });
