@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 
 const logos = [
   { name: "Coca Cola", src: "/company/cocacola.webp" },

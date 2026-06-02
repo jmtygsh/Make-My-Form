@@ -14,9 +14,9 @@ import {
   Slot as SlotPrimitive,
 } from "radix-ui";
 import * as React from "react";
-import { cn } from "@/lib/utils";
-import { useAsRef } from "@/hooks/use-as-ref";
-import { useLazyRef } from "@/hooks/use-lazy-ref";
+import { cn } from "~/lib/utils";
+import { useAsRef } from "~/hooks/use-as-ref";
+import { useLazyRef } from "~/hooks/use-lazy-ref";
 
 const ROOT_NAME = "FileUpload";
 const DROPZONE_NAME = "FileUploadDropzone";
@@ -1039,9 +1039,8 @@ function FileUploadItem(props: FileUploadItemProps) {
         id={id}
         aria-setsize={fileCount}
         aria-posinset={fileIndex}
-        aria-describedby={`${nameId} ${sizeId} ${statusId} ${
-          fileState.error ? messageId : ""
-        }`}
+        aria-describedby={`${nameId} ${sizeId} ${statusId} ${fileState.error ? messageId : ""
+          }`}
         aria-labelledby={nameId}
         data-slot="file-upload-item"
         dir={context.dir}

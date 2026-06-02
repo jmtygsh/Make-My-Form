@@ -17,10 +17,7 @@ export const updateFormIntoDb = z.object({
     formId: z.string().uuid().describe("uuid of user submitted form id"),
     draft: z.record(z.string(), z.unknown()).optional().describe("form data for draft"),
     publish: z.record(z.string(), z.unknown()).optional().describe("form data for live publish")
-}).refine(
-    (data) => data.draft !== undefined || data.publish !== undefined,
-    { message: "Either draft or publish must be provided" }
-);
+})
 
 export type updateFormIntoDbInputType = z.infer<typeof updateFormIntoDb>;
 

@@ -15,10 +15,8 @@ export const updateFormDataIntoDbInputModel = z.object({
     formId: z.string().uuid().describe("uuid of the form to update"),
     draft: z.record(z.string(), z.unknown()).optional().describe("form data for draft"),
     publish: z.record(z.string(), z.unknown()).optional().describe("form data for live publish"),
-}).refine(
-    (data) => data.draft !== undefined || data.publish !== undefined,
-    { message: "Either draft or publish must be provided" }
-);
+})
+
 export const updateFormDataIntoDbOutputModel = z.object({
     id: z.string().uuid().describe("form id"),
     public_slug: z.string().describe("slug url"),
