@@ -18,20 +18,25 @@ const openApiDocument = generateOpenApiDocument(serverRouter, {
   baseUrl: env.BASE_URL.concat("/api"),
 });
 
-if (env.NODE_ENV !== "production") {
-  app.use(
-    cors({
-      origin: "*",
-    }),
-  );
-} else {
-  app.use(
-    cors({
-      origin: env.BASE_URL,
-      credentials: true
-    }),
-  );
-}
+const allowedOrigins = env.FRONTEND_URL.split(",").map((o) => o.trim());
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      return callback(new Error(`CORS: origin '${origin}' not allowed`));
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "x-trpc-source",
+      "x-trpc-accept",
+    ],
+  }),
+);
 
 app.use(cookieParser());
 app.use(express.json());

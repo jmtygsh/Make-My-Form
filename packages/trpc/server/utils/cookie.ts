@@ -8,11 +8,13 @@ const ONE_DAY = 24 * ONE_HOUR;
 const ONE_MONTH = 30 * ONE_DAY;
 const ONE_YEAR = 12 * ONE_MONTH;
 
+const isProduction = process.env.NODE_ENV === "production";
+
 const defaultCookieOptions: CookieOptions = {
     path: "/",
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
     maxAge: ONE_YEAR
 };
 
