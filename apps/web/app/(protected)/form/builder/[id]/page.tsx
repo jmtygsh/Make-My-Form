@@ -11,5 +11,3 @@ const FormBuilder = () => {
         <div>page</div>
     )
 }
-
-export default FormBuilder;

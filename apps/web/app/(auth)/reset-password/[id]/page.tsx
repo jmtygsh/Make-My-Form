@@ -5,5 +5,5 @@ export default function ResetPasswordPage({
 }: {
   params: { id: string };
 }) {
-  return <ResetPasswordForm id={params.id} />;
+  return <ResetPasswordForm token={params.id} />;
 }

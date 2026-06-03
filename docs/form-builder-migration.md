@@ -31,6 +31,27 @@
 - **Two new tRPC endpoints** are required for the builder (ownership-checked, returns `draft` not `published`).
 - **Out of scope:** `form-credit-card.tsx` (dropped), `socialLinks.tsx` (deferred), public form responses (deferred).
 
+## 🏁 End-to-End Goal (user's stated objective)
+
+The full form builder workflow that must work end-to-end:
+
+```
+User (authed)          Server                Friend (unauthed)
+─────────────         ──────                ──────────────────
+  │                     │                          │
+  ├─ Create form ──────►│                          │
+  ├─ Edit in builder ──►│  (saves to `draft`)      │
+  ├─ Publish ──────────►│  (saves to `published`)  │
+  ├─ Get slug ─────────►│  → returns slug          │
+  ├─ Share slug URL ────┼─────────────────────────►│
+  │                     │◄───── Open slug page ────┤
+  │                     │◄───── Fill & submit ─────┤
+  │                     │  (saves response)        │
+  ├─ View responses ───►│                          │
+```
+
+**Implication:** beyond the builder UI, we also need a **public form viewer** (e.g. `app/(public)/form/[slug]/page.tsx`) that uses the existing `showTheFormBySlug` endpoint to render the published form, and `storeFormSubmissionIntoDb` to save responses. This is added to scope as a Phase 15 follow-up.
+
 ---
 
 ## 📍 Source & Target
