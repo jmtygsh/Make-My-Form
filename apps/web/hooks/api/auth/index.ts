@@ -163,8 +163,7 @@ export const useLogout = () => {
     const utils = trpc.useUtils();
 
     const {
-        mutateAsync: logoutAsync,
-        mutate: logout,
+        mutateAsync: logout,
         error,
         failureCount,
         isError,
@@ -178,7 +177,6 @@ export const useLogout = () => {
     });
 
     return {
-        logoutAsync,
         logout,
         error,
         failureCount,
@@ -190,7 +188,7 @@ export const useLogout = () => {
 };
 
 export const useMe = () => {
-    const { data: user, error, isFetched, isFetching, isLoading, status } = trpc.auth.getLoggedInUserInfo.useQuery()
+    const { data: user, error, isFetched, isFetching, isLoading, status } = trpc.auth.getLoggedInUserInfo.useQuery({})
     return {
         user,
         error,

@@ -47,6 +47,48 @@ class EmailService {
 
     await sendEmail(email, subject, html);
   }
+
+
+  // Notifies a form's owner that someone submitted a response.
+  // - `ownerEmail`/`ownerName`: pulled from the users table by the caller.
+  // - `formTitle`/`formId`: pulled from the form table by the caller.
+  // - `responsesUrl`: deep-link into the owner's responses view. The caller
+  //   builds the URL because it knows the public base.
+  //
+  // The body is intentionally short — this is a notification, not a full
+  // report. Heavy details (the actual responses) are in the dashboard.
+  public static async sendNewResponseNotificationEmail(params: {
+    ownerEmail: string;
+    ownerName: string;
+    formTitle: string;
+    formId: string;
+    responsesUrl: string;
+    submittedAt: Date;
+  }) {
+    const { ownerEmail, ownerName, formTitle, formId, responsesUrl, submittedAt } = params;
+
+    const subject = `New response on "${formTitle}"`;
+    const when = submittedAt.toUTCString();
+
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2>New form response</h2>
+        <p>Hi ${ownerName},</p>
+        <p>Someone just submitted a response on your form <strong>${formTitle}</strong>.</p>
+        <p style="color: #6b7280; font-size: 13px;">Submitted at ${when}</p>
+        <p>
+          <a href="${responsesUrl}" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: #ffffff; text-decoration: none; border-radius: 5px;">
+            View responses
+          </a>
+        </p>
+        <p>If the button doesn't work, copy and paste this link into your browser:</p>
+        <p><a href="${responsesUrl}">${responsesUrl}</a></p>
+        <p style="color: #9ca3af; font-size: 12px;">Form ID: ${formId}</p>
+      </div>
+    `;
+
+    await sendEmail(ownerEmail, subject, html);
+  }
 }
 
 export default EmailService;

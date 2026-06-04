@@ -25,7 +25,7 @@ export const signInUserWithEmailAndPasswordOutputModel = z.object({
 
 
 // get current log data 
-export const getLoggerInUserInfoInputModel = z.undefined();
+export const getLoggerInUserInfoInputModel = z.object({});
 
 export const getLoggerInUserInfoOutput = z.object({
     id: z.string().describe("ID of the user"),
@@ -68,7 +68,7 @@ export const resetPasswordOutputModel = z.object({
 
 
 // logout
-export const logoutInputModel = z.undefined();
+export const logoutInputModel = z.object({});
 
 export const logoutOutputModel = z.object({
     message: z.string().describe("Logout status message"),

@@ -14,6 +14,16 @@ import {
     getAllMyFormsOutputModel,
     getMyFormByIdInputModel,
     getMyFormByIdOutputModel,
+    getShareInfoInputModel,
+    getShareInfoOutputModel,
+    getAllFormSubmissionsInputModel,
+    getAllFormSubmissionsOutputModel,
+    getFormAnalyticsInputModel,
+    getFormAnalyticsOutputModel,
+    getGlobalAnalyticsInputModel,
+    getGlobalAnalyticsOutputModel,
+    softDeleteFormInputModel,
+    softDeleteFormOutputModel,
 } from "./model";
 
 import { publicProcedure, protectedProcedure, router } from "../../trpc";
@@ -49,6 +59,8 @@ export const formRouter = router({
                 formId: input.formId,
                 draft: input.draft,
                 publish: input.publish,
+                isExpiry: input.isExpiry,
+                responseLimit: input.responseLimit,
             });
 
             if (!result) {
@@ -137,6 +149,82 @@ export const formRouter = router({
             });
 
             return form;
+        }),
+
+    // getShareInfo - check if a form is published and return its share slug (form-builder, ownership-checked)
+    getShareInfo: protectedProcedure
+        .meta({ openapi: { method: "GET", path: getPath("/get-share-info"), tags: TAGS } })
+        .input(getShareInfoInputModel)
+        .output(getShareInfoOutputModel)
+        .query(async ({ input, ctx }) => {
+            const share = await formService.getShareInfo({
+                userId: ctx.user.id,
+                formId: input.formId,
+            });
+
+            return share;
+        }),
+
+
+    // ---------------- Phase 8: Submissions + Analytics ----------------
+
+    // getAllFormSubmissions - paginated list of submissions for one form (owner only)
+    getAllFormSubmissions: protectedProcedure
+        .meta({ openapi: { method: "GET", path: getPath("/get-all-form-submissions"), tags: TAGS } })
+        .input(getAllFormSubmissionsInputModel)
+        .output(getAllFormSubmissionsOutputModel)
+        .query(async ({ input, ctx }) => {
+            const result = await formService.getAllFormSubmissions({
+                userId: ctx.user.id,
+                formId: input.formId,
+                page: input.page,
+                limit: input.limit,
+            });
+
+            return result;
+        }),
+
+    // getFormAnalytics - per-form analytics: counts + per-field response stats
+    getFormAnalytics: protectedProcedure
+        .meta({ openapi: { method: "GET", path: getPath("/get-form-analytics"), tags: TAGS } })
+        .input(getFormAnalyticsInputModel)
+        .output(getFormAnalyticsOutputModel)
+        .query(async ({ input, ctx }) => {
+            const result = await formService.getFormAnalytics({
+                userId: ctx.user.id,
+                formId: input.formId,
+            });
+
+            return result;
+        }),
+
+    // getGlobalAnalytics - analytics across all forms owned by the current user
+    getGlobalAnalytics: protectedProcedure
+        .meta({ openapi: { method: "GET", path: getPath("/get-global-analytics"), tags: TAGS } })
+        .input(getGlobalAnalyticsInputModel)
+        .output(getGlobalAnalyticsOutputModel)
+        .query(async ({ ctx }) => {
+            const result = await formService.getGlobalAnalytics({
+                userId: ctx.user.id,
+            });
+
+            return result;
+        }),
+
+
+    // softDeleteForm - marks a form as deleted (owner only).
+    // Hides it from the dashboard and builder; submissions are kept for history.
+    softDeleteForm: protectedProcedure
+        .meta({ openapi: { method: "POST", path: getPath("/soft-delete-form"), tags: TAGS } })
+        .input(softDeleteFormInputModel)
+        .output(softDeleteFormOutputModel)
+        .mutation(async ({ input, ctx }) => {
+            const result = await formService.softDeleteForm({
+                userId: ctx.user.id,
+                formId: input.formId,
+            });
+
+            return result;
         }),
 
 });

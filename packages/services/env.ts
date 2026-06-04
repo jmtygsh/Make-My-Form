@@ -8,6 +8,11 @@ const envSchema = z.object({
   JWT_SECRET: z.string().describe("secret key for JWT secret"),
 
   BASE_URL: z.string().describe("base url for the application"),
+  // Frontend web app URL — used to build absolute links in transactional
+  // emails (e.g. "View responses" in owner-notification emails). The Next.js
+  // app reads this on its side as well; we keep it duplicated here so the
+  // services package can build deep-links without depending on web envs.
+  FRONTEND_URL: z.string().describe("public URL of the web app"),
   // mail config
   SMTP_HOST: z.string().describe("smtp host"),
   SMTP_PORT: z.coerce.number().describe("smtp port"),

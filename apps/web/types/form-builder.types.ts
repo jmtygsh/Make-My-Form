@@ -91,6 +91,7 @@ export interface FormBuilderStore {
   moveComponent: (oldIndex: number, newIndex: number) => void;
   duplicateComponent: (componentId: string) => void;
   loadTemplate: (templateName: string, templateKey?: string) => Promise<boolean>;
+  appendTemplate: (templateName: string, templateKey?: string) => Promise<boolean>;
   clearForm: () => void;
   // History methods
   saveSnapshot: () => void;

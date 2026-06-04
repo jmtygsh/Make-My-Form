@@ -3,6 +3,8 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { GlobalProviders } from "~/providers/global";
 
+
+
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
@@ -49,7 +51,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${helveticaNeue.variable} ${ppEditorialNew.variable} ${laBelleAurore.variable} ${geistSans.variable} ${geistMono.variable} antialiased bg-[#FFFAF5] [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-primary [&::-webkit-scrollbar-thumb]:rounded-full`}>
+
         <GlobalProviders>{children}</GlobalProviders>
+
       </body>
     </html>
   );
