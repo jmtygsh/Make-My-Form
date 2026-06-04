@@ -22,4 +22,4 @@ export interface CreateFormData {
 }
 
 export type ViewType = 'list' | 'grid';
-export type SortBy = 'date' | 'name' | 'updated';
+export type SortBy = 'date_created' | 'last_updated' | 'alphabetical';

@@ -1,20 +1,21 @@
 'use client';
 
-import { MoreHorizontal, Calendar, List, LayoutGrid } from 'lucide-react';
+import { Calendar, List, LayoutGrid } from 'lucide-react';
+import { ToggleGroup, ToggleGroupItem } from '~/components/ui/toggle-group';
+import { ViewType, SortBy } from './types';
+import { SORT_OPTIONS } from '../../constants/constants';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-} from '~/components/ui/select';
-import { ToggleGroup, ToggleGroupItem } from '~/components/ui/toggle-group';
-import { ViewType, SortBy } from './types';
-import { SORT_OPTIONS } from './constants';
+  SelectValue,
+} from "~/components/ui/select"
 
 interface ToolbarProps {
   viewMode: ViewType;
   onViewModeChange: (mode: ViewType) => void;
-  sortBy: SortBy;
+  sortBy?: SortBy; // allow undefined if parent might not pass it
   onSortChange: (sort: SortBy) => void;
 }
 
@@ -24,6 +25,11 @@ export function Toolbar({
   sortBy,
   onSortChange,
 }: ToolbarProps) {
+  // fallback to 'date_created' when nothing is selected
+  const effectiveSort: SortBy = (sortBy ?? 'date_created') as SortBy;
+
+  const label = SORT_OPTIONS.find((opt) => opt.value === effectiveSort)?.label ?? 'Date created';
+
   return (
     <div className="flex justify-between items-center w-full">
       <div className="flex items-center gap-3">
@@ -31,15 +37,16 @@ export function Toolbar({
       </div>
 
       <div className="flex items-center gap-3">
-        <Select value={sortBy} onValueChange={(value) => onSortChange(value as SortBy)}>
+        <Select value={effectiveSort} onValueChange={onSortChange}>
           <SelectTrigger className="w-[150px] h-9 bg-white border-gray-200 text-sm shadow-sm">
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Calendar className="w-4 h-4" aria-hidden="true" />
-              <span className="text-foreground font-medium">
-                {SORT_OPTIONS.find((opt) => opt.value === sortBy)?.label}
-              </span>
-            </div>
+            <SelectValue>
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Calendar className="w-4 h-4" aria-hidden="true" />
+                <span className="text-foreground font-medium">{label}</span>
+              </div>
+            </SelectValue>
           </SelectTrigger>
+
           <SelectContent>
             {SORT_OPTIONS.map((option) => (
               <SelectItem key={option.value} value={option.value}>

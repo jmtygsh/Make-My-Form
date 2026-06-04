@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, ChevronDown, Plus } from 'lucide-react';
+import { Search, ChevronDown, Plus, ChevronRight } from 'lucide-react';
 import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
 
@@ -9,21 +9,17 @@ interface SidebarProps {
   onCreateClick: () => void;
   searchValue: string;
   onSearchChange: (value: string) => void;
+  activeFilter: string;
+  onFilterChange: (filter: string) => void;
 }
-
-type VisibilityFilter = 'unlisted' | 'public';
 
 export function Sidebar({
   onCreateClick,
   searchValue,
   onSearchChange,
+  activeFilter,
+  onFilterChange,
 }: SidebarProps) {
-  const [expandedFilter, setExpandedFilter] = useState<VisibilityFilter | null>(null);
-
-  const toggleFilter = (filter: VisibilityFilter) => {
-    setExpandedFilter(expandedFilter === filter ? null : filter);
-  };
-
   return (
     <aside
       className="w-64 flex-shrink-0 border-l border-t border-r border-gray-500 flex flex-col p-4 gap-6"
@@ -55,27 +51,21 @@ export function Sidebar({
 
       <nav className="flex flex-col gap-1">
         <button
-          onClick={() => toggleFilter('unlisted')}
-          className="flex items-center justify-between w-full px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-gray-100/50 rounded-md transition-colors"
-          aria-expanded={expandedFilter === 'unlisted'}
+          onClick={() => onFilterChange(activeFilter === 'draft' ? 'all' : 'draft')}
+          className={`flex items-center justify-between w-full px-3 py-2 text-sm font-medium ${activeFilter === 'draft' ? 'text-foreground bg-gray-100/50' : 'text-muted-foreground'
+            } rounded-md transition-colors`}
         >
-          Unlisted
-          <ChevronDown
-            className={`w-4 h-4 transition-transform ${expandedFilter === 'unlisted' ? 'rotate-180' : ''
-              }`}
-          />
+          Draft Forms
+          <ChevronRight className="w-4 h-4" />
         </button>
 
         <button
-          onClick={() => toggleFilter('public')}
-          className="flex items-center justify-between w-full px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-gray-100/50 rounded-md transition-colors"
-          aria-expanded={expandedFilter === 'public'}
+          onClick={() => onFilterChange(activeFilter === 'public' ? 'all' : 'public')}
+          className={`flex items-center justify-between w-full px-3 py-2 text-sm font-medium ${activeFilter === 'public' ? 'text-foreground bg-gray-100/50' : 'text-muted-foreground'
+            } rounded-md transition-colors`}
         >
-          Public
-          <ChevronDown
-            className={`w-4 h-4 transition-transform ${expandedFilter === 'public' ? 'rotate-180' : ''
-              }`}
-          />
+          Public Forms
+          <ChevronRight className="w-4 h-4" />
         </button>
       </nav>
     </aside>

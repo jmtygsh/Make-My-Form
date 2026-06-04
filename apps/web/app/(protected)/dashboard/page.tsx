@@ -8,7 +8,7 @@ import { Sidebar } from '~/components/dashboard/sidebar';
 import { Toolbar } from '~/components/dashboard/toolbar';
 import { FormGrid } from '~/components/dashboard/form-grid';
 import { CreateFormDialog } from '~/components/dashboard/create-form-dialog';
-import { ViewType, SortBy, CreateFormData } from '~/components/dashboard/types';
+import { ViewType, SortBy, CreateFormData, Form } from '~/components/dashboard/types';
 
 export default function DashboardPage() {
   // Dialog state
@@ -19,7 +19,10 @@ export default function DashboardPage() {
   // UI state
   const [searchValue, setSearchValue] = useState('');
   const [viewMode, setViewMode] = useState<ViewType>('grid');
-  const [sortBy, setSortBy] = useState<SortBy>('date');
+  const [sortBy, setSortBy] = useState<SortBy>('date_created');
+  const [filterByStatus, setFilterByStatus] = useState('all');
+
+
 
   // API hooks
   const { createFormAsync, isCreating } = useCreateForm();
@@ -53,6 +56,40 @@ export default function DashboardPage() {
     console.log('[Dashboard] Form menu clicked for:', formId);
   }, []);
 
+
+  // Filter and sort forms
+  const filteredAndSortedForms = forms
+    ?.filter((form) => {
+      // 1. Status Filter
+      if (filterByStatus === 'draft' && !form.hasDraft) return false;
+      if (filterByStatus === 'public' && form.visibility !== 'public') return false;
+
+      // 2. Search Filter
+      const searchLower = searchValue.toLowerCase();
+      const matchesSearch = !searchValue ||
+        form.title.toLowerCase().includes(searchLower) ||
+        (form.description && form.description.toLowerCase().includes(searchLower));
+
+      return matchesSearch;
+    })
+    .sort((a, b) => {
+      if (sortBy === 'date_created') {
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return dateB - dateA;
+      }
+      if (sortBy === 'alphabetical') {
+        return a.title.localeCompare(b.title);
+      }
+      if (sortBy === 'last_updated') {
+        // Fallback to createdAt if updated is not available
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return dateB - dateA;
+      }
+      return 0;
+    }) as Form[] | undefined;
+
   return (
     <div className="flex flex-col flex-1 w-full h-screen bg-background">
       <div className="flex flex-1 overflow-hidden">
@@ -61,6 +98,8 @@ export default function DashboardPage() {
           onCreateClick={handleCreateClick}
           searchValue={searchValue}
           onSearchChange={setSearchValue}
+          activeFilter={filterByStatus}
+          onFilterChange={setFilterByStatus}
         />
 
         {/* Main Content Area */}
@@ -77,7 +116,7 @@ export default function DashboardPage() {
 
           {/* Forms Grid */}
           <FormGrid
-            forms={forms}
+            forms={filteredAndSortedForms}
             isLoading={isLoading}
             viewMode={viewMode}
             onCreateClick={handleCreateClick}

@@ -27,7 +27,7 @@ interface FormCardProps {
   onMenuClick?: (formId: string) => void;
 }
 
-export function FormCard({ form, viewMode, onMenuClick }: FormCardProps) {
+export function FormCard({ form, viewMode }: FormCardProps) {
   const router = useRouter();
   const isPublished = form.hasPublished;
   const statusColor = isPublished ? 'bg-green-500' : 'bg-yellow-500';
@@ -36,6 +36,17 @@ export function FormCard({ form, viewMode, onMenuClick }: FormCardProps) {
   const handleEditClick = () => {
     router.push(`/dashboard/form/builder/${form.id}`);
   };
+
+
+  console.log(form)
+
+  const handleCopyLink = (e) => {
+    console.log("clicked", e)
+    // get the form public slug 
+    // make url
+    // copy to clipboard
+
+  }
 
   const formattedDate = new Date(form.createdAt).toLocaleDateString('en-US', {
     month: 'short',
@@ -46,9 +57,9 @@ export function FormCard({ form, viewMode, onMenuClick }: FormCardProps) {
   if (viewMode === 'list') {
     return (
       <Card
-        className="flex flex-row items-center p-4 gap-4 hover:shadow-md transition-all group border-border/50 cursor-pointer"
+        className="flex flex-row items-center p-4 gap-4 hover:shadow-md transition-all group border-border/50 "
         tabIndex={0}
-        onClick={handleEditClick}
+
         aria-label={`Form: ${form.title}`}
       >
         {/* Left: Info */}
@@ -91,7 +102,7 @@ export function FormCard({ form, viewMode, onMenuClick }: FormCardProps) {
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-48" align="end" onClick={(e) => e.stopPropagation()}>
-              <DropdownMenuItem>Copy link</DropdownMenuItem>
+              <DropdownMenuItem onClick={handleCopyLink}>Copy link</DropdownMenuItem>
               <DropdownMenuItem onClick={handleEditClick}>Edit</DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem className="text-destructive focus:text-destructive focus:bg-destructive/10">

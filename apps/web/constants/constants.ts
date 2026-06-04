@@ -18,9 +18,9 @@ export const COLORS = {
 } as const;
 
 export const SORT_OPTIONS = [
-  { value: 'date', label: 'Date created' },
-  { value: 'name', label: 'Name' },
-  { value: 'updated', label: 'Last updated' },
+  { value: 'date_created', label: 'Date created' },
+  { value: 'last_updated', label: 'Last updated' },
+  { value: 'alphabetical', label: 'Alphabetical' },
 ] as const;
 
 export const STATUS_INDICATORS = {
