@@ -4,6 +4,7 @@ import { Calendar, List, LayoutGrid } from 'lucide-react';
 import { ToggleGroup, ToggleGroupItem } from '~/components/ui/toggle-group';
 import { ViewType, SortBy } from './types';
 import { SORT_OPTIONS } from '../../constants/constants';
+import { Badge } from '~/components/ui/badge';
 import {
   Select,
   SelectContent,
@@ -17,6 +18,7 @@ interface ToolbarProps {
   onViewModeChange: (mode: ViewType) => void;
   sortBy?: SortBy; // allow undefined if parent might not pass it
   onSortChange: (sort: SortBy) => void;
+  activeFilter?: string;
 }
 
 export function Toolbar({
@@ -24,6 +26,7 @@ export function Toolbar({
   onViewModeChange,
   sortBy,
   onSortChange,
+  activeFilter,
 }: ToolbarProps) {
   // fallback to 'date_created' when nothing is selected
   const effectiveSort: SortBy = (sortBy ?? 'date_created') as SortBy;
@@ -34,6 +37,11 @@ export function Toolbar({
     <div className="flex justify-between items-center w-full">
       <div className="flex items-center gap-3">
         <h1 className="text-[22px] font-normal text-foreground">My Forms</h1>
+        {activeFilter && activeFilter !== 'all' && (
+          <Badge variant="secondary" className="capitalize text-sm font-medium px-2.5 py-0.5 shadow-sm">
+            {activeFilter}
+          </Badge>
+        )}
       </div>
 
       <div className="flex items-center gap-3">

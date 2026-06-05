@@ -60,9 +60,20 @@ export default function DashboardPage() {
   // Filter and sort forms
   const filteredAndSortedForms = forms
     ?.filter((form) => {
-      // 1. Status Filter
-      if (filterByStatus === 'draft' && !form.hasDraft) return false;
-      if (filterByStatus === 'public' && form.visibility !== 'public') return false;
+      // 1. Sidebar Category Filter (Status or Visibility)
+      if (filterByStatus !== 'all') {
+        const isStatusFilter = ['draft', 'published', 'archived'].includes(filterByStatus);
+        const isVisibilityFilter = ['public', 'unlisted'].includes(filterByStatus);
+
+        if (isStatusFilter) {
+          const matchesStatus =
+            (filterByStatus === 'draft' && form.hasDraft) ||
+            (filterByStatus === 'published' && form.hasPublished) ||
+            (filterByStatus === 'archived' && false); // Add archived logic once implemented
+          if (!matchesStatus) return false;
+        }
+        if (isVisibilityFilter && form.visibility !== filterByStatus) return false;
+      }
 
       // 2. Search Filter
       const searchLower = searchValue.toLowerCase();
@@ -111,6 +122,7 @@ export default function DashboardPage() {
               onViewModeChange={setViewMode}
               sortBy={sortBy}
               onSortChange={setSortBy}
+              activeFilter={filterByStatus}
             />
           </div>
 

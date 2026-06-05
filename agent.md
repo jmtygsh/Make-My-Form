@@ -154,6 +154,7 @@ form-builder/
 │       │   └── page.tsx           # marketing home (Header + Homepage + Footer)
 │       ├── components/
 │       │   ├── auth/              # login, sign-up, forgot/reset forms
+│       │   ├── form-builder/      # Core form builder canvas and mode components
 │       │   ├── layout/app-sidebar.tsx
 │       │   ├── sections/          # marketing sections (Header, Footer, Features, …)
 │       │   └── ui/                # shadcn/ui primitives (accordion → tooltip)

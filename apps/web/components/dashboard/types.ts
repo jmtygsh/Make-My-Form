@@ -2,10 +2,14 @@
 export interface Form {
   id: string;
   title: string;
-  description?: string;
+  description?: string | null;
   visibility: 'public' | 'unlisted';
-  submissionCount: number;
+  status?: 'draft' | 'published' | 'archived'; // Optional since it's missing from payload
+  publicSlug: string;
+  unlistedSlug: string;
+  hasDraft: boolean;
   hasPublished: boolean;
+  submissionCount: number;
   createdAt: string;
 }
 

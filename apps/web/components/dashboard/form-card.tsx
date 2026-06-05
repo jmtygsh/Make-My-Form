@@ -1,6 +1,8 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+
 import { MoreHorizontal, Calendar, Inbox } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '~/components/ui/card';
 import { Badge } from '~/components/ui/badge';
@@ -9,15 +11,8 @@ import { Form, ViewType } from './types';
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuPortal,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu"
 
@@ -26,6 +21,8 @@ interface FormCardProps {
   viewMode: ViewType;
   onMenuClick?: (formId: string) => void;
 }
+
+
 
 export function FormCard({ form, viewMode }: FormCardProps) {
   const router = useRouter();
@@ -37,16 +34,24 @@ export function FormCard({ form, viewMode }: FormCardProps) {
     router.push(`/dashboard/form/builder/${form.id}`);
   };
 
+  const handlePublicCopyLink = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!form.publicSlug) return toast.error("Public link not available");
 
-  console.log(form)
-
-  const handleCopyLink = (e) => {
-    console.log("clicked", e)
-    // get the form public slug 
-    // make url
-    // copy to clipboard
-
+    const url = `${window.location.origin}/from/${form.publicSlug}`;
+    navigator.clipboard.writeText(url);
+    toast.success("Public link copied to clipboard");
   }
+
+  const handleUnlistedCopyLink = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!form.unlistedSlug) return toast.error("Unlisted link not available");
+
+    const url = `${window.location.origin}/form/${form.unlistedSlug}`;
+    navigator.clipboard.writeText(url);
+    toast.success("Unlisted link copied to clipboard");
+  }
+
 
   const formattedDate = new Date(form.createdAt).toLocaleDateString('en-US', {
     month: 'short',
@@ -102,7 +107,8 @@ export function FormCard({ form, viewMode }: FormCardProps) {
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-48" align="end" onClick={(e) => e.stopPropagation()}>
-              <DropdownMenuItem onClick={handleCopyLink}>Copy link</DropdownMenuItem>
+              <DropdownMenuItem onClick={handlePublicCopyLink}>Copy Public link</DropdownMenuItem>
+              <DropdownMenuItem onClick={handleUnlistedCopyLink}>Copy Unlisted link</DropdownMenuItem>
               <DropdownMenuItem onClick={handleEditClick}>Edit</DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem className="text-destructive focus:text-destructive focus:bg-destructive/10">
@@ -137,7 +143,8 @@ export function FormCard({ form, viewMode }: FormCardProps) {
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-48" align="end" onClick={(e) => e.stopPropagation()}>
-              <DropdownMenuItem>Copy link</DropdownMenuItem>
+              <DropdownMenuItem onClick={handlePublicCopyLink}>Copy Public link</DropdownMenuItem>
+              <DropdownMenuItem onClick={handleUnlistedCopyLink}>Copy Unlisted link</DropdownMenuItem>
               <DropdownMenuItem onClick={handleEditClick}>Edit</DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem className="text-destructive focus:text-destructive focus:bg-destructive/10">

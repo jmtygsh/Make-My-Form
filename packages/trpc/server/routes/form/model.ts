@@ -105,6 +105,7 @@ export const getAllMyFormsOutputModel = z.object({
             description: z.string().nullable(),
             visibility: z.enum(["public", "unlisted"]),
             publicSlug: z.string(),
+            unlistedSlug: z.string(),
             hasDraft: z.boolean(),
             hasPublished: z.boolean(),
             // Phase 8: per-form submission count, returned alongside each form

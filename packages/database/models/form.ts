@@ -31,6 +31,7 @@ export type FormPayload = {
 
 
 export const visibilityEnum = pgEnum("visibility", ["public", "unlisted"]);
+export const formStatusEnum = pgEnum("form_status", ["draft", "published", "archived"]);
 
 
 export const formTable = pgTable("form", {
@@ -53,6 +54,7 @@ export const formTable = pgTable("form", {
 
     visibility: visibilityEnum("visibility").default("public").notNull(),
     responseLimit: integer("response_limit"),
+    status: formStatusEnum("status").default("draft").notNull(),
 
     // data 
     draft: jsonb("draft").$type<FormPayload>(),

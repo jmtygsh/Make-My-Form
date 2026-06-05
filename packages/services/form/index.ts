@@ -51,6 +51,55 @@ class FormService {
     }
 
 
+
+    // Helper for storeFormSubmissionIntoDb: fetches the form's owner (email
+    // + name) and form title, then calls the email service. Kept private
+    // because nothing else in the service needs to send this email.
+    private async notifyOwnerOfNewSubmission(
+        formId: string,
+        submissionId: string,
+        submittedAt: Date
+    ): Promise<void> {
+        const rows = await db
+            .select({
+                formTitle: formTable.title,
+                ownerEmail: usersTable.email,
+                ownerName: usersTable.fullName,
+            })
+            .from(formTable)
+            .innerJoin(usersTable, eq(formTable.userId, usersTable.id))
+            .where(eq(formTable.id, formId))
+            .limit(1);
+
+        const info = rows[0];
+        if (!info) return; // form was deleted between insert and notify — skip
+
+        const responsesUrl = `${env.FRONTEND_URL}/form/${formId}/responses`;
+
+        await EmailService.sendNewResponseNotificationEmail({
+            ownerEmail: info.ownerEmail,
+            ownerName: info.ownerName,
+            formTitle: info.formTitle || "Untitled form",
+            formId,
+            responsesUrl,
+            submittedAt,
+        });
+    }
+
+
+
+    // Helper: 30-day window bounds (UTC, date-only).
+    // start = today minus 29 days, end = today → 30 buckets total.
+    private _thirtyDayBounds(): { startDate: Date; endDate: Date } {
+        const endDate = new Date();
+        endDate.setUTCHours(23, 59, 59, 999);
+        const startDate = new Date(endDate);
+        startDate.setUTCDate(startDate.getUTCDate() - 29);
+        startDate.setUTCHours(0, 0, 0, 0);
+        return { startDate, endDate };
+    }
+
+
     // create form title & description
     public async storeFormTitleAndDesriptionIntoDb(payload: storeFormTitleAndDesriptionIntoDbInputType) {
         const { userId, title, description } = await storeFormTitleAndDesriptionIntoDb.parseAsync(payload);
@@ -261,39 +310,6 @@ class FormService {
     }
 
 
-    // Helper for storeFormSubmissionIntoDb: fetches the form's owner (email
-    // + name) and form title, then calls the email service. Kept private
-    // because nothing else in the service needs to send this email.
-    private async notifyOwnerOfNewSubmission(
-        formId: string,
-        submissionId: string,
-        submittedAt: Date
-    ): Promise<void> {
-        const rows = await db
-            .select({
-                formTitle: formTable.title,
-                ownerEmail: usersTable.email,
-                ownerName: usersTable.fullName,
-            })
-            .from(formTable)
-            .innerJoin(usersTable, eq(formTable.userId, usersTable.id))
-            .where(eq(formTable.id, formId))
-            .limit(1);
-
-        const info = rows[0];
-        if (!info) return; // form was deleted between insert and notify — skip
-
-        const responsesUrl = `${env.FRONTEND_URL}/form/${formId}/responses`;
-
-        await EmailService.sendNewResponseNotificationEmail({
-            ownerEmail: info.ownerEmail,
-            ownerName: info.ownerName,
-            formTitle: info.formTitle || "Untitled form",
-            formId,
-            responsesUrl,
-            submittedAt,
-        });
-    }
 
 
     // display all public for to all users (only make as public gonna show to all)
@@ -390,6 +406,7 @@ class FormService {
                 description: formTable.description,
                 visibility: formTable.visibility,
                 publicSlug: formTable.publicSlug,
+                unlistedSlug: formTable.unlistedSlug,
                 // boolean: true when the jsonb column holds a non-null payload
                 hasDraft: sql<boolean>`${formTable.draft} IS NOT NULL`,
                 hasPublished: sql<boolean>`${formTable.published} IS NOT NULL`,
@@ -503,17 +520,6 @@ class FormService {
     // buckets always cover the last 30 calendar days, with zero-count days
     // included so the chart has no gaps.
 
-
-    // Helper: 30-day window bounds (UTC, date-only).
-    // start = today minus 29 days, end = today → 30 buckets total.
-    private _thirtyDayBounds(): { startDate: Date; endDate: Date } {
-        const endDate = new Date();
-        endDate.setUTCHours(23, 59, 59, 999);
-        const startDate = new Date(endDate);
-        startDate.setUTCDate(startDate.getUTCDate() - 29);
-        startDate.setUTCHours(0, 0, 0, 0);
-        return { startDate, endDate };
-    }
 
 
     // getAllFormSubmissions — paginated list of submissions for one form (owner only)

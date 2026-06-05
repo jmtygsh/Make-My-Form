@@ -49,24 +49,74 @@ export function Sidebar({
         />
       </div>
 
-      <nav className="flex flex-col gap-1">
-        <button
-          onClick={() => onFilterChange(activeFilter === 'draft' ? 'all' : 'draft')}
-          className={`flex items-center justify-between w-full px-3 py-2 text-sm font-medium ${activeFilter === 'draft' ? 'text-foreground bg-gray-100/50' : 'text-muted-foreground'
-            } rounded-md transition-colors`}
-        >
-          Draft Forms
-          <ChevronRight className="w-4 h-4" />
-        </button>
+      <nav className="flex flex-col gap-6">
+        <div className="flex flex-col gap-1">
+          <button
+            onClick={() => onFilterChange('all')}
+            className={`flex items-center justify-between cursor-pointer w-full px-3 py-2 text-sm font-medium ${activeFilter === 'all' ? 'text-foreground bg-gray-100/50' : 'text-muted-foreground'
+              } rounded-md transition-colors`}
+          >
+            All Forms
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
 
-        <button
-          onClick={() => onFilterChange(activeFilter === 'public' ? 'all' : 'public')}
-          className={`flex items-center justify-between w-full px-3 py-2 text-sm font-medium ${activeFilter === 'public' ? 'text-foreground bg-gray-100/50' : 'text-muted-foreground'
-            } rounded-md transition-colors`}
-        >
-          Public Forms
-          <ChevronRight className="w-4 h-4" />
-        </button>
+        {/* Status Filters */}
+        <div className="flex flex-col gap-1">
+          <div className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+            Status
+          </div>
+          <button
+            onClick={() => onFilterChange(activeFilter === 'draft' ? 'all' : 'draft')}
+            className={`flex items-center cursor-pointer justify-between w-full px-3 py-2 text-sm font-medium ${activeFilter === 'draft' ? 'text-foreground bg-gray-100/50' : 'text-muted-foreground'
+              } rounded-md transition-colors`}
+          >
+            Draft
+            <ChevronRight className="w-4 h-4" />
+          </button>
+
+          <button
+            onClick={() => onFilterChange(activeFilter === 'published' ? 'all' : 'published')}
+            className={`flex items-center justify-between cursor-pointer w-full px-3 py-2 text-sm font-medium ${activeFilter === 'published' ? 'text-foreground bg-gray-100/50' : 'text-muted-foreground'
+              } rounded-md transition-colors`}
+          >
+            Published
+            <ChevronRight className="w-4 h-4" />
+          </button>
+
+          <button
+            onClick={() => onFilterChange(activeFilter === 'archived' ? 'all' : 'archived')}
+            className={`flex items-center justify-between cursor-pointer w-full px-3 py-2 text-sm font-medium ${activeFilter === 'archived' ? 'text-foreground bg-gray-100/50' : 'text-muted-foreground'
+              } rounded-md transition-colors`}
+          >
+            Archived
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Visibility Filters */}
+        <div className="flex flex-col gap-1">
+          <div className="px-3 text-xs font-semibold  text-muted-foreground uppercase tracking-wider mb-1">
+            Visibility
+          </div>
+          <button
+            onClick={() => onFilterChange(activeFilter === 'public' ? 'all' : 'public')}
+            className={`flex items-center justify-between  cursor-pointer w-full px-3 py-2 text-sm font-medium ${activeFilter === 'public' ? 'text-foreground bg-gray-100/50' : 'text-muted-foreground'
+              } rounded-md transition-colors`}
+          >
+            Public
+            <ChevronRight className="w-4 h-4" />
+          </button>
+
+          <button
+            onClick={() => onFilterChange(activeFilter === 'unlisted' ? 'all' : 'unlisted')}
+            className={`flex items-center justify-between cursor-pointer w-full px-3 py-2 text-sm font-medium ${activeFilter === 'unlisted' ? 'text-foreground bg-gray-100/50' : 'text-muted-foreground'
+              } rounded-md transition-colors`}
+          >
+            Unlisted
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
       </nav>
     </aside>
   );

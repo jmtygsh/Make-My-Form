@@ -1,4 +1,4 @@
-import Header from '~/components/protected/Header'
+import ConditionalHeader from '~/components/protected/ConditionalHeader'
 
 
 export default function RootLayout({
@@ -7,11 +7,11 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <body className="font-sans antialiased">
-        <Header />
-        {children}
-      </body>
-    </html>
+
+    <>
+      <ConditionalHeader />
+      {children}
+    </>
   )
 }
+
