@@ -105,6 +105,12 @@ export function AppSidebar() {
   // Don't render the sidebar content if we're redirecting
   if (!user) return null;
 
+
+  const intialName = (name?: string) => {
+    if (!name) return "U";
+    return name.charAt(0).toUpperCase();
+  }
+
   const logOutHandler = async () => {
     try {
       router.push("/login")
@@ -128,7 +134,11 @@ export function AppSidebar() {
 
                 < div className="flex items-center gap-2">
                   <Avatar className="h-7 w-7 rounded-full border border-gray-200 bg-white">
-                    <AvatarFallback className="bg-transparent text-black/70 font-normal text-xs">Y</AvatarFallback>
+                    <AvatarImage src={user?.profileImageUrl} alt={user?.fullName || "User"} />
+                    <AvatarFallback className="bg-transparent text-black/70 font-normal text-xs">
+                      {intialName(user?.fullName)}
+                    </AvatarFallback>
+
                   </Avatar>
                   <span className="font-semibold text-[14px] text-black/70 cursor-pointer truncate">
                     {!isLoading && `${user?.fullName}`}
