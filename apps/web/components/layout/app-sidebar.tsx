@@ -97,10 +97,10 @@ export function AppSidebar() {
   const { logout } = useLogout()
 
   React.useEffect(() => {
-    if (!user) {
+    if (!isLoading && !user) {
       router.push("/login")
     }
-  }, [user, router])
+  }, [user, isLoading, router])
 
   // Don't render the sidebar content if we're redirecting
   if (!user) return null;
@@ -132,8 +132,8 @@ export function AppSidebar() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
 
-                < div className="flex items-center gap-2">
-                  <Avatar className="h-7 w-7 rounded-full border border-gray-200 bg-white">
+                <div className="flex items-center gap-2">
+                  <Avatar className="h-7 w-7 rounded-full border border-gray-200 bg-white cursor-pointer">
                     <AvatarImage src={user?.profileImageUrl} alt={user?.fullName || "User"} />
                     <AvatarFallback className="bg-transparent text-black/70 font-normal text-xs">
                       {intialName(user?.fullName)}
@@ -257,7 +257,7 @@ export function AppSidebar() {
       <SidebarFooter className="p-4 pt-0">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton className="font-medium text-gray-900 hover:bg-black/5! px-3 py-2 h-9 rounded-md w-full justify-start">
+            <SidebarMenuButton className="font-medium text-gray-900 bg-black/2! px-3 py-2 h-9 rounded-md w-full justify-start">
               <MessageSquareHeart className="mr-2 h-4 w-4" strokeWidth={2} />
               Give Feedback
             </SidebarMenuButton>

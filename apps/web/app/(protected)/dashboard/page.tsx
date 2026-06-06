@@ -2,8 +2,17 @@
 
 import { Button } from "~/components/ui/button"
 import { Plus, HelpCircle, MoveRight } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { generateRandomString } from "~/lib/random"
 
 export default function DashboardPage() {
+  const router = useRouter();
+
+  const handleCreateForm = () => {
+    const id = generateRandomString(8);
+    router.push(`/forms/${id}/edit`);
+  };
+
   return (
     <div className="flex h-full flex-col items-center justify-center relative min-h-screen w-full bg-white">
       <div className="relative isolate flex flex-col items-center justify-center text-center max-w-md mx-auto space-y-4">
@@ -35,7 +44,7 @@ export default function DashboardPage() {
           <br />
           It's as simple as one-two-three.
         </p>
-        <Button variant="textured" className="h-10 px-8 text-base">
+        <Button variant="textured" className="h-10 px-8 text-base" onClick={handleCreateForm}>
           Create your form
           <MoveRight className="ml-2 size-5" />
         </Button>
