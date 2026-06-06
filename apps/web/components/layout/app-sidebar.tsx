@@ -30,6 +30,7 @@ import {
   LogOutIcon
 } from "lucide-react"
 
+
 import {
   Sidebar,
   SidebarContent,
@@ -56,7 +57,8 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu"
 
-import { useMe } from "~/hooks/api/auth/index"
+import { useMe, useLogout } from "~/hooks/api/auth/index"
+import { toast } from "sonner"
 
 const MAIN_NAV = [
   { title: "Home", icon: Home },
@@ -92,6 +94,7 @@ export function AppSidebar() {
 
 
   const { user, isLoading } = useMe() as { user: User | undefined, isLoading: boolean }
+  const { logout } = useLogout()
 
   React.useEffect(() => {
     if (!user) {
@@ -99,10 +102,20 @@ export function AppSidebar() {
     }
   }, [user, router])
 
-  console.log(user)
-
   // Don't render the sidebar content if we're redirecting
   if (!user) return null;
+
+  const logOutHandler = async () => {
+    try {
+      router.push("/login")
+
+      await logout({})
+      toast.success('Log Out Successful')
+
+    } catch (error) {
+      toast.error('Failed to log out')
+    }
+  }
 
 
   return (
@@ -140,7 +153,9 @@ export function AppSidebar() {
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-[12px] text-sidebar-accent-foreground">
+                <DropdownMenuItem className="text-[12px] text-sidebar-accent-foreground"
+                  onClick={logOutHandler}
+                >
                   <LogOutIcon />
                   Log Out
                 </DropdownMenuItem>
