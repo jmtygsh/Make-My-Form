@@ -1,17 +1,28 @@
-import ConditionalHeader from '~/components/protected/ConditionalHeader'
+import localFont from "next/font/local";
+import { SidebarProvider, SidebarInset } from "~/components/ui/sidebar"
+import { AppSidebar, FloatingSidebarTrigger } from "~/components/layout/app-sidebar"
 
+const latin = localFont({
+  src: "../fonts/linter.woff2",
+  weight: "400",
+  style: "normal",
+  variable: "--latin",
+});
 
-export default function RootLayout({
+export default function ProtectedLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
   return (
-
-    <>
-      <ConditionalHeader />
-      {children}
-    </>
+    <div className={`${latin.variable} ${latin.className}`}>
+      <SidebarProvider>
+        <AppSidebar />
+        <SidebarInset className="relative">
+          <FloatingSidebarTrigger />
+          {children}
+        </SidebarInset>
+      </SidebarProvider>
+    </ div>
   )
 }
-

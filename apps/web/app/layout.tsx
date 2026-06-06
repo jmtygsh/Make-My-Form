@@ -5,15 +5,6 @@ import { GlobalProviders } from "~/providers/global";
 
 
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-});
-
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-});
 
 const helveticaNeue = localFont({
   src: [
@@ -50,7 +41,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${helveticaNeue.variable} ${ppEditorialNew.variable} ${laBelleAurore.variable} ${geistSans.variable} ${geistMono.variable} antialiased bg-[#FFFAF5] [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-primary [&::-webkit-scrollbar-thumb]:rounded-full`}>
+      <body className={`${helveticaNeue.variable} ${ppEditorialNew.variable} ${laBelleAurore.variable} antialiased bg-[#FFFAF5] [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-primary [&::-webkit-scrollbar-thumb]:rounded-full`}>
 
         <GlobalProviders>{children}</GlobalProviders>
 

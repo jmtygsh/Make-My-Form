@@ -1,0 +1,260 @@
+"use client"
+
+import * as React from "react"
+import { useRouter } from "next/navigation"
+import {
+  Asterisk,
+  Search,
+  Users,
+  Globe,
+  Settings,
+  ArrowUpCircle,
+  LayoutTemplate,
+  Sparkles,
+  Map,
+  SmilePlus,
+  CircleDollarSign,
+  Trash,
+  Send,
+  Book,
+  LifeBuoy,
+  MessageCircle,
+  ChevronDown,
+  ChevronsLeft,
+  ChevronsRight,
+  MessageSquareHeart,
+  Home,
+  BadgeCheckIcon,
+  CreditCardIcon,
+  BellIcon,
+  LogOutIcon
+} from "lucide-react"
+
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
+  useSidebar,
+} from "~/components/ui/sidebar"
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu"
+
+import { useMe } from "~/hooks/api/auth/index"
+
+const MAIN_NAV = [
+  { title: "Home", icon: Home },
+  { title: "Search", icon: Search },
+  { title: "Settings", icon: Settings },
+  { title: "Upgrade plan", icon: ArrowUpCircle },
+]
+
+const PRODUCT_NAV = [
+  { title: "Templates", icon: LayoutTemplate },
+  { title: "Feature requests", icon: SmilePlus },
+  { title: "Rewards", icon: CircleDollarSign },
+  { title: "Trash", icon: Trash },
+]
+
+const HELP_NAV = [
+  { title: "Help center", icon: LifeBuoy },
+  { title: "Contact support", icon: MessageCircle },
+]
+
+
+interface User {
+  email: string,
+  fullName: string,
+  id: string,
+  profileImageUrl: string
+}
+
+
+export function AppSidebar() {
+  const router = useRouter();
+  const { toggleSidebar } = useSidebar()
+
+
+  const { user, isLoading } = useMe() as { user: User | undefined, isLoading: boolean }
+
+  React.useEffect(() => {
+    if (!user) {
+      router.push("/login")
+    }
+  }, [user, router])
+
+  console.log(user)
+
+  // Don't render the sidebar content if we're redirecting
+  if (!user) return null;
+
+
+  return (
+    <Sidebar className="border-r border-border">
+      <SidebarHeader className="pb-2">
+        <div className="flex items-center justify-between w-full mt-2">
+          <SidebarMenuButton size="sm" className="flex items-center gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+
+                < div className="flex items-center gap-2">
+                  <Avatar className="h-7 w-7 rounded-full border border-gray-200 bg-white">
+                    <AvatarFallback className="bg-transparent text-black/70 font-normal text-xs">Y</AvatarFallback>
+                  </Avatar>
+                  <span className="font-semibold text-[14px] text-black/70 cursor-pointer truncate">
+                    {!isLoading && `${user?.fullName}`}
+                  </span>
+                </div >
+
+
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="rounded-none shadow-sm mt-2">
+                <DropdownMenuGroup>
+                  <DropdownMenuItem className="text-[13px] text-sidebar-accent-foreground">
+                    <BadgeCheckIcon />
+                    Account
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="text-[13px] text-sidebar-accent-foreground">
+                    <CreditCardIcon />
+                    Billing
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="text-[13px] text-sidebar-accent-foreground">
+                    <BellIcon />
+                    Notifications
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="text-[12px] text-sidebar-accent-foreground">
+                  <LogOutIcon />
+                  Log Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+          </SidebarMenuButton>
+          <button
+            onClick={toggleSidebar}
+            className="text-gray-500 hover:text-gray-900 transition-colors p-1 rounded-md"
+          >
+            <ChevronsLeft className="h-4 w-4" strokeWidth={2} />
+          </button>
+        </div>
+      </SidebarHeader>
+
+      <SidebarContent className="gap-0">
+        {/* Main Nav */}
+        <SidebarGroup className="pt-2">
+          <SidebarGroupContent>
+            <SidebarMenu className="space-y-[2px]">
+              {MAIN_NAV.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton
+                    className="text-[14px]! px-3 py-2 h-7 rounded-md cursor-pointer hover:text-primary!">
+                    <item.icon className="h-4 w-4" strokeWidth={2} /> {item.title}
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+
+        {/* Workspaces */}
+        <SidebarGroup className="pt-6">
+          <SidebarGroupLabel className="text-[12px] font-medium text-gray-500 px-3 mb-1">Workspaces</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+
+              <SidebarMenuItem>
+
+                <SidebarMenuButton
+                  className="text-[14px]! px-3 py-2 h-7 rounded-md cursor-pointer hover:text-primary!">
+                  <ChevronDown className="h-4 w-4" strokeWidth={2} /> My workspace
+                </SidebarMenuButton>
+
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Product */}
+        <SidebarGroup className="pt-6">
+          <SidebarGroupLabel className="text-[13px] font-medium text-gray-500 px-3 mb-1">Product</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu className="space-y-[2px]">
+              {PRODUCT_NAV.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton
+                    className="text-[14px]! px-3 py-2 h-7 rounded-md cursor-pointer hover:text-primary!">
+                    <item.icon className="h-4 w-4" strokeWidth={2} /> {item.title}
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Help */}
+        <SidebarGroup className="pt-6 pb-4">
+          <SidebarGroupLabel className="text-[13px] font-medium text-gray-500 px-3 mb-1">Help</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu className="space-y-[2px]">
+              {HELP_NAV.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton
+                    className="text-[14px]! px-3 py-2 h-7 rounded-md cursor-pointer hover:text-primary!">
+                    <item.icon className="h-4 w-4" strokeWidth={2} /> {item.title}
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+      </SidebarContent>
+
+      <SidebarFooter className="p-4 pt-0">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton className="font-medium text-gray-900 hover:bg-black/5! px-3 py-2 h-9 rounded-md w-full justify-start">
+              <MessageSquareHeart className="mr-2 h-4 w-4" strokeWidth={2} />
+              Give Feedback
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
+    </Sidebar>
+  )
+}
+
+export function FloatingSidebarTrigger() {
+  const { state, toggleSidebar } = useSidebar()
+
+  if (state !== "collapsed") return null
+
+  return (
+    <button
+      onClick={toggleSidebar}
+      className="absolute top-4 left-4 z-50 text-gray-500 hover:text-gray-900 transition-colors p-2 rounded-md flex items-center justify-center"
+      title="Show Sidebar"
+    >
+      <ChevronsRight className="h-4 w-4" strokeWidth={2} />
+    </button>
+  )
+}
