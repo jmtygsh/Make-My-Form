@@ -1,7 +1,9 @@
 "use client"
 
 import React, { useState } from 'react';
+import { useParams } from 'next/navigation';
 import Formbuilder from '~/components/form-builder/Formbuilder';
+import { useFormDraft } from '~/hooks/use-form-draft';
 import {
     Asterisk,
     Zap,
@@ -22,11 +24,12 @@ import {
 } from 'lucide-react';
 
 const FormEditPage = () => {
+    const params = useParams();
+    const formId = params?.id as string;
 
-    const [formTitle, setFormTitle] = useState("")
+    const { title: formTitle, setTitle: setFormTitle, isHydrated } = useFormDraft(formId);
     const [isBuilderActive, setIsBuilderActive] = useState(false)
-
-    console.log(formTitle)
+    const [show, setShow] = useState(false)
 
 
     const actions = [
@@ -36,7 +39,10 @@ const FormEditPage = () => {
     ];
 
     return (
-        <div className="flex flex-col min-h-screen bg-white font-sans text-gray-900 relative">
+        <div className="flex flex-col min-h-screen bg-white font-sans text-gray-900 relative"
+            onMouseEnter={() => setShow(true)}
+            onMouseLeave={() => setShow(false)}
+        >
             {/* Header */}
             <header className="flex items-center justify-between px-4 py-3 border-b border-transparent">
                 {/* Left */}
@@ -63,8 +69,13 @@ const FormEditPage = () => {
             {/* Main Content */}
             <main className="flex-1 overflow-y-auto pb-24">
                 <div className="max-w-[700px] mx-auto mt-32 px-8">
-
-                    <div className="flex items-center gap-4">
+                    <div className={`flex items-center gap-4 transition-all duration-300 ease-out
+                            ${show
+                            ? "opacity-100 translate-y-0 pointer-events-auto"
+                            : "opacity-0 -translate-y-2 pointer-events-none"}`}
+                        onMouseEnter={() => setShow(true)}
+                        onMouseLeave={() => setShow(false)}
+                    >
                         {actions.map((action) => {
                             const Icon = action.icon;
                             return (
@@ -74,7 +85,7 @@ const FormEditPage = () => {
                                      text-gray-500 transition-colors
                                      p-2 py-1 cursor-pointer
                                      rounded-md hover:text-gray-800 
-                                     hover:bg-gray-100 focus:outline-none 
+                                    hover:bg-gray-100 focus:outline-none 
                                      focus:ring-2 focus:ring-gray-200"
                                 >
 
@@ -91,18 +102,21 @@ const FormEditPage = () => {
                         value={formTitle}
                         placeholder="Form title"
                         onChange={(e) => setFormTitle(e.target.value)}
+                        onMouseEnter={() => setShow(true)}
+                        onMouseLeave={() => setShow(false)}
+
                         onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
+                            if (e.key === "Enter") {
                                 e.preventDefault();
                                 setIsBuilderActive(true);
                             }
                         }}
-                        className="text-[40px] font-bold text-gray-800 placeholder:text-gray-300 outline-none w-full mb-10 bg-transparent"
+                        className="text-[40px] font-bold text-gray-800 placeholder:text-gray-300 outline-none w-full  bg-transparent"
                     />
 
                     {isBuilderActive ? (
                         <div className="mt-8">
-                            <Formbuilder />
+                            <Formbuilder title={formTitle} />
                         </div>
                     ) : (
                         <>
