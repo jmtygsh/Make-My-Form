@@ -1,3 +1,5 @@
+// packages/database/models.form.ts
+
 import {
     pgTable,
     uuid,
@@ -11,23 +13,39 @@ import {
     integer
 } from "drizzle-orm/pg-core";
 import { usersTable } from "./user";
-import { json } from "zod";
 
 
-// type check for json 
+// Matches the frontend schema in apps/web/lib/form-builder/schema.ts
+// Stored as jsonb in both `draft` and `published` columns.
+export type FormBlock = {
+    id: string;
+    type: string;
+    width: number;
+    // Input block fields (present when type is an input like short_answer, email, etc.)
+    label?: string;
+    description?: string;
+    required?: boolean;
+    hidden?: boolean;
+    placeholder?: string;
+    // Type-specific fields
+    options?: { id: string; label: string }[];
+    content?: string;
+    defaultValue?: string | number;
+    min?: number;
+    max?: number;
+    minLength?: number;
+    maxLength?: number;
+    minDate?: string;
+    maxDate?: string;
+};
+
 export type FormPayload = {
     name: string;
-    props?: Record<string, any>;
-    rows: {
-        id: string;
-        props?: Record<string, any>;
-        fields: {
-            id: string;
-            type: string;
-            props: Record<string, any>;
-        }[];
-    }[];
+    blocks: FormBlock[];
 };
+
+// Submission stores a flat key-value map keyed by block id
+export type SubmissionPayload = Record<string, unknown>;
 
 
 export const visibilityEnum = pgEnum("visibility", ["public", "unlisted"]);
@@ -74,7 +92,7 @@ export const submissionFormTable = pgTable("submission_form", {
     id: uuid("id").primaryKey().defaultRandom(),
     formId: uuid("form_id").references(() => formTable.id, { onDelete: "cascade" }).notNull(),
 
-    submission: jsonb("submission").$type<FormPayload>(),
+    submission: jsonb("submission").$type<SubmissionPayload>(),
 
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),

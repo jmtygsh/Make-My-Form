@@ -2,6 +2,10 @@
 
 This Turborepo starter is maintained by the Turborepo core team.
 
+pm2 start "pnpm --filter web start" --name web
+pm2 start apps/api/dist/index.js --name api
+
+
 ## Using this example
 
 Run the following command:

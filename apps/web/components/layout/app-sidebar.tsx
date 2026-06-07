@@ -111,11 +111,11 @@ export function AppSidebar() {
     return name.charAt(0).toUpperCase();
   }
 
-  const logOutHandler = async () => {
+  const logOutHandler = () => {
     try {
       router.push("/login")
 
-      await logout({})
+      logout({})
       toast.success('Log Out Successful')
 
     } catch (error) {

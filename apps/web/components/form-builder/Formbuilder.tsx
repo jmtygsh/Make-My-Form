@@ -1,38 +1,47 @@
-import React from 'react'
-import { Trash, Plus, GripVertical } from 'lucide-react'
+// apps/web/components/form-builder/Formbuilder.tsx
+'use client';
 
-const Formbuilder = ({ title }: { title: string }) => {
-    return (
-        <div className="w-full flex flex-col gap-2">
-            {/* Tally-like block insertion row */}
-            <div className="group flex items-start gap-2 w-full">
-                {/* Left Actions (Trash, Plus, Drag Handle) */}
-                <div className="flex items-center gap-1 text-gray-400 mt-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
-                    <button className="p-1 hover:text-gray-700 transition-colors" aria-label="Delete block">
-                        <Trash className="w-[18px] h-[18px]" strokeWidth={1.5} />
-                    </button>
-                    <button className="p-1 hover:text-gray-700 transition-colors" aria-label="Add block">
-                        <Plus className="w-[20px] h-[20px]" strokeWidth={1.5} />
-                    </button>
-                    <div
-                        className="p-1 hover:bg-gray-100 hover:text-gray-700 rounded cursor-grab transition-colors flex items-center justify-center"
-                        aria-label="Drag to move"
-                    >
-                        <GripVertical className="w-[18px] h-[18px]" strokeWidth={1.5} />
-                    </div>
-                </div>
+import React, { useEffect } from 'react';
+import { BlockList } from './BlockList';
+import { FieldPicker } from './FieldPicker';
+import { useFormBuilder } from '~/hooks/use-form-builder';
+import { useBlockActions } from '~/hooks/use-block-actions';
+import { useKeyboardShortcuts } from '~/hooks/use-keyboard-shortcuts';
 
-                {/* Input Area */}
-                <div className="flex-1">
-                    <input
-                        type="text"
-                        placeholder="Type '/' to insert blocks"
-                        className="w-full outline-none border-none bg-transparent text-[17px] text-gray-800 placeholder:text-gray-400 py-1"
-                    />
-                </div>
-            </div>
-        </div>
-    )
+interface FormbuilderProps {
+    formId: string;
 }
 
-export default Formbuilder
+const Formbuilder = ({ formId }: FormbuilderProps) => {
+    const { blocks, hydrated } = useFormBuilder({ formId });
+    const { insertBlock } = useBlockActions();
+
+    useKeyboardShortcuts();
+
+    useEffect(() => {
+        if (hydrated && blocks.length === 0) {
+            insertBlock('short_answer');
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [hydrated]);
+
+    return (
+        <div className="flex flex-col gap-2">
+            <BlockList blocks={blocks} />
+
+            <div className="pt-2">
+                <FieldPicker
+                    onSelect={(type) => insertBlock(type)}
+                    trigger={
+                        <button className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700">
+                            <span className="text-base leading-none">+</span>
+                            <span>Add field</span>
+                        </button>
+                    }
+                />
+            </div>
+        </div>
+    );
+};
+
+export default Formbuilder;

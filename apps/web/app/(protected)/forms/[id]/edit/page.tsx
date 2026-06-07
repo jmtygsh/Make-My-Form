@@ -1,9 +1,13 @@
-"use client"
+// apps/web/app/(protected)/forms/[id]/edit/page.tsx
+'use client';
 
 import React, { useState } from 'react';
 import { useParams } from 'next/navigation';
 import Formbuilder from '~/components/form-builder/Formbuilder';
-import { useFormDraft } from '~/hooks/use-form-draft';
+import { useFormBuilder } from '~/hooks/use-form-builder';
+import { useSaveDraft } from '~/hooks/use-save-draft';
+import { Loader2 } from 'lucide-react';
+import { PreviewDialog } from '~/components/form-builder/PreviewDialog';
 import {
     Asterisk,
     Zap,
@@ -20,17 +24,19 @@ import {
     AtSign,
     DollarSign,
     Hexagon,
-    Palette
+    Palette,
 } from 'lucide-react';
 
 const FormEditPage = () => {
     const params = useParams();
     const formId = params?.id as string;
 
-    const { title: formTitle, setTitle: setFormTitle, isHydrated } = useFormDraft(formId);
-    const [isBuilderActive, setIsBuilderActive] = useState(false)
-    const [show, setShow] = useState(false)
+    const { title: formTitle, setTitle: setFormTitle, isDirty } = useFormBuilder({ formId });
+    const { saveDraft, publish, isSaving } = useSaveDraft();
+    const [previewOpen, setPreviewOpen] = useState(false);
 
+    const [isBuilderActive, setIsBuilderActive] = useState(false);
+    const [show, setShow] = useState(false);
 
     const actions = [
         { name: 'Add logo', icon: Hexagon },
@@ -39,7 +45,8 @@ const FormEditPage = () => {
     ];
 
     return (
-        <div className="flex flex-col min-h-screen bg-white font-sans text-gray-900 relative"
+        <div
+            className="flex flex-col min-h-screen bg-white font-sans text-gray-900 relative"
             onMouseEnter={() => setShow(true)}
             onMouseLeave={() => setShow(false)}
         >
@@ -51,28 +58,54 @@ const FormEditPage = () => {
                     <span className="text-gray-300">/</span>
                     <span className="hover:bg-gray-100 px-1.5 py-0.5 rounded cursor-pointer transition-colors">My workspace</span>
                     <span className="text-gray-300">/</span>
-                    <span className="text-gray-900 hover:bg-gray-100 px-1.5 py-0.5 rounded cursor-pointer transition-colors">{formTitle || "Untitled"}</span>
+                    <span className="text-gray-900 hover:bg-gray-100 px-1.5 py-0.5 rounded cursor-pointer transition-colors">{formTitle || 'Untitled'}</span>
                 </div>
 
                 {/* Right */}
                 <div className="flex items-center gap-4 text-sm font-medium text-gray-500">
-                    <span className="text-gray-400">Draft</span>
+                    <span className="text-gray-400"> {isDirty ? 'Unsaved' : 'Draft'} </span>
                     <button className="hover:bg-gray-100 p-1.5 rounded transition-colors"><Zap className="w-4 h-4" /></button>
                     <button className="hover:bg-gray-100 p-1.5 rounded transition-colors"><History className="w-4 h-4" /></button>
                     <button className="hover:bg-gray-100 p-1.5 rounded transition-colors"><Settings className="w-4 h-4" /></button>
                     <button className="hover:bg-gray-100 px-2 py-1.5 rounded transition-colors">Customize</button>
-                    <button className="hover:bg-gray-100 px-2 py-1.5 rounded transition-colors">Preview</button>
-                    <button className="bg-gray-900 text-white px-3 py-1.5 rounded-md hover:bg-gray-800 transition-colors">Publish</button>
+
+                    <button
+                        onClick={() => setPreviewOpen(true)}
+                        className="hover:bg-gray-100 px-2 py-1.5 rounded transition-colors"
+                    >
+                        Preview
+                    </button>
+
+                    <button
+                        onClick={() => saveDraft()}
+                        disabled={isSaving}
+                        className="hover:bg-gray-100 px-2 py-1.5 rounded transition-colors disabled:opacity-50"
+                    >
+                        Save draft
+                    </button>
+                    <button
+                        onClick={() => publish()}
+                        disabled={isSaving}
+                        className="bg-gray-900 text-white px-3 py-1.5 rounded-md hover:bg-gray-800 transition-colors disabled:opacity-50 inline-flex items-center gap-2"
+                    >
+                        {isSaving && <Loader2 className="w-4 h-4 animate-spin" />}
+                        Publish
+                    </button>
+
+
                 </div>
             </header>
+
+
 
             {/* Main Content */}
             <main className="flex-1 overflow-y-auto pb-24">
                 <div className="max-w-[700px] mx-auto mt-32 px-8">
-                    <div className={`flex items-center gap-4 transition-all duration-300 ease-out
+                    <div
+                        className={`flex items-center gap-4 transition-all duration-300 ease-out
                             ${show
-                            ? "opacity-100 translate-y-0 pointer-events-auto"
-                            : "opacity-0 -translate-y-2 pointer-events-none"}`}
+                                ? 'opacity-100 translate-y-0 pointer-events-auto'
+                                : 'opacity-0 -translate-y-2 pointer-events-none'}`}
                         onMouseEnter={() => setShow(true)}
                         onMouseLeave={() => setShow(false)}
                     >
@@ -88,7 +121,6 @@ const FormEditPage = () => {
                                     hover:bg-gray-100 focus:outline-none 
                                      focus:ring-2 focus:ring-gray-200"
                                 >
-
                                     <Icon className="w-4 h-4" strokeWidth={2} />
                                     <span className="font-bold text-[14px]">{action.name}</span>
                                 </span>
@@ -104,19 +136,18 @@ const FormEditPage = () => {
                         onChange={(e) => setFormTitle(e.target.value)}
                         onMouseEnter={() => setShow(true)}
                         onMouseLeave={() => setShow(false)}
-
                         onKeyDown={(e) => {
-                            if (e.key === "Enter") {
+                            if (e.key === 'Enter') {
                                 e.preventDefault();
                                 setIsBuilderActive(true);
                             }
                         }}
-                        className="text-[40px] font-bold text-gray-800 placeholder:text-gray-300 outline-none w-full  bg-transparent"
+                        className="text-[40px] font-bold text-gray-800 placeholder:text-gray-300 outline-none w-full bg-transparent"
                     />
 
                     {isBuilderActive ? (
                         <div className="mt-8">
-                            <Formbuilder title={formTitle} />
+                            <Formbuilder formId={formId} />
                         </div>
                     ) : (
                         <>
@@ -147,7 +178,6 @@ const FormEditPage = () => {
 
                             {/* Footer Links Grid */}
                             <div className="grid grid-cols-2 gap-x-12 gap-y-6">
-                                {/* Column 1 */}
                                 <div>
                                     <h3 className="text-sm font-semibold text-gray-900 mb-4">Get started</h3>
                                     <div className="flex flex-col gap-3">
@@ -158,8 +188,6 @@ const FormEditPage = () => {
                                         <FooterLink icon={<Zap className="w-4 h-4" />} text="Learn about Tally Pro" />
                                     </div>
                                 </div>
-
-                                {/* Column 2 */}
                                 <div>
                                     <h3 className="text-sm font-semibold text-gray-900 mb-4">How-to guides</h3>
                                     <div className="flex flex-col gap-3">
@@ -180,6 +208,8 @@ const FormEditPage = () => {
             <button className="fixed bottom-6 right-6 w-10 h-10 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-500 hover:text-gray-900 hover:bg-gray-50 shadow-sm transition-all z-50">
                 <span className="font-medium text-lg">?</span>
             </button>
+
+            <PreviewDialog open={previewOpen} onOpenChange={setPreviewOpen} />
         </div>
     );
 };

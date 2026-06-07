@@ -1,4 +1,4 @@
-
+// /apps/web/hooks/api/auth/index.ts
 import { trpc } from "~/trpc/client";
 
 export const useSignUp = () => {
