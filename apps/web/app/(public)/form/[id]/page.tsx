@@ -5,6 +5,15 @@ import React from 'react';
 import { useParams } from 'next/navigation';
 import { FormRenderer } from '~/components/form-renderer/FormRenderer';
 import { useGetFormBySlug } from '~/hooks/api/form';
+import { fromPayload } from '~/lib/form-builder/serialize';
+import type { FormTheme } from '~/lib/form-builder/schema';
+
+const DEFAULT_THEME: FormTheme = {
+    font: 'Roboto',
+    bgColor: '#ffffff',
+    textColor: '#37352F',
+    pageWidth: '700px',
+};
 
 export default function PublicFormPage() {
     const params = useParams();
@@ -42,8 +51,14 @@ export default function PublicFormPage() {
 
     if (!form) return null;
 
+    const parsed = fromPayload(form.published);
+    const theme: FormTheme = parsed?.theme ?? DEFAULT_THEME;
+
     return (
-        <div className="min-h-screen bg-white">
+        <div
+            className="min-h-screen"
+            style={{ backgroundColor: theme.bgColor, color: theme.textColor, fontFamily: theme.font }}
+        >
             <FormRenderer
                 formId={form.id}
                 title={form.title}

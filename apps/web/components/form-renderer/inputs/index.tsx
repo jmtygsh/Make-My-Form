@@ -104,7 +104,7 @@ export function PublicFieldInput({ block, controller }: PublicFieldInputProps) {
             return (
                 <div className="flex flex-col gap-2">
                     {block.options.map((opt) => (
-                        <label key={opt.id} className="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
+                        <label key={opt.id} className="flex cursor-pointer items-center gap-2 text-sm">
                             <input
                                 type="radio"
                                 name={block.id}
@@ -131,7 +131,7 @@ export function PublicFieldInput({ block, controller }: PublicFieldInputProps) {
             return (
                 <div className="flex flex-col gap-2">
                     {block.options.map((opt) => (
-                        <label key={opt.id} className="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
+                        <label key={opt.id} className="flex cursor-pointer items-center gap-2 text-sm">
                             <Checkbox
                                 checked={value.includes(opt.id)}
                                 onCheckedChange={() => toggle(opt.id)}

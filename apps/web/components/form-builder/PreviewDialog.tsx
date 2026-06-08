@@ -16,7 +16,8 @@ interface PreviewDialogProps {
 export function PreviewDialog({ open, onOpenChange }: PreviewDialogProps) {
     const formId = useFormBuilderStore((s) => s.formId);
     const title = useFormBuilderStore((s) => s.title);
-    const blocks = useFormBuilderStore((s) => s.blocks); // 👈 blocks now
+    const blocks = useFormBuilderStore((s) => s.blocks);
+    const theme = useFormBuilderStore((s) => s.theme);
 
     useEffect(() => {
         if (!open) return;
@@ -34,15 +35,18 @@ export function PreviewDialog({ open, onOpenChange }: PreviewDialogProps) {
 
     if (!open) return null;
 
-    const payload = toPayload(title, blocks);
+    const payload = toPayload(title, blocks, theme);
 
     return createPortal(
-        <div className="fixed inset-0 z-60 overflow-y-auto bg-white">
+        <div
+            className="fixed inset-0 z-60 overflow-y-auto"
+            style={{ backgroundColor: theme.bgColor, color: theme.textColor, fontFamily: theme.font }}
+        >
 
             <div className="sticky top-0 z-10 flex items-center px-4 py-3">
                 <button
                     onClick={() => onOpenChange(false)}
-                    className="flex items-center gap-1.5 rounded-md border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50"
+                    className="flex items-center gap-1.5 rounded-md border border-current/20 bg-current/5 px-3 py-1.5 text-sm font-medium shadow-sm transition-colors hover:opacity-80"
                 >
                     <ChevronLeft className="h-4 w-4" />
                     Back to editor
@@ -58,4 +62,4 @@ export function PreviewDialog({ open, onOpenChange }: PreviewDialogProps) {
         </div>,
         document.body,
     );
-}
+}

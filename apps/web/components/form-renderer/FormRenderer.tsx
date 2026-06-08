@@ -12,7 +12,14 @@ import { buildFormSchema } from '~/hooks/use-form-validation';
 import { fromPayload } from '~/lib/form-builder/serialize';
 import { packRows } from '~/lib/form-builder/pack-rows';
 import { useSubmitForm } from '~/hooks/api/form';
-import { isInputType, type Block } from '~/lib/form-builder/schema';
+import { isInputType, type Block, type FormTheme } from '~/lib/form-builder/schema';
+
+const DEFAULT_THEME: FormTheme = {
+    font: 'Roboto',
+    bgColor: '#ffffff',
+    textColor: '#37352F',
+    pageWidth: '700px',
+};
 
 interface FormRendererProps {
     formId: string;
@@ -33,6 +40,7 @@ export function FormRenderer({
 
     const parsed = fromPayload(payload);
     const blocks: Block[] = parsed?.blocks ?? [];
+    const theme: FormTheme = parsed?.theme ?? DEFAULT_THEME;
 
     // visible (non-hidden) blocks → packed into rows for layout
     const rows = React.useMemo(() => {
@@ -87,17 +95,24 @@ export function FormRenderer({
 
     if (submitted) {
         return (
-            <div className="mx-auto mt-32 max-w-[640px] px-8 text-center">
-                <h1 className="text-3xl font-bold text-gray-800">Thank you!</h1>
-                <p className="mt-2 text-gray-500">Your response has been recorded.</p>
+            <div
+                className="mx-auto mt-32 px-8 text-center"
+                style={{ maxWidth: theme.pageWidth }}
+            >
+                <h1 className="text-3xl font-bold">Thank you!</h1>
+                <p className="mt-2 opacity-70">Your response has been recorded.</p>
             </div>
         );
     }
 
     return (
-        <form onSubmit={onSubmit} className="mx-auto mt-20 max-w-[640px] px-8 pb-24">
-            <h1 className="text-4xl font-bold text-gray-800">{title}</h1>
-            {description && <p className="mt-3 text-gray-500">{description}</p>}
+        <form
+            onSubmit={onSubmit}
+            className="mx-auto mt-20 px-8 pb-24"
+            style={{ maxWidth: theme.pageWidth }}
+        >
+            <h1 className="text-4xl font-bold">{title}</h1>
+            {description && <p className="mt-3 opacity-70">{description}</p>}
 
             <div className="mt-10 flex flex-col gap-5">
                 {rows.map((row) => (
@@ -106,7 +121,7 @@ export function FormRenderer({
                             <div
                                 key={block.id}
                                 className="min-w-0"
-                                style={{ flexBasis: `${block.width * 100}%`, flexGrow: 0, flexShrink: 0 }} // 👈 grow:0, shrink:0
+                                style={{ flexBasis: `${block.width * 100}%`, flexGrow: 0, flexShrink: 0 }}
                             >
                                 <BlockField block={block} control={control} error={errors[block.id]?.message as string | undefined} />
                             </div>
@@ -132,15 +147,15 @@ function BlockField({ block, control, error }: {
 }) {
     // Layout blocks
     if (block.type === 'heading_1')
-        return <h2 className="text-3xl font-bold text-gray-800">{block.content}</h2>;
+        return <h2 className="text-3xl font-bold">{block.content}</h2>;
     if (block.type === 'heading_2')
-        return <h3 className="text-2xl font-bold text-gray-800">{block.content}</h3>;
+        return <h3 className="text-2xl font-bold">{block.content}</h3>;
     if (block.type === 'heading_3')
-        return <h4 className="text-xl font-bold text-gray-800">{block.content}</h4>;
+        return <h4 className="text-xl font-bold">{block.content}</h4>;
     if (block.type === 'text')
-        return <p className="text-[15px] leading-relaxed text-gray-600">{block.content}</p>;
+        return <p className="text-[15px] leading-relaxed opacity-80">{block.content}</p>;
     if (block.type === 'divider')
-        return <hr className="border-gray-200" />;
+        return <hr className="border-current/20" />;
 
     // Everything past here is an input block. Use `'required' in block`
     // as the narrowing guard — TS narrows `block` to the input union.
@@ -148,12 +163,12 @@ function BlockField({ block, control, error }: {
 
     return (
         <div className="flex flex-col gap-2">
-            <label className="flex items-center gap-1 text-[15px] font-medium text-gray-800">
-                {block.label || <span className="text-gray-400">Untitled question</span>}
+            <label className="flex items-center gap-1 text-[15px] font-medium">
+                {block.label || <span className="opacity-50">Untitled question</span>}
                 {block.required && <span className="text-red-500">*</span>}
             </label>
             {block.description && (
-                <p className="text-sm text-gray-400">{block.description}</p>
+                <p className="text-sm opacity-50">{block.description}</p>
             )}
             <Controller
                 name={block.id}
