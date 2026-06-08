@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import {
   Asterisk,
   Search,
@@ -20,6 +20,9 @@ import {
   LifeBuoy,
   MessageCircle,
   ChevronDown,
+  ChevronRight,
+  MoreHorizontal,
+  Plus,
   ChevronsLeft,
   ChevronsRight,
   MessageSquareHeart,
@@ -27,7 +30,8 @@ import {
   BadgeCheckIcon,
   CreditCardIcon,
   BellIcon,
-  LogOutIcon
+  LogOutIcon,
+  FileQuestion
 } from "lucide-react"
 
 
@@ -56,27 +60,37 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu"
+import {
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "~/components/ui/command"
 
 import { useMe, useLogout } from "~/hooks/api/auth/index"
+import { useGetAllMyForms } from "~/hooks/api/form"
+import { useCommandSearch } from "~/hooks/use-command-search"
 import { toast } from "sonner"
 
 const MAIN_NAV = [
-  { title: "Home", icon: Home },
-  { title: "Search", icon: Search },
-  { title: "Settings", icon: Settings },
-  { title: "Upgrade plan", icon: ArrowUpCircle },
+  { title: "Home", icon: Home, href: "/dashboard" },
+  { title: "Search", icon: Search }, // this will trigger an command card to search
+  { title: "Settings", icon: Settings, href: "/settings" },
+  { title: "Upgrade plan", icon: ArrowUpCircle, href: "/pricing" },
 ]
 
 const PRODUCT_NAV = [
-  { title: "Templates", icon: LayoutTemplate },
-  { title: "Feature requests", icon: SmilePlus },
-  { title: "Rewards", icon: CircleDollarSign },
-  { title: "Trash", icon: Trash },
+  { title: "Templates", icon: LayoutTemplate, href: "/templates" },
+  { title: "Feature requests", icon: SmilePlus }, // TODO: ADD ROUTE
+  { title: "Trash", icon: Trash }, // dedicated component
 ]
 
 const HELP_NAV = [
   { title: "Help center", icon: LifeBuoy },
   { title: "Contact support", icon: MessageCircle },
+  { title: "How to guide", icon: FileQuestion },
 ]
 
 
@@ -90,7 +104,11 @@ interface User {
 
 export function AppSidebar() {
   const router = useRouter();
+  const pathname = usePathname();
   const { toggleSidebar } = useSidebar()
+  const { searchOpen, setSearchOpen, openSearch } = useCommandSearch()
+  const { forms } = useGetAllMyForms()
+  const [workspaceExpanded, setWorkspaceExpanded] = React.useState(false)
 
 
   const { user, isLoading } = useMe() as { user: User | undefined, isLoading: boolean }
@@ -113,9 +131,12 @@ export function AppSidebar() {
 
   const logOutHandler = () => {
     try {
-      router.push("/login")
+      router.replace("/login")
 
       logout({})
+
+      router.refresh();
+
       toast.success('Log Out Successful')
 
     } catch (error) {
@@ -190,8 +211,17 @@ export function AppSidebar() {
               {MAIN_NAV.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
+                    onClick={() => {
+                      if (item.title === "Search") {
+                        openSearch()
+                      } else if (item.href) {
+                        router.push(item.href)
+                      }
+                    }}
+                    isActive={item.href ? pathname === item.href : false}
                     className="text-[14px]! px-3 py-2 h-7 rounded-md cursor-pointer hover:text-primary!">
-                    <item.icon className="h-4 w-4" strokeWidth={2} /> {item.title}
+                    <item.icon className="h-4 w-4" strokeWidth={2} />
+                    {item.title}
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -202,17 +232,46 @@ export function AppSidebar() {
 
         {/* Workspaces */}
         <SidebarGroup className="pt-6">
-          <SidebarGroupLabel className="text-[12px] font-medium text-gray-500 px-3 mb-1">Workspaces</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-[12px] font-medium text-gray-500 px-3 mb-1 flex items-center justify-between">
+            Workspaces
+
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-
               <SidebarMenuItem>
-
                 <SidebarMenuButton
-                  className="text-[14px]! px-3 py-2 h-7 rounded-md cursor-pointer hover:text-primary!">
-                  <ChevronDown className="h-4 w-4" strokeWidth={2} /> My workspace
-                </SidebarMenuButton>
+                  onClick={() => setWorkspaceExpanded(!workspaceExpanded)}
+                  className="text-[14px]! px-3 py-2 h-7 rounded-md cursor-pointer hover:text-primary! group">
+                  <div className="flex items-center flex-1 min-w-0">
+                    {workspaceExpanded ? (
+                      <ChevronDown className="h-4 w-4 shrink-0 mr-2" strokeWidth={2} />
+                    ) : (
+                      <ChevronRight className="h-4 w-4 shrink-0 mr-2" strokeWidth={2} />
+                    )}
+                    <span className="truncate">
+                      My workspace
+                    </span>
+                  </div>
 
+                </SidebarMenuButton>
+                {workspaceExpanded && forms && forms.length > 0 && (
+                  <SidebarMenuSub>
+                    {forms.map((form) => {
+                      const href = `/forms/${form.id}/edit`;
+                      return (
+                        <SidebarMenuSubItem key={form.id}>
+                          <SidebarMenuSubButton
+                            onClick={() => router.push(href)}
+                            isActive={pathname === href}
+                            className="text-[13px]! h-7 cursor-pointer hover:text-primary!"
+                          >
+                            <span className="truncate">{form.title || 'Untitled'}</span>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      );
+                    })}
+                  </SidebarMenuSub>
+                )}
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
@@ -226,6 +285,8 @@ export function AppSidebar() {
               {PRODUCT_NAV.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
+                    onClick={() => item.href && router.push(item.href)}
+                    isActive={item.href ? pathname === item.href : false}
                     className="text-[14px]! px-3 py-2 h-7 rounded-md cursor-pointer hover:text-primary!">
                     <item.icon className="h-4 w-4" strokeWidth={2} /> {item.title}
                   </SidebarMenuButton>
@@ -264,6 +325,39 @@ export function AppSidebar() {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
+
+      {/* Search Command Palette */}
+      <CommandDialog open={searchOpen} onOpenChange={setSearchOpen}>
+        <CommandInput placeholder="Search forms, pages, settings…" />
+        <CommandList className="py-1.5!">
+          <CommandEmpty>No results found.</CommandEmpty>
+          <CommandGroup heading="Pages" className="py-1.5!">
+            <CommandItem className="py-1.5!" onSelect={() => { router.push("/dashboard"); setSearchOpen(false) }}>
+              <Home className="mr-2 h-4 w-4" /> Home
+            </CommandItem>
+            <CommandItem className="py-1.5!" onSelect={() => { router.push("/settings"); setSearchOpen(false) }}>
+              <Settings className="mr-2 h-4 w-4" /> Settings
+            </CommandItem>
+            <CommandItem className="py-1.5!" onSelect={() => { router.push("/templates"); setSearchOpen(false) }}>
+              <LayoutTemplate className="mr-2 h-4 w-4" /> Templates
+            </CommandItem>
+          </CommandGroup>
+          {forms && forms.length > 0 && (
+            <CommandGroup heading="My Forms" className="py-1.5!">
+              {forms.map((form) => (
+                <CommandItem
+                  key={form.id}
+                  onSelect={() => { router.push(`/forms/${form.id}/edit`); setSearchOpen(false) }}
+                  className="py-1.5!"
+                >
+                  <Asterisk className="mr-2 h-4 w-4" />
+                  {form.title}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          )}
+        </CommandList>
+      </CommandDialog>
     </Sidebar>
   )
 }

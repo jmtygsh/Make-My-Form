@@ -6,7 +6,7 @@ import { useParams } from 'next/navigation';
 import Formbuilder from '~/components/form-builder/Formbuilder';
 import { useFormBuilder } from '~/hooks/use-form-builder';
 import { useSaveDraft } from '~/hooks/use-save-draft';
-import { Loader2 } from 'lucide-react';
+import { HouseWifi, Loader2 } from 'lucide-react';
 import { PreviewDialog } from '~/components/form-builder/PreviewDialog';
 import {
     Asterisk,
@@ -37,6 +37,19 @@ const FormEditPage = () => {
 
     const [isBuilderActive, setIsBuilderActive] = useState(false);
     const [show, setShow] = useState(false);
+
+    // Press Enter anywhere on the page to activate the builder
+    React.useEffect(() => {
+        if (isBuilderActive) return;
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                setIsBuilderActive(true);
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isBuilderActive]);
 
     const actions = [
         { name: 'Add logo', icon: Hexagon },
@@ -102,7 +115,7 @@ const FormEditPage = () => {
             <main className="flex-1 overflow-y-auto pb-24">
                 <div className="max-w-[700px] mx-auto mt-32 px-8">
                     <div
-                        className={`flex items-center gap-4 transition-all duration-300 ease-out
+                        className={`mb-4 flex items-center gap-4 transition-all duration-300 ease-out
                             ${show
                                 ? 'opacity-100 translate-y-0 pointer-events-auto'
                                 : 'opacity-0 -translate-y-2 pointer-events-none'}`}
@@ -142,7 +155,7 @@ const FormEditPage = () => {
                                 setIsBuilderActive(true);
                             }
                         }}
-                        className="text-[40px] font-bold text-gray-800 placeholder:text-gray-300 outline-none w-full bg-transparent"
+                        className="text-[40px] font-bold text-gray-800 placeholder:text-gray-300 outline-none w-full bg-transparent mb-4"
                     />
 
                     {isBuilderActive ? (
@@ -169,10 +182,10 @@ const FormEditPage = () => {
                             {/* Description */}
                             <div className="text-gray-600 text-[15px] leading-relaxed mb-12">
                                 <p>
-                                    Tally is a form builder that <span className="bg-pink-100 text-pink-600 px-1.5 py-0.5 rounded font-medium">works like a doc</span>.
+                                    A form builder that <span className="bg-primary/60 text-black 0 px-1.5 py-0.5 rounded font-medium">works like a doc</span>.
                                 </p>
                                 <p>
-                                    Just type <span className="bg-gray-100 text-gray-800 px-1.5 py-0.5 rounded font-medium text-sm">/</span> to insert form blocks and <span className="bg-gray-100 text-gray-800 px-1.5 py-0.5 rounded font-medium text-sm">@</span> to mention question answers.
+                                    Just type <span className="bg-gray-100 text-gray-800 px-1.5 py-0.5 rounded font-medium text-sm">/</span> to insert a space  on the lable of field block.
                                 </p>
                             </div>
 
@@ -183,19 +196,19 @@ const FormEditPage = () => {
                                     <div className="flex flex-col gap-3">
                                         <FooterLink icon={<MousePointerClick className="w-4 h-4" />} text="Create your first form" />
                                         <FooterLink icon={<LayoutTemplate className="w-4 h-4" />} text="Get started with templates" />
-                                        <FooterLink icon={<Code className="w-4 h-4" />} text="Embed your form" />
+
                                         <FooterLink icon={<HelpCircle className="w-4 h-4" />} text="Help center" />
-                                        <FooterLink icon={<Zap className="w-4 h-4" />} text="Learn about Tally Pro" />
+
                                     </div>
                                 </div>
                                 <div>
                                     <h3 className="text-sm font-semibold text-gray-900 mb-4">How-to guides</h3>
                                     <div className="flex flex-col gap-3">
+                                        <FooterLink icon={<HouseWifi className="w-4 h-4" />} text="How to build" />
                                         <FooterLink icon={<GitBranch className="w-4 h-4" />} text="Conditional logic" />
-                                        <FooterLink icon={<Calculator className="w-4 h-4" />} text="Calculator" />
+
                                         <FooterLink icon={<EyeOff className="w-4 h-4" />} text="Hidden fields" />
-                                        <FooterLink icon={<AtSign className="w-4 h-4" />} text="@ Mentions" />
-                                        <FooterLink icon={<DollarSign className="w-4 h-4" />} text="Collect payments" />
+
                                     </div>
                                 </div>
                             </div>

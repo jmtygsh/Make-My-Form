@@ -12,6 +12,8 @@ import {
   verifyUserEmailWithTokenOutputModel,
   resetPasswordInputModel,
   resetPasswordOutputModel,
+  updateUserInputModel,
+  updateUserOutputModel,
   logoutInputModel,
   logoutOutputModel
 } from "./model";
@@ -110,6 +112,17 @@ export const authRouter = router({
       return {
         id
       };
+    }),
+
+
+  updateUser: protectedProcedure
+    .meta({ openapi: { method: "POST", path: getPath("/update-user"), tags: TAGS } })
+    .input(updateUserInputModel)
+    .output(updateUserOutputModel)
+    .mutation(async ({ input, ctx }) => {
+      const { fullName, profileImageUrl } = input;
+      const updated = await userService.updateUser({ id: ctx.user.id, fullName, profileImageUrl });
+      return updated;
     }),
 
 

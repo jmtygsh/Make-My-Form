@@ -65,7 +65,7 @@ export function LoginForm({
 
             toast.success("Login successfully");
             router.refresh();
-            router.push("/dashboard");
+            router.replace("/dashboard");
         } catch (error) {
             const message = "Failed to login into your account";
             setSubmitError(message);

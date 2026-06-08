@@ -44,3 +44,9 @@ export type resetPasswordInputType = z.infer<typeof resetPasswordInput>;
 
 
 
+export const updateUserInput = z.object({
+  id: z.string().describe("id of the user"),
+  fullName: z.string().min(1).describe("full name of the user"),
+  profileImageUrl: z.string().optional().nullable().describe("profile image url of the user"),
+})
+export type updateUserInputType = z.infer<typeof updateUserInput>;

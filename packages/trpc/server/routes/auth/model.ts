@@ -67,6 +67,20 @@ export const resetPasswordOutputModel = z.object({
 
 
 
+// update user profile
+export const updateUserInputModel = z.object({
+    fullName: z.string().min(1).describe("Full name of the user"),
+    profileImageUrl: z.string().optional().nullable().describe("Profile image URL"),
+});
+
+export const updateUserOutputModel = z.object({
+    id: z.string().describe("ID of the user"),
+    email: z.email().describe("Email of the user"),
+    fullName: z.string().describe("Full name of the user"),
+    profileImageUrl: z.string().optional().nullable().describe("Profile image URL"),
+});
+
+
 // logout
 export const logoutInputModel = z.object({});
 

@@ -199,5 +199,33 @@ export const useMe = () => {
     }
 }
 
+export const useUpdateUser = () => {
+    const utils = trpc.useUtils();
 
+    const {
+        mutateAsync: updateUserAsync,
+        mutate: updateUser,
+        error,
+        failureCount,
+        isError,
+        isIdle,
+        isSuccess,
+        status,
+    } = trpc.auth.updateUser.useMutation({
+        // invalidate user cache since profile update changes user state
+        onSuccess: async () => {
+            await utils.auth.getLoggedInUserInfo.invalidate();
+        },
+    });
 
+    return {
+        updateUserAsync,
+        updateUser,
+        error,
+        failureCount,
+        isError,
+        isIdle,
+        isSuccess,
+        status,
+    }
+}

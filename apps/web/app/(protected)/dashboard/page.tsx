@@ -1,59 +1,65 @@
-'use client';
+"use client";
 
-import { Button } from "~/components/ui/button"
-import { Plus, HelpCircle, MoveRight } from "lucide-react"
-import { useRouter } from "next/navigation"
-import { generateRandomString } from "~/lib/random"
+import { Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { generateRandomString } from "~/lib/random";
+import { useGetAllMyForms } from "~/hooks/api/form";
+import { PageShell } from "~/components/layout/page-shell";
+import { EmptyState } from "~/components/layout/empty-state";
+import { FormCard } from "~/components/layout/form-card";
 
 export default function DashboardPage() {
   const router = useRouter();
+  const { forms, isLoading } = useGetAllMyForms();
 
-  const handleCreateForm = () => {
-    const id = generateRandomString(8);
-    router.push(`/forms/${id}/edit`);
-  };
+  const handleCreateForm = () => router.push(`/forms/${generateRandomString(8)}/edit`);
+
+  if (isLoading) {
+    return (
+      <PageShell>
+        <div className="flex-1 flex items-center justify-center">
+          <div className="animate-pulse text-sm text-gray-400">Loading…</div>
+        </div>
+      </PageShell>
+    );
+  }
+
+  if (!forms?.length) {
+    return (
+      <PageShell>
+        <EmptyState onCreate={handleCreateForm} />
+      </PageShell>
+    );
+  }
 
   return (
-    <div className="flex h-full flex-col items-center justify-center relative min-h-screen w-full bg-white">
-      <div className="relative isolate flex flex-col items-center justify-center text-center max-w-md mx-auto space-y-4">
-        {/* SVG Illustration Placeholder */}
-        <div className="mb-4">
-          <svg width="240" height="160" viewBox="0 0 240 160" fill="none" xmlns="http://www.w3.org/2000/svg">
-            {/* A simplified representation of the doodle */}
-            <path d="M60 120 C 50 80, 80 40, 120 40 C 160 40, 190 80, 180 120" stroke="#e5e7eb" strokeWidth="2" strokeDasharray="4 4" fill="none" />
-            <path d="M120 40 C 130 60, 110 90, 120 110" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" />
-            <circle cx="120" cy="30" r="10" stroke="#9ca3af" strokeWidth="2" />
-
-            {/* Platform/Tablet outline */}
-            <path d="M80 120 L 160 120 L 170 140 L 70 140 Z" stroke="#9ca3af" strokeWidth="2" strokeLinejoin="round" />
-
-            {/* Pink Plus Circle */}
-            <circle cx="140" cy="130" r="6" fill="#ec4899" />
-            <path d="M138 130 L 142 130 M140 128 L 140 132" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-
-            {/* Little stars and scribbles */}
-            <path d="M40 90 L 45 80 L 55 85 L 45 95 Z" stroke="#d1d5db" strokeWidth="1" />
-            <circle cx="190" cy="70" r="3" stroke="#d1d5db" strokeWidth="1" />
-            <path d="M200 100 L 210 90 M200 90 L 210 100" stroke="#d1d5db" strokeWidth="1.5" strokeLinecap="round" />
-          </svg>
+    <PageShell>
+      <div className="flex-1 w-full max-w-6xl mx-auto px-6 py-10 md:py-16">
+        <div className="flex items-center justify-between mb-5">
+          <div className="flex items-baseline gap-2">
+            <h1
+              className="text-sm font-bold text-black/60 tracking-tight"
+              style={{ fontFamily: "var(--latin), sans-serif" }}
+            >
+              My Workspace
+            </h1>
+            <span className="text-sm text-gray-400 font-normal select-none">{forms.length}</span>
+          </div>
+          <button
+            onClick={handleCreateForm}
+            className="text-black/60 font-semibold text-[13px] h-8 rounded-[6px] px-3.5 flex items-center gap-1.5 shadow-sm transition-all hover:shadow-md cursor-pointer select-none"
+          >
+            <Plus className="h-3.5 w-3.5" strokeWidth={3} />
+            New form
+          </button>
         </div>
 
-        <h2 className="text-xl font-bold text-gray-900">No forms yet</h2>
-        <p className="text-sm text-gray-500 max-w-[280px]">
-          Roll up your sleeves and let's get started.
-          <br />
-          It's as simple as one-two-three.
-        </p>
-        <Button variant="textured" className="h-10 px-8 text-base" onClick={handleCreateForm}>
-          Create your form
-          <MoveRight className="ml-2 size-5" />
-        </Button>
+        <div className="space-y-3">
+          {forms.map((form) => (
+            <FormCard key={form.id} form={form} />
+          ))}
+        </div>
       </div>
-
-      {/* Floating Help Button */}
-      <button className="fixed bottom-6 right-6 h-10 w-10 rounded-full border border-gray-200 bg-white shadow-sm flex items-center justify-center text-gray-500 hover:text-gray-900 transition-colors">
-        <HelpCircle className="h-5 w-5" />
-      </button>
-    </div>
-  )
+    </PageShell>
+  );
 }

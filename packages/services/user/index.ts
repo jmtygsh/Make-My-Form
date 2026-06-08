@@ -15,6 +15,8 @@ import {
   signInUserWithEmailAndPasswordInputType,
   verifyUserEmailWithTokenInput,
   verifyUserEmailWithTokenInputType,
+  updateUserInput,
+  updateUserInputType,
 } from "./model";
 
 import EmailService from "../email";
@@ -242,6 +244,23 @@ class UserService {
     return { id: userInfo.id };
   }
 
+
+  public async updateUser(payload: updateUserInputType) {
+
+    const { id, fullName, profileImageUrl } = await updateUserInput.parseAsync(payload);
+
+    // update fullName and profileImageUrl for the user
+    await db
+      .update(usersTable)
+      .set({
+        fullName,
+        ...(profileImageUrl !== undefined ? { profileImageUrl } : {}),
+      })
+      .where(eq(usersTable.id, id));
+
+    const updated = await this.getUserInfoById(id);
+    return updated;
+  }
 
 }
 
