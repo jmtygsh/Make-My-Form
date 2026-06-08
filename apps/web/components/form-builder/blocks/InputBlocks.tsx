@@ -31,14 +31,14 @@ export function LongAnswerBlockView({ block, onChange, onEnter }: BlockRendererP
     return (
         <div className="flex flex-col gap-2">
             <BlockLabel label={block.label} required={block.required} onChange={(label) => onChange({ label })} onEnter={onEnter} />
-            <div className="min-h-[90px] rounded-md border border-gray-200 bg-white px-3 py-2">
+            <div className="min-h-[90px] rounded-md border border-current/20 bg-current/5 px-3 py-2">
                 <textarea
                     value={block.placeholder ?? ''}
                     placeholder="Long answer text"
                     onChange={(e) => onChange({ placeholder: e.target.value })}
                     onClick={(e) => e.stopPropagation()}
                     rows={3}
-                    className="w-full resize-none bg-transparent text-sm text-gray-600 placeholder:text-gray-300 outline-none"
+                    className="w-full resize-none bg-transparent text-sm placeholder:text-gray-300 outline-none"
                 />
             </div>
         </div>

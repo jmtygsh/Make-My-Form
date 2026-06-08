@@ -22,10 +22,10 @@ export function useSaveDraft() {
     const saveDraft = useCallback(async () => {
         try {
             const formId = await ensureFormId();
-            const { title, blocks, markSaved } = useFormBuilderStore.getState();
+            const { title, blocks, theme, markSaved } = useFormBuilderStore.getState();
             await updateFormDataAsync({
                 formId,
-                draft: toPayload(title, blocks) as unknown as Record<string, unknown>,
+                draft: toPayload(title, blocks, theme) as unknown as Record<string, unknown>,
             });
             markSaved();
             toast.success('Draft saved');
@@ -38,10 +38,10 @@ export function useSaveDraft() {
     const publish = useCallback(async () => {
         try {
             const formId = await ensureFormId();
-            const { title, blocks, markSaved } = useFormBuilderStore.getState();
+            const { title, blocks, theme, markSaved } = useFormBuilderStore.getState();
             await updateFormDataAsync({
                 formId,
-                publish: toPayload(title, blocks) as unknown as Record<string, unknown>,
+                publish: toPayload(title, blocks, theme) as unknown as Record<string, unknown>,
             });
             markSaved();
             toast.success('Form published');

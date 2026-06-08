@@ -22,7 +22,7 @@ export function HeadingBlockView({ block, onChange, onEnter }: BlockRendererProp
                     onEnter?.();
                 }
             }}
-            className={`w-full resize-none bg-transparent font-bold text-gray-800 placeholder:text-gray-300 outline-none ${size}`}
+            className={`w-full resize-none bg-transparent font-bold placeholder:text-gray-300 outline-none ${size}`}
             rows={1}
         />
     );
@@ -54,7 +54,7 @@ export function TextBlockView({ block, onChange, onEnter }: BlockRendererProps<T
                         onEnter?.();
                     }
                 }}
-                className="w-full resize-none bg-transparent text-[15px] leading-relaxed text-gray-600 placeholder:text-gray-300 outline-none"
+                className="w-full resize-none bg-transparent text-[15px] leading-relaxed placeholder:text-gray-300 outline-none"
                 rows={1}
             />
 
@@ -73,5 +73,5 @@ export function TextBlockView({ block, onChange, onEnter }: BlockRendererProps<T
 }
 
 export function DividerBlockView() {
-    return <hr className="my-2 border-gray-200" />;
+    return <hr className="my-2 border-current/20" />;
 }

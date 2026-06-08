@@ -2,20 +2,24 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { arrayMove } from '@dnd-kit/sortable';
-import type { Block, BlockType } from './schema';
+import type { Block, BlockType, FormTheme } from './schema';
 import { createBlock, convertBlock, genId, BLOCK_META } from './field-config';
 
 interface FormBuilderState {
     formId: string | null;
     title: string;
     blocks: Block[];
+    theme: FormTheme;
     selectedBlockId: string | null;
     isDirty: boolean;
     hydrated: boolean;
 
+    // theme
+    updateTheme: (patch: Partial<FormTheme>) => void;
+
     // lifecycle
     init: (formId: string) => void;
-    hydrateFromServer: (data: { title: string; blocks: Block[] }) => void;
+    hydrateFromServer: (data: { title: string; blocks: Block[]; theme?: FormTheme }) => void;
     reset: () => void;
     markSaved: () => void;
 
@@ -45,10 +49,18 @@ interface FormBuilderState {
 
 }
 
+const DEFAULT_THEME: FormTheme = {
+    font: 'Roboto',
+    bgColor: '#ffffff',
+    textColor: '#37352F',
+    pageWidth: '700px',
+};
+
 const initialState = {
     formId: null as string | null,
     title: '',
     blocks: [] as Block[],
+    theme: DEFAULT_THEME as FormTheme,
     selectedBlockId: null as string | null,
     isDirty: false,
     hydrated: false,
@@ -59,6 +71,12 @@ export const useFormBuilderStore = create<FormBuilderState>()(
         (set, get) => ({
             ...initialState,
 
+            updateTheme: (patch) =>
+                set((state) => ({
+                    theme: { ...state.theme, ...patch },
+                    isDirty: true,
+                })),
+
             init: (formId) => {
                 const current = get();
                 if (current.formId === formId) return;
@@ -66,6 +84,7 @@ export const useFormBuilderStore = create<FormBuilderState>()(
                     formId,
                     title: '',
                     blocks: [],
+                    theme: DEFAULT_THEME,
                     selectedBlockId: null,
                     isDirty: false,
                     hydrated: false,
@@ -82,6 +101,7 @@ export const useFormBuilderStore = create<FormBuilderState>()(
                 set({
                     title: data.title || current.title,
                     blocks: data.blocks.length > 0 ? data.blocks : current.blocks,
+                    theme: data.theme ?? current.theme,
                     hydrated: true,
                     isDirty: false,
                 });
@@ -215,6 +235,7 @@ export const useFormBuilderStore = create<FormBuilderState>()(
                 formId: state.formId,
                 title: state.title,
                 blocks: state.blocks,
+                theme: state.theme,
                 isDirty: state.isDirty,
                 hydrated: state.hydrated,
             }),

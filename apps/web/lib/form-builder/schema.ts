@@ -191,9 +191,19 @@ export type OptionBlock =
     | DropdownBlock
     | MultiSelectBlock;
 
+// ---- Theme ----
+export const formThemeSchema = z.object({
+    font: z.string().default('Roboto'),
+    bgColor: z.string().default('#ffffff'),
+    textColor: z.string().default('#37352F'),
+    pageWidth: z.string().default('700px'),
+});
+export type FormTheme = z.infer<typeof formThemeSchema>;
+
 // ---- Payload (jsonb draft/published) ----
 export const formPayloadSchema = z.object({
     name: z.string().default(''),
     blocks: z.array(blockSchema).default([]),
+    theme: formThemeSchema.default({}),
 });
 export type FormPayload = z.infer<typeof formPayloadSchema>;

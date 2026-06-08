@@ -23,13 +23,13 @@ export function EditablePlaceholder({
     multiline,
 }: EditablePlaceholderProps) {
     return (
-        <div className="flex items-center justify-between rounded-md border border-gray-200 bg-white px-3 py-2">
+        <div className="flex items-center justify-between rounded-md border border-current/20 bg-current/5 px-3 py-2">
             <input
                 value={value}
                 placeholder={fallback}
                 onChange={(e) => onChange(e.target.value)}
                 onClick={(e) => e.stopPropagation()}
-                className="w-full bg-transparent text-sm text-gray-600 placeholder:text-gray-300 outline-none"
+                className="w-full bg-transparent text-sm placeholder:text-gray-300 outline-none"
             />
             {icon && <span className="ml-2 shrink-0 text-gray-300">{icon}</span>}
         </div>

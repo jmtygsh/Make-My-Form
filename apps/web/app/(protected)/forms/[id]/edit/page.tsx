@@ -1,13 +1,25 @@
 // apps/web/app/(protected)/forms/[id]/edit/page.tsx
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import Formbuilder from '~/components/form-builder/Formbuilder';
 import { useFormBuilder } from '~/hooks/use-form-builder';
+import { useFormBuilderStore } from '~/lib/form-builder/store';
+import { useShallow } from 'zustand/react/shallow';
 import { useSaveDraft } from '~/hooks/use-save-draft';
 import { HouseWifi, Loader2 } from 'lucide-react';
 import { PreviewDialog } from '~/components/form-builder/PreviewDialog';
+import { CustomizeSidebar } from '~/components/form-builder/CustomizeSidebar';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter,
+} from '~/components/ui/dialog';
+import { Button } from '~/components/ui/button';
+import { Input } from '~/components/ui/input';
 import {
     Asterisk,
     Zap,
@@ -34,9 +46,24 @@ const FormEditPage = () => {
     const { title: formTitle, setTitle: setFormTitle, isDirty } = useFormBuilder({ formId });
     const { saveDraft, publish, isSaving } = useSaveDraft();
     const [previewOpen, setPreviewOpen] = useState(false);
+    const [showLogo, setShowLogo] = useState(false);
+    const [showCover, setShowCover] = useState(false);
+    const [showCustomize, setShowCustomize] = useState(false);
+    const [logoDialogOpen, setLogoDialogOpen] = useState(false);
+    const [logoUrl, setLogoUrl] = useState('');
+    const [pendingLogoUrl, setPendingLogoUrl] = useState('');
 
     const [isBuilderActive, setIsBuilderActive] = useState(false);
-    const [show, setShow] = useState(false);
+
+    // Theme from store (real-time canvas preview)
+    const { font, bgColor, textColor, pageWidth } = useFormBuilderStore(
+        useShallow((s) => ({
+            font: s.theme.font,
+            bgColor: s.theme.bgColor,
+            textColor: s.theme.textColor,
+            pageWidth: s.theme.pageWidth,
+        })),
+    );
 
     // Press Enter anywhere on the page to activate the builder
     React.useEffect(() => {
@@ -52,16 +79,15 @@ const FormEditPage = () => {
     }, [isBuilderActive]);
 
     const actions = [
-        { name: 'Add logo', icon: Hexagon },
-        { name: 'Add cover', icon: LayoutTemplate },
-        { name: 'Customize', icon: Palette },
+        { name: 'Add logo', icon: Hexagon, onClick: () => setShowLogo((v) => !v) },
+        { name: 'Add cover', icon: LayoutTemplate, onClick: () => setShowCover((v) => !v) },
+        { name: 'Customize', icon: Palette, onClick: () => setShowCustomize((v) => !v) },
     ];
 
     return (
         <div
             className="flex flex-col min-h-screen bg-white font-sans text-gray-900 relative"
-            onMouseEnter={() => setShow(true)}
-            onMouseLeave={() => setShow(false)}
+
         >
             {/* Header */}
             <header className="flex items-center justify-between px-4 py-3 border-b border-transparent">
@@ -80,7 +106,7 @@ const FormEditPage = () => {
                     <button className="hover:bg-gray-100 p-1.5 rounded transition-colors"><Zap className="w-4 h-4" /></button>
                     <button className="hover:bg-gray-100 p-1.5 rounded transition-colors"><History className="w-4 h-4" /></button>
                     <button className="hover:bg-gray-100 p-1.5 rounded transition-colors"><Settings className="w-4 h-4" /></button>
-                    <button className="hover:bg-gray-100 px-2 py-1.5 rounded transition-colors">Customize</button>
+                    <button onClick={() => setShowCustomize((v) => !v)} className="hover:bg-gray-100 px-2 py-1.5 rounded transition-colors">Customize</button>
 
                     <button
                         onClick={() => setPreviewOpen(true)}
@@ -112,26 +138,55 @@ const FormEditPage = () => {
 
 
             {/* Main Content */}
-            <main className="flex-1 overflow-y-auto pb-24">
-                <div className="max-w-[700px] mx-auto mt-32 px-8">
+            <main className="flex-1 overflow-y-auto pb-24" style={{ backgroundColor: bgColor, fontFamily: font }}>
+                {/* Cover Band */}
+                <div className={`w-full h-50 bg-[#fde8e4]${showCover ? '' : ' hidden'}`} />
+
+                <div className="relative mx-auto p-10" style={{ maxWidth: pageWidth, color: textColor }}>
+
+
+                    {/* Overlapping Logo Circle */}
+                    <div className={`${showLogo && showCover ? 'absolute -top-19 translate-y-1/2' : ''} flex items-center gap-2`}>
+
+
+                        {/* Main logo circle */}
+                        <div
+                            className={`${showLogo ? '' : 'hidden '}w-18 h-18 rounded-full flex items-center justify-center shadow-md cursor-pointer overflow-hidden`}
+                            onClick={() => {
+                                setPendingLogoUrl(logoUrl);
+                                setLogoDialogOpen(true);
+                            }}
+                            title="Click to change logo"
+                        >
+                            {logoUrl ? (
+                                <img
+                                    src={logoUrl}
+                                    alt="Logo"
+                                    className="w-full h-full object-cover rounded-full"
+                                    onError={() => setLogoUrl('')}
+                                />
+                            ) : (
+                                <Hexagon className="w-10 h-10 text-white" strokeWidth={1.5} />
+                            )}
+                        </div>
+                    </div>
+
+
+
                     <div
-                        className={`mb-4 flex items-center gap-4 transition-all duration-300 ease-out
-                            ${show
-                                ? 'opacity-100 translate-y-0 pointer-events-auto'
-                                : 'opacity-0 -translate-y-2 pointer-events-none'}`}
-                        onMouseEnter={() => setShow(true)}
-                        onMouseLeave={() => setShow(false)}
+                        className={`z-10 my-6 flex items-center gap-4`}
                     >
                         {actions.map((action) => {
                             const Icon = action.icon;
                             return (
                                 <span
                                     key={action.name}
+                                    onClick={action.onClick}
                                     className="flex items-center gap-2 
-                                     text-gray-500 transition-colors
+                                     transition-opacity opacity-70 hover:opacity-100
                                      p-2 py-1 cursor-pointer
-                                     rounded-md hover:text-gray-800 
-                                    hover:bg-gray-100 focus:outline-none 
+                                     rounded-md
+                                    bg-gray-50 focus:outline-none 
                                      focus:ring-2 focus:ring-gray-200"
                                 >
                                     <Icon className="w-4 h-4" strokeWidth={2} />
@@ -147,15 +202,13 @@ const FormEditPage = () => {
                         value={formTitle}
                         placeholder="Form title"
                         onChange={(e) => setFormTitle(e.target.value)}
-                        onMouseEnter={() => setShow(true)}
-                        onMouseLeave={() => setShow(false)}
                         onKeyDown={(e) => {
                             if (e.key === 'Enter') {
                                 e.preventDefault();
                                 setIsBuilderActive(true);
                             }
                         }}
-                        className="text-[40px] font-bold text-gray-800 placeholder:text-gray-300 outline-none w-full bg-transparent mb-4"
+                        className="text-[30px] font-bold placeholder:text-gray-300 outline-none w-full bg-transparent mb-4"
                     />
 
                     {isBuilderActive ? (
@@ -168,19 +221,19 @@ const FormEditPage = () => {
                             <div className="flex flex-col gap-4 mb-12">
                                 <button
                                     onClick={() => setIsBuilderActive(true)}
-                                    className="flex items-center gap-3 text-gray-500 hover:text-gray-900 transition-colors w-fit text-sm"
+                                    className="flex items-center gap-3 opacity-70 hover:opacity-100 transition-opacity w-fit text-sm"
                                 >
                                     <FileText className="w-4 h-4" />
                                     <span>Press Enter to start from scratch</span>
                                 </button>
-                                <button className="flex items-center gap-3 text-gray-500 hover:text-gray-900 transition-colors w-fit text-sm">
+                                <button className="flex items-center gap-3 opacity-70 hover:opacity-100 transition-opacity w-fit text-sm">
                                     <LayoutTemplate className="w-4 h-4" />
                                     <span>Use a template</span>
                                 </button>
                             </div>
 
                             {/* Description */}
-                            <div className="text-gray-600 text-[15px] leading-relaxed mb-12">
+                            <div className="text-[15px] leading-relaxed mb-12 opacity-80">
                                 <p>
                                     A form builder that <span className="bg-primary/60 text-black 0 px-1.5 py-0.5 rounded font-medium">works like a doc</span>.
                                 </p>
@@ -192,7 +245,7 @@ const FormEditPage = () => {
                             {/* Footer Links Grid */}
                             <div className="grid grid-cols-2 gap-x-12 gap-y-6">
                                 <div>
-                                    <h3 className="text-sm font-semibold text-gray-900 mb-4">Get started</h3>
+                                    <h3 className="text-sm font-semibold mb-4">Get started</h3>
                                     <div className="flex flex-col gap-3">
                                         <FooterLink icon={<MousePointerClick className="w-4 h-4" />} text="Create your first form" />
                                         <FooterLink icon={<LayoutTemplate className="w-4 h-4" />} text="Get started with templates" />
@@ -202,7 +255,7 @@ const FormEditPage = () => {
                                     </div>
                                 </div>
                                 <div>
-                                    <h3 className="text-sm font-semibold text-gray-900 mb-4">How-to guides</h3>
+                                    <h3 className="text-sm font-semibold mb-4">How-to guides</h3>
                                     <div className="flex flex-col gap-3">
                                         <FooterLink icon={<HouseWifi className="w-4 h-4" />} text="How to build" />
                                         <FooterLink icon={<GitBranch className="w-4 h-4" />} text="Conditional logic" />
@@ -214,6 +267,8 @@ const FormEditPage = () => {
                             </div>
                         </>
                     )}
+
+
                 </div>
             </main>
 
@@ -223,13 +278,66 @@ const FormEditPage = () => {
             </button>
 
             <PreviewDialog open={previewOpen} onOpenChange={setPreviewOpen} />
+            <CustomizeSidebar open={showCustomize} onClose={() => setShowCustomize(false)} />
+
+            {/* Logo URL Dialog */}
+            <Dialog open={logoDialogOpen} onOpenChange={setLogoDialogOpen}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Change logo</DialogTitle>
+                    </DialogHeader>
+                    <div className="flex flex-col gap-3 py-2">
+                        <label className="text-sm text-gray-600">Paste an image URL</label>
+                        <Input
+                            autoFocus
+                            placeholder="https://example.com/logo.png"
+                            value={pendingLogoUrl}
+                            onChange={(e) => setPendingLogoUrl(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    setLogoUrl(pendingLogoUrl.trim());
+                                    setLogoDialogOpen(false);
+                                }
+                            }}
+                        />
+                        {pendingLogoUrl && (
+                            <div className="flex items-center gap-3 mt-1">
+                                <img
+                                    src={pendingLogoUrl}
+                                    alt="Preview"
+                                    className="w-12 h-12 rounded-full object-cover border border-gray-200"
+                                    onError={(e) => (e.currentTarget.style.display = 'none')}
+                                    onLoad={(e) => (e.currentTarget.style.display = 'block')}
+                                />
+                                <span className="text-xs text-gray-400">Preview</span>
+                            </div>
+                        )}
+                    </div>
+                    <DialogFooter>
+                        <Button
+                            variant="outline"
+                            onClick={() => setLogoDialogOpen(false)}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={() => {
+                                setLogoUrl(pendingLogoUrl.trim());
+                                setLogoDialogOpen(false);
+                            }}
+                        >
+                            Apply
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };
 
 function FooterLink({ icon, text }: { icon: React.ReactNode; text: string }) {
     return (
-        <button className="flex items-center gap-3 text-sm text-gray-500 hover:text-gray-900 transition-colors w-fit">
+        <button className="flex items-center gap-3 text-sm opacity-70 hover:opacity-100 transition-opacity w-fit">
             {icon}
             <span>{text}</span>
         </button>
