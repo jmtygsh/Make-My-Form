@@ -2,6 +2,7 @@
 'use client';
 
 import React from 'react';
+import { Star } from 'lucide-react';
 import { Input } from '~/components/ui/input';
 import { Checkbox } from '~/components/ui/checkbox';
 import { Textarea } from '~/components/ui/textarea';
@@ -12,7 +13,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '~/components/ui/select';
-import { Star } from 'lucide-react';
+import { getInputStyle, getTextareaStyle } from '~/lib/form-builder/input-style';
 import type { Block, FormTheme } from '~/lib/form-builder/schema';
 import type { ControllerRenderProps, FieldValues } from 'react-hook-form';
 
@@ -24,30 +25,22 @@ interface PublicFieldInputProps {
 
 /** Functional input for the public/preview form, per block type. */
 export function PublicFieldInput({ block, controller, theme }: PublicFieldInputProps) {
-    const inputStyle = theme ? {
-        backgroundColor: theme.inputBg,
-        borderColor: theme.inputBorderColor,
-        borderWidth: theme.inputBorderWidth,
-        borderRadius: theme.inputBorderRadius,
-        height: theme.inputHeight,
-        paddingLeft: theme.inputHorizontalPadding,
-        paddingRight: theme.inputHorizontalPadding,
-        width: theme.inputWidth === 'auto' ? '100%' : theme.inputWidth,
-        color: theme.textColor,
-    } : {};
-
-    const textareaStyle = theme ? {
-        ...inputStyle,
-        height: 'auto',
-        minHeight: theme.inputHeight,
-        paddingTop: '8px',
-        paddingBottom: '8px',
-    } : {};
+    // `theme` is optional on this component; when absent we render unstyled
+    // (relies on the ui component defaults). When present, we style to match
+    // the builder exactly via the shared helpers.
+    const inputStyle = theme ? getInputStyle(theme) : undefined;
+    const textareaStyle = theme ? getTextareaStyle(theme) : undefined;
 
     switch (block.type) {
         case 'short_answer':
             return (
-                <Input {...controller} value={controller.value ?? ''} placeholder={block.placeholder} style={inputStyle} className="public-form-input" />
+                <Input
+                    {...controller}
+                    value={controller.value ?? ''}
+                    placeholder={block.placeholder}
+                    style={inputStyle}
+                    className="public-form-input"
+                />
             );
 
         case 'long_answer':
@@ -130,7 +123,6 @@ export function PublicFieldInput({ block, controller, theme }: PublicFieldInputP
             );
 
         case 'multiple_choice': {
-            // single-select radio behaviour
             const value: string = controller.value ?? '';
             return (
                 <div className="flex flex-col gap-2">
@@ -189,8 +181,7 @@ export function PublicFieldInput({ block, controller, theme }: PublicFieldInputP
                                 aria-label={`Rate ${val}`}
                             >
                                 <Star
-                                    className={`h-7 w-7 ${val <= current ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
-                                        }`}
+                                    className={`h-7 w-7 ${val <= current ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
                                 />
                             </button>
                         );

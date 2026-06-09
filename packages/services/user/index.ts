@@ -121,7 +121,8 @@ class UserService {
     const { token: verificationToken } = await this.generateUserToken({ id: userId });
 
     // send email for verification
-    await EmailService.sendEmailVerificationEmail(email, verificationToken);
+    // await EmailService.sendEmailVerificationEmail(email, verificationToken);
+    console.log(verificationToken)
 
 
     const { token } = await this.generateUserToken({ id: userId });

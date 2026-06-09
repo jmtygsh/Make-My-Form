@@ -194,8 +194,8 @@ export type OptionBlock =
 // ---- Theme ----
 export const formThemeSchema = z.object({
     font: z.string().default('Roboto'),
-    bgColor: z.string().default('#ffffff'),
-    textColor: z.string().default('#37352F'),
+    bgColor: z.string().default('#b8b8b821'),
+    textColor: z.string().default('#1c1b19cf'),
     pageWidth: z.string().default('700px'),
     baseFontSize: z.string().default('16px'),
     // Logo
@@ -212,20 +212,21 @@ export const formThemeSchema = z.object({
     showLogo: z.boolean().default(false),
     showCover: z.boolean().default(false),
     // Buttons
-    btnBgColor: z.string().default('#000000'),
+    btnBgColor: z.string().default('#4AB99D'),
     btnTextColor: z.string().default('#FFFFFF'),
-    btnWidth: z.string().default('auto'),
+    btnWidth: z.string().default('100%'),
     btnHeight: z.string().default('36px'),
     btnAlignment: z.enum(['left', 'center', 'right']).default('left'),
     btnFontSize: z.string().default('16px'),
     btnCornerRadius: z.string().default('8px'),
     btnVerticalMargin: z.string().default('10px'),
     btnHorizontalPadding: z.string().default('14px'),
+
     // Inputs
-    inputWidth: z.string().default('320px'),
-    inputBg: z.string().default('#ffffff80'),
-    inputPlaceholderColor: z.string().default('#bbbab8'),
-    inputBorderColor: z.string().default('#3d3b3b'),
+    inputWidth: z.string().default('100%'),
+    inputBg: z.string().default('#EDEDED80'),
+    inputPlaceholderColor: z.string().default('#828282'),
+    inputBorderColor: z.string().default('#s62606036'),
     inputBorderWidth: z.string().default('1px'),
     inputBorderRadius: z.string().default('8px'),
     inputHeight: z.string().default('36px'),
@@ -235,6 +236,8 @@ export const formThemeSchema = z.object({
     accentColor: z.string().default('#0070D7'),
 });
 export type FormTheme = z.infer<typeof formThemeSchema>;
+export const DEFAULT_THEME: FormTheme = formThemeSchema.parse({});
+
 
 // ---- Payload (jsonb draft/published) ----
 export const formPayloadSchema = z.object({

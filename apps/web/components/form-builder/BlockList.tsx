@@ -52,9 +52,6 @@ export function BlockList({ blocks }: BlockListProps) {
     const rows = packRows(blocks);
     const activeBlock = blocks.find((b) => b.id === activeId) ?? null;
 
-    const lastBlockId = blocks[blocks.length - 1]?.id; // 👈 flat last id
-
-
     return (
         <DndContext
             sensors={sensors}
@@ -75,10 +72,7 @@ export function BlockList({ blocks }: BlockListProps) {
                                     key={block.id}
                                     style={{ flexBasis: `${block.width * 100}%`, flexGrow: 0, minWidth: 0 }}
                                 >
-                                    <BlockItem
-                                        block={block}
-                                        isLast={block.id === lastBlockId}
-                                    />
+                                    <BlockItem block={block} />
                                 </div>
                             ))}
                         </div>
@@ -86,11 +80,11 @@ export function BlockList({ blocks }: BlockListProps) {
                 </div>
             </SortableContext>
 
-            {/* 👇 Compact drag preview — constrained width, no layout disruption */}
+            {/* Compact, non-interactive drag preview. */}
             <DragOverlay>
                 {activeBlock ? (
                     <div
-                        className="rounded-lg border border-gray-200 bg-white px-3 py-2 opacity-90 shadow-lg"
+                        className="pointer-events-none select-none rounded-lg border border-gray-200 bg-white px-3 py-2 opacity-90 shadow-lg"
                         style={{ width: `${activeBlock.width * 600}px`, maxWidth: '600px' }}
                     >
                         <BlockRenderer block={activeBlock} onChange={() => { }} />

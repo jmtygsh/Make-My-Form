@@ -2,11 +2,16 @@
 'use client';
 
 import React from 'react';
-import { Plus, X, Phone, AtSign, Link as LinkIcon, Calendar, Star, ChevronDown, Circle, Square } from 'lucide-react';
+import {
+    Plus, X, Phone, AtSign, Link as LinkIcon, Calendar, Star,
+    ChevronDown, Circle, Square,
+} from 'lucide-react';
 import { Input } from '~/components/ui/input';
 import { BlockLabel } from './BlockLabel';
 import { EditablePlaceholder } from './EditablePlaceholder';
 import { newOption } from '~/lib/form-builder/field-config';
+import { useFormBuilderStore } from '~/lib/form-builder/store';
+import { getInputStyle, getTextareaStyle } from '~/lib/form-builder/input-style';
 import type { BlockRendererProps } from './types';
 import type {
     ShortAnswerBlock, LongAnswerBlock, EmailBlock, PhoneBlock, NumberBlock,
@@ -14,10 +19,11 @@ import type {
     DropdownBlock, MultiSelectBlock, Option,
 } from '~/lib/form-builder/schema';
 
-export function ShortAnswerBlockView({ block, onChange, onEnter }: BlockRendererProps<ShortAnswerBlock>) {
+export function ShortAnswerBlockView({ block, onChange, onEnter, onSlash }: BlockRendererProps<ShortAnswerBlock>) {
+
     return (
         <div className="flex flex-col gap-2">
-            <BlockLabel label={block.label} required={block.required} onChange={(label) => onChange({ label })} onEnter={onEnter} />
+            <BlockLabel label={block.label} required={block.required} onChange={(label) => onChange({ label })} onEnter={onEnter} onSlash={onSlash} />
             <EditablePlaceholder
                 value={block.placeholder ?? ''}
                 fallback="Short answer text"
@@ -27,18 +33,28 @@ export function ShortAnswerBlockView({ block, onChange, onEnter }: BlockRenderer
     );
 }
 
+
+
 export function LongAnswerBlockView({ block, onChange, onEnter }: BlockRendererProps<LongAnswerBlock>) {
+    const theme = useFormBuilderStore((s) => s.theme);
+
     return (
         <div className="flex flex-col gap-2">
             <BlockLabel label={block.label} required={block.required} onChange={(label) => onChange({ label })} onEnter={onEnter} />
-            <div className="min-h-[90px] rounded-md border border-current/20 bg-current/5 px-3 py-2">
+            <style>{`
+                .builder-themed-textarea::placeholder {
+                    color: ${theme.inputPlaceholderColor} !important;
+                }
+            `}</style>
+            <div className="overflow-hidden" style={getTextareaStyle(theme)}>
                 <textarea
                     value={block.placeholder ?? ''}
                     placeholder="Long answer text"
                     onChange={(e) => onChange({ placeholder: e.target.value })}
                     onClick={(e) => e.stopPropagation()}
                     rows={3}
-                    className="w-full resize-none bg-transparent text-sm placeholder:text-gray-300 outline-none"
+                    className="builder-themed-textarea w-full resize-none bg-transparent text-sm outline-none"
+                    style={{ color: theme.textColor }}
                 />
             </div>
         </div>
@@ -138,6 +154,9 @@ function OptionsEditor({
     icon: React.ReactNode;
     onChange: (options: Option[]) => void;
 }) {
+    const theme = useFormBuilderStore((s) => s.theme);
+    const optionStyle = getInputStyle(theme);
+
     const update = (id: string, label: string) =>
         onChange(options.map((o) => (o.id === id ? { ...o, label } : o)));
     const remove = (id: string) => onChange(options.filter((o) => o.id !== id));
@@ -147,12 +166,13 @@ function OptionsEditor({
         <div className="flex flex-col gap-1.5">
             {options.map((opt) => (
                 <div key={opt.id} className="group/opt flex items-center gap-2">
-                    <span className="shrink-0 text-gray-300">{icon}</span>
+                    <span className="shrink-0 text-gray-400">{icon}</span>
                     <Input
                         value={opt.label}
                         onChange={(e) => update(opt.id, e.target.value)}
                         placeholder="Option"
-                        className="h-8"
+                        className="placeholder:text-gray-400"
+                        style={optionStyle}
                     />
                     {options.length > 1 && (
                         <button

@@ -19,7 +19,6 @@ import { cn } from '~/lib/utils';
 
 interface BlockItemProps {
     block: Block;
-    isLast?: boolean;
 }
 
 export function BlockItem({ block }: BlockItemProps) {
@@ -50,8 +49,10 @@ export function BlockItem({ block }: BlockItemProps) {
         opacity: isDragging ? 0.4 : 1,
     };
 
+
     const handleChange = (patch: Partial<Block>) => updateBlock(block.id, patch);
     const handleEnter = () => insertEmptyTextBlockAfter(block.id);
+    const handleSlash = () => insertEmptyTextBlockAfter(block.id);
 
     return (
         <div
@@ -133,7 +134,7 @@ export function BlockItem({ block }: BlockItemProps) {
                 )}
             </div>
 
-            <BlockRenderer block={block} onChange={handleChange} onEnter={handleEnter} />
+            <BlockRenderer block={block} onChange={handleChange} onEnter={handleEnter} onSlash={handleSlash} />
         </div>
     );
 }

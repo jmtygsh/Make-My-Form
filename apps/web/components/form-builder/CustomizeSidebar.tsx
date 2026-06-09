@@ -1,9 +1,22 @@
+// apps/web/components/form-builder/CustomizeSidebar.tsx
 'use client';
 
 import React, { useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
-import { X, MoveHorizontal, MoveVertical, Image, AlignLeft, AlignCenter, AlignRight, ArrowLeftRight, ArrowDownUp, ArrowDown } from 'lucide-react';
+import { HexAlphaColorPicker } from 'react-colorful';
+import {
+    X, MoveHorizontal, MoveVertical, Image, AlignLeft, AlignCenter, AlignRight,
+    ArrowLeftRight, ArrowDown, RotateCcw,
+} from 'lucide-react';
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from '~/components/ui/popover';
 import { useFormBuilderStore } from '~/lib/form-builder/store';
+import { DEFAULT_THEME } from '~/lib/form-builder/schema';
+import { ColorPicker } from './ColorPicker';
+import { UnitInput } from './UnitInput';
 import { CoverImageDialog } from './CoverImageDialog';
 
 interface CustomizeSidebarProps {
@@ -11,65 +24,24 @@ interface CustomizeSidebarProps {
     onClose: () => void;
 }
 
-function ColorField({ label, color, onChange }: { label: string; color?: string; onChange: (v: string) => void }) {
-    return (
-        <div className="flex flex-col gap-1">
-            <label className="text-[11px] text-gray-500">{label}</label>
-            <div className="flex items-center gap-2 border border-gray-200 rounded-md px-2 py-1.5 bg-white">
-                <input
-                    type="color"
-                    value={color || '#000000'}
-                    onChange={(e) => onChange(e.target.value)}
-                    className="w-5 h-5 rounded cursor-pointer border-0 p-0 bg-transparent"
-                />
-                <span className="text-[12px] text-gray-700 font-mono uppercase">{color || '#000000'}</span>
-            </div>
-        </div>
-    );
-}
-
-function TextInput({ label, value, onChange }: { label?: string; value?: string; onChange: (v: string) => void }) {
-    return (
-        <div className="flex flex-col gap-1 flex-1">
-            {label && <label className="text-[11px] text-gray-500">{label}</label>}
-            <input
-                type="text"
-                value={value || ''}
-                onChange={(e) => onChange(e.target.value)}
-                className="border border-gray-200 rounded-md px-2.5 py-1.5 text-[12px] text-gray-700 bg-white outline-none focus:ring-1 focus:ring-gray-300 w-full"
-            />
-        </div>
-    );
-}
-
-/** Number-only input that stores values with "px" suffix. Shows just the number. */
-function PxInput({ label, value, onChange }: { label?: string; value?: string; onChange: (v: string) => void }) {
-    const num = parseInt(value || '0') || 0;
-    return (
-        <div className="flex flex-col gap-1 flex-1">
-            {label && <label className="text-[11px] text-gray-500">{label}</label>}
-            <input
-                type="number"
-                min={0}
-                value={num}
-                onChange={(e) => onChange(`${e.target.value}px`)}
-                className="border border-gray-200 rounded-md px-2.5 py-1.5 text-[12px] text-gray-700 bg-white outline-none focus:ring-1 focus:ring-gray-300 w-full"
-            />
-        </div>
-    );
+function SectionTitle({ children }: { children: React.ReactNode }) {
+    return <h3 className="text-[13px] font-semibold text-gray-900 mb-3">{children}</h3>;
 }
 
 function SectionDivider() {
     return <div className="border-t border-gray-100 my-4" />;
 }
 
+/** Two-column grid — the default layout for most field pairs. */
+function Row({ children }: { children: React.ReactNode }) {
+    return <div className="grid grid-cols-2 gap-3">{children}</div>;
+}
+
 export function CustomizeSidebar({ open, onClose }: CustomizeSidebarProps) {
-    // Read from Zustand store
     const {
         font, bgColor, textColor, pageWidth,
         baseFontSize, logoBgColor, logoWidth, logoHeight, logoRadius,
-        coverUrl, coverHeight, coverPosition, showLogo, showCover, logoUrl,
-        // New theme properties
+        coverUrl, coverHeight, coverPosition, logoUrl,
         btnBgColor, btnTextColor, btnWidth, btnHeight, btnAlignment, btnFontSize, btnCornerRadius, btnVerticalMargin, btnHorizontalPadding,
         inputWidth, inputBg, inputPlaceholderColor, inputBorderColor, inputBorderWidth, inputBorderRadius, inputHeight, inputHorizontalPadding, inputMarginBottom,
         accentColor,
@@ -88,8 +60,6 @@ export function CustomizeSidebar({ open, onClose }: CustomizeSidebarProps) {
             coverUrl: s.theme.coverUrl,
             coverHeight: s.theme.coverHeight,
             coverPosition: s.theme.coverPosition,
-            showLogo: s.theme.showLogo,
-            showCover: s.theme.showCover,
             logoUrl: s.theme.logoUrl,
 
             btnBgColor: s.theme.btnBgColor,
@@ -118,28 +88,25 @@ export function CustomizeSidebar({ open, onClose }: CustomizeSidebarProps) {
         })),
     );
 
-    // Cover image dialog
     const [coverDialogOpen, setCoverDialogOpen] = useState(false);
+
+    const handleReset = () => {
+        const ok = window.confirm('Reset all customization to defaults? This cannot be undone.');
+        if (ok) updateTheme(DEFAULT_THEME);
+    };
 
     const fonts = ['Roboto', 'Inter', 'Outfit', 'Poppins', 'DM Sans', 'Lato', 'Merriweather'];
 
     return (
         <>
             {/* Overlay */}
-            {open && (
-                <div
-                    className="fixed inset-0 z-40"
-                    onClick={onClose}
-                />
-            )}
-
-
+            {open && <div className="fixed inset-0 z-40" onClick={onClose} />}
 
             {/* Sidebar */}
             <aside
                 className={`
                     fixed top-0 right-0 h-full z-50 bg-white border-l border-gray-200 shadow-xl
-                    w-[350px] flex flex-col
+                    w-[340px] flex flex-col
                     transition-transform duration-300 ease-in-out
                     ${open ? 'translate-x-0' : 'translate-x-full'}
                 `}
@@ -147,12 +114,22 @@ export function CustomizeSidebar({ open, onClose }: CustomizeSidebarProps) {
                 {/* Header */}
                 <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
                     <span className="font-semibold text-[14px] text-gray-900">Customize</span>
-                    <button
-                        onClick={onClose}
-                        className="p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors"
-                    >
-                        <X className="w-4 h-4" />
-                    </button>
+                    <div className="flex items-center gap-1">
+                        <button
+                            onClick={handleReset}
+                            className="flex items-center gap-1.5 rounded px-2 py-1 text-[12px] font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors"
+                            title="Reset all customization to defaults"
+                        >
+                            <RotateCcw className="w-3.5 h-3.5" />
+                            Reset
+                        </button>
+                        <button
+                            onClick={onClose}
+                            className="p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors"
+                        >
+                            <X className="w-4 h-4" />
+                        </button>
+                    </div>
                 </div>
 
                 {/* Scrollable body */}
@@ -173,80 +150,79 @@ export function CustomizeSidebar({ open, onClose }: CustomizeSidebarProps) {
                     </div>
 
                     {/* Colors */}
-                    <div className="grid grid-cols-2 gap-3">
-                        <ColorField label="Background" color={bgColor} onChange={(v) => updateTheme({ bgColor: v })} />
-                        <ColorField label="Text" color={textColor} onChange={(v) => updateTheme({ textColor: v })} />
-                        <ColorField label="Button background" color={btnBgColor} onChange={(v) => updateTheme({ btnBgColor: v })} />
-                        <ColorField label="Button text" color={btnTextColor} onChange={(v) => updateTheme({ btnTextColor: v })} />
-                    </div>
-                    <ColorField label="Accent (?)" color={accentColor} onChange={(v) => updateTheme({ accentColor: v })} />
+                    <Row>
+                        <ColorPicker label="Background" value={bgColor} onChange={(v) => updateTheme({ bgColor: v })} />
+                        <ColorPicker label="Text" value={textColor} onChange={(v) => updateTheme({ textColor: v })} />
+                    </Row>
+                    <Row>
+                        <ColorPicker label="Button bg" value={btnBgColor} onChange={(v) => updateTheme({ btnBgColor: v })} />
+                        <ColorPicker label="Button text" value={btnTextColor} onChange={(v) => updateTheme({ btnTextColor: v })} />
+                    </Row>
+                    <ColorPicker label="Accent" value={accentColor} onChange={(v) => updateTheme({ accentColor: v })} />
 
                     <SectionDivider />
 
                     {/* Layout */}
                     <div>
-                        <h3 className="text-[13px] font-semibold text-gray-900 mb-3">Layout</h3>
+                        <SectionTitle>Layout</SectionTitle>
                         <div className="space-y-3">
-                            <div className="grid grid-cols-2 gap-3">
-                                <PxInput label="Page width" value={pageWidth} onChange={(v) => updateTheme({ pageWidth: v })} />
-                                <PxInput label="Base font size" value={baseFontSize} onChange={(v) => updateTheme({ baseFontSize: v })} />
-                            </div>
+                            <Row>
+                                <UnitInput label="Page width" value={pageWidth} onChange={(v) => updateTheme({ pageWidth: v })} units={['px', 'rem', '%']} />
+                                <UnitInput label="Base font size" value={baseFontSize} onChange={(v) => updateTheme({ baseFontSize: v })} units={['px', 'rem']} />
+                            </Row>
 
-                            {/* Logo row */}
-                            <div className="flex flex-1 gap-2">
-                                <div>
-                                    <label className="text-[11px] text-gray-500 block mb-1">Logo</label>
-                                    <div
-                                        className="w-8 h-8 border border-gray-200 rounded-md flex items-center justify-center shrink-0 cursor-pointer overflow-hidden"
-                                        style={{ backgroundColor: logoBgColor }}
-                                        onClick={() => {
-                                            const color = prompt('Logo background color (hex):', logoBgColor);
-                                            if (color) updateTheme({ logoBgColor: color });
-                                        }}
-                                        title="Click to change logo background color"
-                                    >
-                                        {logoUrl ? (
-                                            <img src={logoUrl} alt="Logo" className="w-full h-full object-cover" />
-                                        ) : (
-                                            <div className="w-5 h-5 rounded-full" style={{ backgroundColor: logoBgColor, filter: 'brightness(1.3)' }} />
-                                        )}
-                                    </div>
-                                </div>
-                                <PxInput label="Width" value={logoWidth} onChange={(v) => updateTheme({ logoWidth: v })} />
-                                <PxInput label="Height" value={logoHeight} onChange={(v) => updateTheme({ logoHeight: v })} />
-                                <PxInput label="Corner radius" value={logoRadius} onChange={(v) => updateTheme({ logoRadius: v })} />
-                            </div>
-
-                            {/* Cover row */}
-                            <div>
+                            {/* Logo */}
+                            <div className="space-y-2">
                                 <div className="flex items-center gap-2">
-                                    <div>
-                                        <label className="text-[11px] text-gray-500 block mb-1">Cover</label>
-                                        <div
-                                            className="w-8 h-8 border border-gray-200 rounded-md flex items-center justify-center bg-gray-50 shrink-0 cursor-pointer overflow-hidden"
-                                            onClick={() => setCoverDialogOpen(true)}
-                                            title="Click to choose a cover image"
-                                        >
-                                            {coverUrl ? (
-                                                <img src={coverUrl} alt="Cover" className="w-full h-full object-cover" />
-                                            ) : (
-                                                <Image className="w-4 h-4 text-gray-400" />
-                                            )}
-                                        </div>
-                                    </div>
-                                    <PxInput label="Height" value={coverHeight} onChange={(v) => updateTheme({ coverHeight: v })} />
-                                    <div className="flex flex-col gap-1 flex-1">
-                                        <label className="text-[11px] text-gray-500">Position</label>
-                                        <input
-                                            type="number"
-                                            min={0}
-                                            max={100}
-                                            value={parseInt(coverPosition) || 50}
-                                            onChange={(e) => updateTheme({ coverPosition: `${e.target.value}%` })}
-                                            className="border border-gray-200 rounded-md px-2.5 py-1.5 text-[12px] text-gray-700 bg-white outline-none focus:ring-1 focus:ring-gray-300 w-full"
-                                        />
-                                    </div>
+                                    <label className="text-[11px] font-medium text-gray-600">Logo</label>
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <button
+                                                type="button"
+                                                className="w-7 h-7 border border-gray-200 rounded-md flex items-center justify-center shrink-0 cursor-pointer overflow-hidden"
+                                                style={{ backgroundColor: logoBgColor }}
+                                                title="Change logo background color"
+                                            >
+                                                {logoUrl ? (
+                                                    <img src={logoUrl} alt="Logo" className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <div className="w-4 h-4 rounded-full" style={{ backgroundColor: logoBgColor, filter: 'brightness(1.3)' }} />
+                                                )}
+                                            </button>
+                                        </PopoverTrigger>
+                                        <PopoverContent align="start" className="w-auto p-3" sideOffset={6}>
+                                            <HexAlphaColorPicker color={logoBgColor} onChange={(v) => updateTheme({ logoBgColor: v })} />
+                                        </PopoverContent>
+                                    </Popover>
                                 </div>
+                                <Row>
+                                    <UnitInput label="Width" value={logoWidth} onChange={(v) => updateTheme({ logoWidth: v })} units={['px', 'rem']} />
+                                    <UnitInput label="Height" value={logoHeight} onChange={(v) => updateTheme({ logoHeight: v })} units={['px', 'rem']} />
+                                </Row>
+                                <UnitInput label="Corner radius" value={logoRadius} onChange={(v) => updateTheme({ logoRadius: v })} units={['px', '%', 'rem']} />
+                            </div>
+
+                            {/* Cover */}
+                            <div className="space-y-2">
+                                <div className="flex items-center gap-2">
+                                    <label className="text-[11px] font-medium text-gray-600">Cover</label>
+                                    <button
+                                        type="button"
+                                        className="w-7 h-7 border border-gray-200 rounded-md flex items-center justify-center bg-gray-50 shrink-0 cursor-pointer overflow-hidden"
+                                        onClick={() => setCoverDialogOpen(true)}
+                                        title="Click to choose a cover image"
+                                    >
+                                        {coverUrl ? (
+                                            <img src={coverUrl} alt="Cover" className="w-full h-full object-cover" />
+                                        ) : (
+                                            <Image className="w-4 h-4 text-gray-400" />
+                                        )}
+                                    </button>
+                                </div>
+                                <Row>
+                                    <UnitInput label="Height" value={coverHeight} onChange={(v) => updateTheme({ coverHeight: v })} units={['px', 'rem']} />
+                                    <UnitInput label="Position" value={coverPosition} onChange={(v) => updateTheme({ coverPosition: v })} units={['px', 'rem', '%']} />
+                                </Row>
                             </div>
 
                             <CoverImageDialog
@@ -264,60 +240,43 @@ export function CustomizeSidebar({ open, onClose }: CustomizeSidebarProps) {
 
                     {/* Inputs */}
                     <div>
-                        <h3 className="text-[13px] font-semibold text-gray-900 mb-3">Inputs</h3>
+                        <SectionTitle>Inputs</SectionTitle>
                         <div className="space-y-3">
-                            {/* Width / Height */}
-                            <div className="grid grid-cols-2 gap-3">
-                                <div className="flex flex-col gap-1">
-                                    <label className="text-[11px] text-gray-500">Width</label>
-                                    <div className="flex gap-1">
+                            {/* Width — toggles on top, UnitInput below */}
+                            <div className="flex flex-col gap-1">
+                                <label className="text-[11px] text-gray-500">Width</label>
+                                <div className="flex gap-2">
+                                    <div className="flex gap-1 shrink-0">
                                         <button onClick={() => updateTheme({ inputWidth: '100%' })} className="border border-gray-200 rounded-md p-1.5 bg-white hover:bg-gray-50 transition-colors" title="Full width">
                                             <MoveHorizontal className="w-3.5 h-3.5 text-gray-500" />
                                         </button>
                                         <button onClick={() => updateTheme({ inputWidth: '320px' })} className="border border-gray-200 rounded-md p-1.5 bg-white hover:bg-gray-50 transition-colors" title="Fixed width">
                                             <MoveVertical className="w-3.5 h-3.5 text-gray-500" />
                                         </button>
-                                        <input
-                                            type="text"
-                                            value={inputWidth || ''}
-                                            onChange={(e) => updateTheme({ inputWidth: e.target.value })}
-                                            className="border border-gray-200 rounded-md px-2 py-1.5 text-[12px] text-gray-700 bg-white outline-none focus:ring-1 focus:ring-gray-300 flex-1 min-w-0"
-                                        />
                                     </div>
-                                </div>
-                                <TextInput label="Height" value={inputHeight} onChange={(v) => updateTheme({ inputHeight: v })} />
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-3">
-                                <ColorField label="Background" color={inputBg?.slice(0, 7) || '#ffffff'} onChange={(v) => updateTheme({ inputBg: v + '80' })} />
-                                <ColorField label="Placeholder" color={inputPlaceholderColor || '#bbbab8'} onChange={(v) => updateTheme({ inputPlaceholderColor: v })} />
-                            </div>
-
-                            {/* Border row */}
-                            <div>
-
-                                <div className="flex gap-2">
-                                    <div>
-                                        <label className="text-[11px] text-gray-500 block mb-1">Border</label>
-                                        <div className="flex items-center gap-2 border border-gray-200 rounded-md px-2 py-1.5 bg-white flex-1">
-                                            <input
-                                                type="color"
-                                                value={inputBorderColor || '#000000'}
-                                                onChange={(e) => updateTheme({ inputBorderColor: e.target.value })}
-                                                className="w-4 h-4 rounded cursor-pointer border-0 p-0 bg-transparent"
-                                            />
-                                            <span className="text-[11px] text-gray-600 font-mono">{inputBorderColor || '#000000'}</span>
-                                        </div>
-                                    </div>
-                                    <TextInput label="Width" value={inputBorderWidth} onChange={(v) => updateTheme({ inputBorderWidth: v })} />
-                                    <TextInput label="Radius" value={inputBorderRadius} onChange={(v) => updateTheme({ inputBorderRadius: v })} />
+                                    <UnitInput value={inputWidth} onChange={(v) => updateTheme({ inputWidth: v })} units={['px', 'rem', '%', 'auto']} />
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-3">
-                                <TextInput label="Margin bottom" value={inputMarginBottom} onChange={(v) => updateTheme({ inputMarginBottom: v })} />
-                                <TextInput label="Horizontal padding" value={inputHorizontalPadding} onChange={(v) => updateTheme({ inputHorizontalPadding: v })} />
-                            </div>
+                            <Row>
+                                <UnitInput label="Height" value={inputHeight} onChange={(v) => updateTheme({ inputHeight: v })} units={['px', 'rem']} />
+                                <UnitInput label="Border radius" value={inputBorderRadius} onChange={(v) => updateTheme({ inputBorderRadius: v })} units={['px', '%', 'rem']} />
+                            </Row>
+
+                            <Row>
+                                <ColorPicker label="Background" value={inputBg} onChange={(v) => updateTheme({ inputBg: v })} />
+                                <ColorPicker label="Placeholder" value={inputPlaceholderColor} onChange={(v) => updateTheme({ inputPlaceholderColor: v })} />
+                            </Row>
+
+                            <Row>
+                                <ColorPicker label="Border color" value={inputBorderColor} onChange={(v) => updateTheme({ inputBorderColor: v })} />
+                                <UnitInput label="Border width" value={inputBorderWidth} onChange={(v) => updateTheme({ inputBorderWidth: v })} units={['px', 'rem']} />
+                            </Row>
+
+                            <Row>
+                                <UnitInput label="Margin bottom" value={inputMarginBottom} onChange={(v) => updateTheme({ inputMarginBottom: v })} units={['px', 'rem']} />
+                                <UnitInput label="Padding X" value={inputHorizontalPadding} onChange={(v) => updateTheme({ inputHorizontalPadding: v })} units={['px', 'rem']} />
+                            </Row>
                         </div>
                     </div>
 
@@ -325,74 +284,65 @@ export function CustomizeSidebar({ open, onClose }: CustomizeSidebarProps) {
 
                     {/* Buttons */}
                     <div>
-                        <h3 className="text-[13px] font-semibold text-gray-900 mb-3">Buttons</h3>
+                        <SectionTitle>Buttons</SectionTitle>
                         <div className="space-y-3">
-
-                            {/* Width / Height */}
-                            <div className="grid grid-cols-2 gap-3">
-                                <div className="flex flex-col gap-1">
-                                    <label className="text-[11px] text-gray-500">Width</label>
-                                    <div className="flex gap-1">
+                            {/* Width — toggles on top, UnitInput below */}
+                            <div className="flex flex-col gap-1">
+                                <label className="text-[11px] text-gray-500">Width</label>
+                                <div className="flex gap-2">
+                                    <div className="flex gap-1 shrink-0">
                                         <button onClick={() => updateTheme({ btnWidth: 'auto' })} className="border border-gray-200 rounded-md p-1.5 bg-white hover:bg-gray-50 transition-colors" title="Auto width">
                                             <ArrowLeftRight className="w-3.5 h-3.5 text-gray-500" />
                                         </button>
-
                                         <button onClick={() => updateTheme({ btnWidth: '100%' })} className="border border-gray-200 rounded-md p-1.5 bg-white hover:bg-gray-50 transition-colors" title="Full width">
                                             <MoveHorizontal className="w-3.5 h-3.5 text-gray-500" />
                                         </button>
-
                                         <button onClick={() => updateTheme({ btnWidth: '200px' })} className="border border-gray-200 rounded-md p-1.5 bg-white hover:bg-gray-50 transition-colors" title="Fixed width">
                                             <ArrowDown className="w-3.5 h-3.5 text-gray-500" />
                                         </button>
-                                        <input
-                                            type="text"
-                                            value={btnWidth || ''}
-                                            onChange={(e) => updateTheme({ btnWidth: e.target.value })}
-                                            className="border border-gray-200 rounded-md px-2 py-1.5 text-[12px] text-gray-700 bg-white outline-none focus:ring-1 focus:ring-gray-300 flex-1 min-w-0"
-                                        />
                                     </div>
+                                    <UnitInput value={btnWidth} onChange={(v) => updateTheme({ btnWidth: v })} units={['px', 'rem', '%', 'auto']} />
                                 </div>
-                                <TextInput label="Height" value={btnHeight} onChange={(v) => updateTheme({ btnHeight: v })} />
                             </div>
 
-                            {/* Alignment / Font size / Corner radius */}
-                            <div className="flex gap-2">
-                                <div className="flex flex-col gap-1">
-                                    <label className="text-[11px] text-gray-500">Alignment</label>
-                                    <div className="flex gap-1">
-                                        {(['left', 'center', 'right'] as const).map((a) => {
-                                            const Icon = a === 'left' ? AlignLeft : a === 'center' ? AlignCenter : AlignRight;
-                                            return (
-                                                <button
-                                                    key={a}
-                                                    onClick={() => updateTheme({ btnAlignment: a })}
-                                                    className={`border rounded-md p-1.5 transition-colors ${btnAlignment === a
-                                                        ? 'border-gray-400 bg-gray-100 text-gray-900'
-                                                        : 'border-gray-200 bg-white text-gray-400 hover:bg-gray-50'
-                                                        }`}
-                                                >
-                                                    <Icon className="w-3.5 h-3.5" />
-                                                </button>
-                                            );
-                                        })}
-                                    </div>
+                            <Row>
+                                <UnitInput label="Height" value={btnHeight} onChange={(v) => updateTheme({ btnHeight: v })} units={['px', 'rem']} />
+                                <UnitInput label="Font size" value={btnFontSize} onChange={(v) => updateTheme({ btnFontSize: v })} units={['px', 'rem']} />
+                            </Row>
+
+                            {/* Alignment */}
+                            <div className="flex flex-col gap-1">
+                                <label className="text-[11px] text-gray-500">Alignment</label>
+                                <div className="flex gap-1">
+                                    {(['left', 'center', 'right'] as const).map((a) => {
+                                        const Icon = a === 'left' ? AlignLeft : a === 'center' ? AlignCenter : AlignRight;
+                                        return (
+                                            <button
+                                                key={a}
+                                                onClick={() => updateTheme({ btnAlignment: a })}
+                                                className={`border rounded-md p-1.5 transition-colors ${btnAlignment === a
+                                                    ? 'border-gray-400 bg-gray-100 text-gray-900'
+                                                    : 'border-gray-200 bg-white text-gray-400 hover:bg-gray-50'
+                                                    }`}
+                                            >
+                                                <Icon className="w-3.5 h-3.5" />
+                                            </button>
+                                        );
+                                    })}
                                 </div>
-                                <TextInput label="Font size" value={btnFontSize} onChange={(v) => updateTheme({ btnFontSize: v })} />
-                                <TextInput label="Corner radius" value={btnCornerRadius} onChange={(v) => updateTheme({ btnCornerRadius: v })} />
                             </div>
 
-                            {/* Background / Text */}
-                            <div className="grid grid-cols-2 gap-3">
-                                <ColorField label="Background" color={btnBgColor} onChange={(v) => updateTheme({ btnBgColor: v })} />
-                                <ColorField label="Text" color={btnTextColor} onChange={(v) => updateTheme({ btnTextColor: v })} />
-                            </div>
+                            <Row>
+                                <UnitInput label="Corner radius" value={btnCornerRadius} onChange={(v) => updateTheme({ btnCornerRadius: v })} units={['px', '%', 'rem']} />
+                                <UnitInput label="Vertical margin" value={btnVerticalMargin} onChange={(v) => updateTheme({ btnVerticalMargin: v })} units={['px', 'rem']} />
+                            </Row>
 
-                            {/* Vertical margin / Horizontal padding */}
-                            <div className="grid grid-cols-2 gap-3">
-                                <TextInput label="Vertical margin" value={btnVerticalMargin} onChange={(v) => updateTheme({ btnVerticalMargin: v })} />
-                                <TextInput label="Horizontal padding" value={btnHorizontalPadding} onChange={(v) => updateTheme({ btnHorizontalPadding: v })} />
-                            </div>
+                            <Row>
+                                <ColorPicker label="Background" value={btnBgColor} onChange={(v) => updateTheme({ btnBgColor: v })} />
+                                <ColorPicker label="Text" value={btnTextColor} onChange={(v) => updateTheme({ btnTextColor: v })} />
+                            </Row>
 
+                            <UnitInput label="Horizontal padding" value={btnHorizontalPadding} onChange={(v) => updateTheme({ btnHorizontalPadding: v })} units={['px', 'rem']} />
                         </div>
                     </div>
 

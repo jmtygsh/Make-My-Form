@@ -1,16 +1,21 @@
 // apps/web/app/(protected)/forms/[id]/edit/page.tsx
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import Formbuilder from '~/components/form-builder/Formbuilder';
-import { useFormBuilder } from '~/hooks/use-form-builder';
-import { useFormBuilderStore } from '~/lib/form-builder/store';
 import { useShallow } from 'zustand/react/shallow';
-import { useSaveDraft } from '~/hooks/use-save-draft';
-import { HouseWifi, Loader2 } from 'lucide-react';
-import { PreviewDialog } from '~/components/form-builder/PreviewDialog';
+import {
+    Loader2, Asterisk, History, Settings, FileText, LayoutTemplate,
+    MousePointerClick, HelpCircle, GitBranch, EyeOff, Hexagon, Palette, Move,
+    HouseWifi,
+} from 'lucide-react';
+import Formbuilder from '~/components/form-builder/Formbuilder';
 import { CustomizeSidebar } from '~/components/form-builder/CustomizeSidebar';
+import { FormRenderer } from '~/components/form-renderer/FormRenderer';
+import { useFormBuilder } from '~/hooks/use-form-builder';
+import { useSaveDraft } from '~/hooks/use-save-draft';
+import { useFormBuilderStore } from '~/lib/form-builder/store';
+import { toPayload } from '~/lib/form-builder/serialize';
 import {
     Dialog,
     DialogContent,
@@ -20,47 +25,29 @@ import {
 } from '~/components/ui/dialog';
 import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
-import {
-    Asterisk,
-    Zap,
-    History,
-    Settings,
-    FileText,
-    LayoutTemplate,
-    MousePointerClick,
-    Code,
-    HelpCircle,
-    GitBranch,
-    Calculator,
-    EyeOff,
-    AtSign,
-    DollarSign,
-    Hexagon,
-    Palette,
-    ArrowDownUp,
-    Move,
-} from 'lucide-react';
 
 const FormEditPage = () => {
     const params = useParams();
     const formId = params?.id as string;
 
     const { title: formTitle, setTitle: setFormTitle, isDirty } = useFormBuilder({ formId });
-    const { saveDraft, publish, isSaving } = useSaveDraft();
+    const { saveDraft, publish, isSaving } = useSaveDraft(formId);
+
     const [previewOpen, setPreviewOpen] = useState(false);
     const [showCustomize, setShowCustomize] = useState(false);
     const [logoDialogOpen, setLogoDialogOpen] = useState(false);
     const [pendingLogoUrl, setPendingLogoUrl] = useState('');
     const [isRepositioning, setIsRepositioning] = useState(false);
-
     const [isBuilderActive, setIsBuilderActive] = useState(false);
 
-    // Theme from store (real-time canvas preview)
+    const blocks = useFormBuilderStore((s) => s.blocks);
+    const theme = useFormBuilderStore((s) => s.theme);
+    const updateTheme = useFormBuilderStore((s) => s.updateTheme);
+
     const {
         font, bgColor, textColor, pageWidth, baseFontSize,
         logoUrl, logoBgColor, logoWidth, logoHeight, logoRadius,
         coverUrl, coverHeight, coverPosition, showLogo, showCover,
-        updateTheme,
     } = useFormBuilderStore(
         useShallow((s) => ({
             font: s.theme.font,
@@ -78,12 +65,10 @@ const FormEditPage = () => {
             coverPosition: s.theme.coverPosition,
             showLogo: s.theme.showLogo,
             showCover: s.theme.showCover,
-            updateTheme: s.updateTheme,
         })),
     );
 
-    // Press Enter anywhere on the page to activate the builder
-    React.useEffect(() => {
+    useEffect(() => {
         if (isBuilderActive) return;
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'Enter') {
@@ -101,35 +86,60 @@ const FormEditPage = () => {
         { name: 'Customize', icon: Palette, onClick: () => setShowCustomize((v) => !v) },
     ];
 
-    return (
-        <div
-            className="flex flex-col min-h-screen bg-white font-sans text-gray-900 relative"
+    if (previewOpen) {
+        const payload = toPayload(formTitle, blocks, theme);
+        return (
+            <div
+                className="min-h-screen overflow-y-auto"
+                style={{ backgroundColor: bgColor, color: textColor, fontFamily: font, fontSize: baseFontSize }}
+            >
+                <div className="sticky top-0 flex items-center px-4 py-3">
+                    <button
+                        onClick={() => setPreviewOpen(false)}
+                        className="flex items-center gap-1.5 rounded-md border border-current/20 bg-current/5 px-3 py-1.5 text-sm font-medium shadow-sm transition-colors hover:opacity-80"
+                    >
+                        ← Back to editor
+                    </button>
+                </div>
+                <FormRenderer
+                    shortId={formId}
+                    title={formTitle}
+                    payload={payload}
+                    mode="preview"
+                />
+            </div>
+        );
+    }
 
-        >
-            {/* Header */}
-            <header className="flex items-center justify-between px-4 py-3 border-b border-transparent">
-                {/* Left */}
+    return (
+        <div className="relative flex min-h-screen flex-col bg-white font-sans text-gray-900">
+            <header className="flex items-center justify-between border-b border-transparent px-4 py-3">
                 <div className="flex items-center gap-2 text-sm font-medium text-gray-500">
-                    <Asterisk className="w-5 h-5 text-gray-800" />
+                    <Asterisk className="h-5 w-5 text-gray-800" />
                     <span className="text-gray-300">/</span>
-                    <span className="hover:bg-gray-100 px-1.5 py-0.5 rounded cursor-pointer transition-colors">My workspace</span>
+                    <span className="cursor-pointer rounded px-1.5 py-0.5 transition-colors hover:bg-gray-100">My workspace</span>
                     <span className="text-gray-300">/</span>
-                    <span className="text-gray-900 hover:bg-gray-100 px-1.5 py-0.5 rounded cursor-pointer transition-colors">{formTitle || 'Untitled'}</span>
+                    <span className="cursor-pointer rounded px-1.5 py-0.5 text-gray-900 transition-colors hover:bg-gray-100">
+                        {formTitle || 'Untitled'}
+                    </span>
                 </div>
 
-                {/* Right */}
                 <div className="flex items-center gap-4 text-sm font-medium text-gray-500">
-                    <span className="text-gray-400"> {isDirty ? 'Unsaved' : 'Draft'} </span>
+                    <span className="text-gray-400">{isDirty ? 'Unsaved' : 'Draft'}</span>
 
-                    <button className="hover:bg-gray-100 p-1.5 rounded transition-colors"><History className="w-4 h-4" /></button>
-                    <button className="hover:bg-gray-100 p-1.5 rounded transition-colors"
+                    <button className="rounded p-1.5 transition-colors hover:bg-gray-100">
+                        <History className="h-4 w-4" />
+                    </button>
+                    <button
+                        className="rounded p-1.5 transition-colors hover:bg-gray-100"
                         onClick={() => setShowCustomize((v) => !v)}
-                    ><Settings className="w-4 h-4" /></button>
-
+                    >
+                        <Settings className="h-4 w-4" />
+                    </button>
 
                     <button
                         onClick={() => setPreviewOpen(true)}
-                        className="hover:bg-gray-100 px-2 py-1.5 rounded transition-colors"
+                        className="rounded px-2 py-1.5 transition-colors hover:bg-gray-100"
                     >
                         Preview
                     </button>
@@ -137,35 +147,30 @@ const FormEditPage = () => {
                     <button
                         onClick={() => saveDraft()}
                         disabled={isSaving}
-                        className="hover:bg-gray-100 px-2 py-1.5 rounded transition-colors disabled:opacity-50"
+                        className="rounded px-2 py-1.5 transition-colors hover:bg-gray-100 disabled:opacity-50"
                     >
                         Save draft
                     </button>
                     <button
                         onClick={() => publish()}
                         disabled={isSaving}
-                        className="bg-gray-900 text-white px-3 py-1.5 rounded-md hover:bg-gray-800 transition-colors disabled:opacity-50 inline-flex items-center gap-2"
+                        className="inline-flex items-center gap-2 rounded-md bg-gray-900 px-3 py-1.5 text-white transition-colors hover:bg-gray-800 disabled:opacity-50"
                     >
-                        {isSaving && <Loader2 className="w-4 h-4 animate-spin" />}
+                        {isSaving && <Loader2 className="h-4 w-4 animate-spin" />}
                         Publish
                     </button>
-
-
                 </div>
             </header>
 
-
-
-            {/* Main Content */}
             <link
                 href={`https://fonts.googleapis.com/css2?family=${font.replace(' ', '+')}:wght@400;500;600;700&display=swap`}
                 rel="stylesheet"
             />
+
             <main className="flex-1 overflow-y-auto pb-24" style={{ backgroundColor: bgColor, fontFamily: font }}>
-                {/* Cover Band */}
                 {showCover && (
                     <div
-                        className={`w-full bg-cover relative group ${isRepositioning ? 'cursor-grab active:cursor-grabbing' : ''}`}
+                        className={`group relative w-full bg-cover ${isRepositioning ? 'cursor-grab active:cursor-grabbing' : ''}`}
                         style={{
                             height: coverHeight,
                             backgroundColor: coverUrl ? undefined : '#fde8e4',
@@ -193,41 +198,38 @@ const FormEditPage = () => {
                             window.addEventListener('mouseup', onUp);
                         }}
                     >
-                        {/* Reposition tooltip */}
                         {isRepositioning && (
                             <div className="absolute inset-0 flex items-center justify-center">
-                                <div className="bg-black/70 text-white text-xs font-medium px-4 py-2 rounded-md pointer-events-none">
+                                <div className="pointer-events-none rounded-md bg-black/70 px-4 py-2 text-xs font-medium text-white">
                                     Drag image to reposition
                                 </div>
                             </div>
                         )}
 
-                        {/* Cover hover actions */}
                         {!isRepositioning && (
-                            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+                            <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-2 opacity-0 transition-opacity group-hover:opacity-100">
                                 <button
                                     onClick={() => setShowCustomize(true)}
-                                    className="flex items-center gap-1.5 bg-white/90 backdrop-blur-sm text-gray-700 text-xs font-medium px-3 py-1.5 rounded-md shadow-sm hover:bg-white transition-colors"
+                                    className="flex items-center gap-1.5 rounded-md bg-white/90 px-3 py-1.5 text-xs font-medium text-gray-700 shadow-sm backdrop-blur-sm transition-colors hover:bg-white"
                                 >
-                                    <LayoutTemplate className="w-3.5 h-3.5" />
+                                    <LayoutTemplate className="h-3.5 w-3.5" />
                                     Change cover
                                 </button>
                                 <button
                                     onClick={() => setIsRepositioning(true)}
-                                    className="flex items-center gap-1.5 bg-white/90 backdrop-blur-sm text-gray-700 text-xs font-medium px-3 py-1.5 rounded-md shadow-sm hover:bg-white transition-colors"
+                                    className="flex items-center gap-1.5 rounded-md bg-white/90 px-3 py-1.5 text-xs font-medium text-gray-700 shadow-sm backdrop-blur-sm transition-colors hover:bg-white"
                                 >
-                                    <Move className="w-3.5 h-3.5" />
+                                    <Move className="h-3.5 w-3.5" />
                                     Reposition
                                 </button>
                             </div>
                         )}
 
-                        {/* Save position button */}
                         {isRepositioning && (
-                            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
+                            <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-2">
                                 <button
                                     onClick={() => setIsRepositioning(false)}
-                                    className="flex items-center gap-1.5 bg-white text-gray-700 text-xs font-medium px-4 py-2 rounded-md shadow-md hover:bg-gray-50 transition-colors"
+                                    className="flex items-center gap-1.5 rounded-md bg-white px-4 py-2 text-xs font-medium text-gray-700 shadow-md transition-colors hover:bg-gray-50"
                                 >
                                     Save position
                                 </button>
@@ -236,24 +238,12 @@ const FormEditPage = () => {
                     </div>
                 )}
 
-
                 <div className="relative mx-auto p-10" style={{ maxWidth: pageWidth, color: textColor, fontSize: baseFontSize }}>
-
-
-                    {/* Overlapping Logo Circle */}
-                    <div className={`${showLogo && showCover ? 'absolute top-0 -translate-y-1/2 left-10' : ''} flex items-center gap-2`}>
-
-
-                        {/* Main logo circle */}
+                    <div className={`${showLogo && showCover ? 'absolute left-10 top-0 -translate-y-1/2' : ''} flex items-center gap-2`}>
                         {showLogo && (
                             <div
-                                className="flex items-center justify-center shadow-md cursor-pointer overflow-hidden"
-                                style={{
-                                    width: logoWidth,
-                                    height: logoHeight,
-                                    borderRadius: logoRadius,
-                                    backgroundColor: logoBgColor,
-                                }}
+                                className="flex cursor-pointer items-center justify-center overflow-hidden shadow-md"
+                                style={{ width: logoWidth, height: logoHeight, borderRadius: logoRadius, backgroundColor: logoBgColor }}
                                 onClick={() => {
                                     setPendingLogoUrl(logoUrl);
                                     setLogoDialogOpen(true);
@@ -264,43 +254,33 @@ const FormEditPage = () => {
                                     <img
                                         src={logoUrl}
                                         alt="Logo"
-                                        className="w-full h-full object-cover"
+                                        className="h-full w-full object-cover"
                                         style={{ borderRadius: logoRadius }}
                                         onError={() => updateTheme({ logoUrl: '' })}
                                     />
                                 ) : (
-                                    <Hexagon className="w-10 h-10 text-white" strokeWidth={1.5} />
+                                    <Hexagon className="h-10 w-10 text-white" strokeWidth={1.5} />
                                 )}
                             </div>
                         )}
                     </div>
 
-
-
-                    <div
-                        className={`z-10 my-6 flex items-center gap-4`}
-                    >
+                    <div className="z-10 my-6 flex items-center gap-4">
                         {actions.map((action) => {
                             const Icon = action.icon;
                             return (
                                 <span
                                     key={action.name}
                                     onClick={action.onClick}
-                                    className="flex items-center gap-2 
-                                     transition-opacity opacity-70 hover:opacity-100
-                                     p-2 py-1 cursor-pointer
-                                     rounded-md
-                                    bg-gray-50 focus:outline-none 
-                                     focus:ring-2 focus:ring-gray-200"
+                                    className="flex cursor-pointer items-center gap-2 rounded-md bg-gray-50 p-2 py-1 opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-gray-200"
                                 >
-                                    <Icon className="w-4 h-4" strokeWidth={2} />
-                                    <span className="font-bold text-[14px]">{action.name}</span>
+                                    <Icon className="h-4 w-4" strokeWidth={2} />
+                                    <span className="text-[14px] font-bold">{action.name}</span>
                                 </span>
                             );
                         })}
                     </div>
 
-                    {/* Title */}
                     <input
                         type="text"
                         value={formTitle}
@@ -312,7 +292,7 @@ const FormEditPage = () => {
                                 setIsBuilderActive(true);
                             }
                         }}
-                        className="text-[30px] font-bold placeholder:text-gray-300 outline-none w-full bg-transparent mb-4"
+                        className="mb-4 w-full bg-transparent text-[30px] font-bold outline-none placeholder:text-gray-300"
                     />
 
                     {isBuilderActive ? (
@@ -321,70 +301,61 @@ const FormEditPage = () => {
                         </div>
                     ) : (
                         <>
-                            {/* Quick Actions */}
-                            <div className="flex flex-col gap-4 mb-12">
+                            <div className="mb-12 flex flex-col gap-4">
                                 <button
                                     onClick={() => setIsBuilderActive(true)}
-                                    className="flex items-center gap-3 opacity-70 hover:opacity-100 transition-opacity w-fit text-sm"
+                                    className="flex w-fit items-center gap-3 text-sm opacity-70 transition-opacity hover:opacity-100"
                                 >
-                                    <FileText className="w-4 h-4" />
+                                    <FileText className="h-4 w-4" />
                                     <span>Press Enter to start from scratch</span>
                                 </button>
-                                <button className="flex items-center gap-3 opacity-70 hover:opacity-100 transition-opacity w-fit text-sm">
-                                    <LayoutTemplate className="w-4 h-4" />
+                                <button className="flex w-fit items-center gap-3 text-sm opacity-70 transition-opacity hover:opacity-100">
+                                    <LayoutTemplate className="h-4 w-4" />
                                     <span>Use a template</span>
                                 </button>
                             </div>
 
-                            {/* Description */}
-                            <div className="text-[15px] leading-relaxed mb-12 opacity-80">
+                            <div className="mb-12 text-[15px] leading-relaxed opacity-80">
                                 <p>
-                                    A form builder that <span className="bg-primary/60 text-black 0 px-1.5 py-0.5 rounded font-medium">works like a doc</span>.
+                                    A form builder that{' '}
+                                    <span className="rounded bg-primary/60 px-1.5 py-0.5 font-medium text-black">works like a doc</span>.
                                 </p>
                                 <p>
-                                    Just type <span className="bg-gray-100 text-gray-800 px-1.5 py-0.5 rounded font-medium text-sm">/</span> to insert a space  on the lable of field block.
+                                    Just type{' '}
+                                    <span className="rounded bg-gray-100 px-1.5 py-0.5 text-sm font-medium text-gray-800">/</span>{' '}
+                                    to insert a block.
                                 </p>
                             </div>
 
-                            {/* Footer Links Grid */}
                             <div className="grid grid-cols-2 gap-x-12 gap-y-6">
                                 <div>
-                                    <h3 className="text-sm font-semibold mb-4">Get started</h3>
+                                    <h3 className="mb-4 text-sm font-semibold">Get started</h3>
                                     <div className="flex flex-col gap-3">
-                                        <FooterLink icon={<MousePointerClick className="w-4 h-4" />} text="Create your first form" />
-                                        <FooterLink icon={<LayoutTemplate className="w-4 h-4" />} text="Get started with templates" />
-
-                                        <FooterLink icon={<HelpCircle className="w-4 h-4" />} text="Help center" />
-
+                                        <FooterLink icon={<MousePointerClick className="h-4 w-4" />} text="Create your first form" />
+                                        <FooterLink icon={<LayoutTemplate className="h-4 w-4" />} text="Get started with templates" />
+                                        <FooterLink icon={<HelpCircle className="h-4 w-4" />} text="Help center" />
                                     </div>
                                 </div>
                                 <div>
-                                    <h3 className="text-sm font-semibold mb-4">How-to guides</h3>
+                                    <h3 className="mb-4 text-sm font-semibold">How-to guides</h3>
                                     <div className="flex flex-col gap-3">
-                                        <FooterLink icon={<HouseWifi className="w-4 h-4" />} text="How to build" />
-                                        <FooterLink icon={<GitBranch className="w-4 h-4" />} text="Conditional logic" />
-
-                                        <FooterLink icon={<EyeOff className="w-4 h-4" />} text="Hidden fields" />
-
+                                        <FooterLink icon={<HouseWifi className="h-4 w-4" />} text="How to build" />
+                                        <FooterLink icon={<GitBranch className="h-4 w-4" />} text="Conditional logic" />
+                                        <FooterLink icon={<EyeOff className="h-4 w-4" />} text="Hidden fields" />
                                     </div>
                                 </div>
                             </div>
                         </>
                     )}
-
-
                 </div>
             </main>
 
-            {/* Floating Help Button */}
-            <button className="fixed bottom-6 right-6 w-10 h-10 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-500 hover:text-gray-900 hover:bg-gray-50 shadow-sm transition-all z-50">
-                <span className="font-medium text-lg">?</span>
+            <button className="fixed bottom-6 right-6 z-50 flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 shadow-sm transition-all hover:bg-gray-50 hover:text-gray-900">
+                <span className="text-lg font-medium">?</span>
             </button>
 
-            <PreviewDialog open={previewOpen} onOpenChange={setPreviewOpen} />
             <CustomizeSidebar open={showCustomize} onClose={() => setShowCustomize(false)} />
 
-            {/* Logo URL Dialog */}
             <Dialog open={logoDialogOpen} onOpenChange={setLogoDialogOpen}>
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
@@ -405,11 +376,11 @@ const FormEditPage = () => {
                             }}
                         />
                         {pendingLogoUrl && (
-                            <div className="flex items-center gap-3 mt-1">
+                            <div className="mt-1 flex items-center gap-3">
                                 <img
                                     src={pendingLogoUrl}
                                     alt="Preview"
-                                    className="w-12 h-12 rounded-full object-cover border border-gray-200"
+                                    className="h-12 w-12 rounded-full border border-gray-200 object-cover"
                                     onError={(e) => (e.currentTarget.style.display = 'none')}
                                     onLoad={(e) => (e.currentTarget.style.display = 'block')}
                                 />
@@ -418,10 +389,7 @@ const FormEditPage = () => {
                         )}
                     </div>
                     <DialogFooter>
-                        <Button
-                            variant="outline"
-                            onClick={() => setLogoDialogOpen(false)}
-                        >
+                        <Button variant="outline" onClick={() => setLogoDialogOpen(false)}>
                             Cancel
                         </Button>
                         <Button
@@ -441,7 +409,7 @@ const FormEditPage = () => {
 
 function FooterLink({ icon, text }: { icon: React.ReactNode; text: string }) {
     return (
-        <button className="flex items-center gap-3 text-sm opacity-70 hover:opacity-100 transition-opacity w-fit">
+        <button className="flex w-fit items-center gap-3 text-sm opacity-70 transition-opacity hover:opacity-100">
             {icon}
             <span>{text}</span>
         </button>

@@ -1,86 +1,100 @@
+// packages/trpc/server/routes/form/model.ts
+
 import { z } from "zod";
 
-// storeFormTitleAndDescription
-export const storeFormTitleAndDesriptionIntoDbInputModel = z.object({
+// ---- Draft (upsert) ----
+export const storeDraftFormIntoDbInput = z.object({
     title: z.string().describe("title of the form"),
     description: z.string().optional().describe("description of the form"),
+    shortId: z.string().describe("short id of the form"),
+    status: z.enum(["draft", "published"]).default("draft"),
+    draft: z.record(z.string(), z.unknown()).describe("form payload { name, blocks, theme }"),
 });
-export const storeFormTitleAndDesriptionIntoDbOutputModel = z.object({
+export const storeDraftFormIntoDbOutput = z.object({
     id: z.string().uuid().describe("form id"),
-    public_slug: z.string().describe("slug url"),
+    short_id: z.string().describe("short id"),
 });
 
-// updateFormData (draft / publish / settings)
-export const updateFormDataIntoDbInputModel = z.object({
-    formId: z.string().uuid().describe("uuid of the form to update"),
-    draft: z.record(z.string(), z.unknown()).optional().describe("form data for draft"),
-    publish: z.record(z.string(), z.unknown()).optional().describe("form data for live publish"),
-    // Settings — same tri-state convention as the service-level schema:
-    //   undefined = leave alone, null = clear, value = set.
-    isExpiry: z.date().nullable().optional().describe("form expiry date (null clears)"),
-    responseLimit: z.number().int().positive().nullable().optional()
-        .describe("max submissions to accept (null = unlimited)"),
-})
-
-export const updateFormDataIntoDbOutputModel = z.object({
+// ---- Publish (upsert) ----
+export const storePublishFormIntoDbInput = z.object({
+    title: z.string().describe("title of the form"),
+    description: z.string().optional().describe("description of the form"),
+    shortId: z.string().describe("short id of the form"),
+    status: z.enum(["draft", "published"]).default("published"),
+    published: z.record(z.string(), z.unknown()).describe("form payload { name, blocks, theme }"),
+});
+export const storePublishFormIntoDbOutput = z.object({
     id: z.string().uuid().describe("form id"),
-    public_slug: z.string().describe("slug url"),
+    short_id: z.string().describe("short id"),
 });
 
+// ---- Update settings (tri-state) ----
+export const updateFormSettingIntoDbInput = z.object({
+    shortId: z.string().describe("short id of the form"),
+    visibility: z.enum(["public", "unlisted"]).optional(),
+    responseLimit: z.number().int().nonnegative().optional().describe("max submissions (0 = unlimited)"),
+    isExpiry: z.coerce.date().nullable().optional().describe("expiry date (null = clear)"),
+});
+export const updateFormSettingIntoDbOutput = z.object({
+    id: z.string().uuid().describe("form id"),
+    shortId: z.string().describe("short id"),
+    visibility: z.enum(["public", "unlisted"]),
+    responseLimit: z.number(),
+    isExpiry: z.date().nullable(),
+});
 
-// softDeleteForm — marks the form as deleted (`isDeleted = true`).
+// ---- Soft delete ----
 export const softDeleteFormInputModel = z.object({
     formId: z.string().uuid().describe("uuid of the form to soft-delete"),
 });
-
 export const softDeleteFormOutputModel = z.object({
     id: z.string().uuid().describe("uuid of the form that was deleted"),
 });
 
-// showTheFormBySlug
-export const showTheFormBySlugInputModel = z.object({
-    slug: z.string().describe("public or unlisted slug of the form"),
-});
-
-
-export const showTheFormBySlugOutputModel = z.object({
-    id: z.string().uuid(),
-    title: z.string(),
-    description: z.string().nullable(),
-    visibility: z.enum(["public", "unlisted"]),
-    response_limit: z.number().nullable(),
-    published: z.record(z.string(), z.unknown()).nullable(),
-    createdAt: z.date().nullable(),
-});
-
-// storeFormSubmission
+// ---- Public submission ----
 export const storeFormSubmissionIntoDbInputModel = z.object({
-    formId: z.string().uuid().describe("uuid of the form being submitted"),
-    response: z.record(z.string(), z.unknown()).describe("submitted form data"),
+    shortId: z.string().describe("short id of the form being submitted"),
+    data: z.record(z.string(), z.unknown()).describe("submitted form data"),
 });
 export const storeFormSubmissionIntoDbOutputModel = z.object({
     submission_id: z.string().uuid().describe("id of the created submission"),
 });
 
-// showAllPublicForms
-export const showAllThePublicFormsInputModel = z.object({
-    page: z.number().int().min(1).default(1),
-    limit: z.number().int().min(1).max(100).default(10),
-    search: z.string().optional(),
+// ---- Public form viewer ----
+export const getPublicFormByIdInputModel = z.object({
+    shortId: z.string().describe("short id of the form to load for the public viewer"),
+});
+export const getPublicFormByIdOutputModel = z.object({
+    id: z.string().uuid(),
+    title: z.string(),
+    description: z.string().nullable(),
+    visibility: z.enum(["public", "unlisted"]),
+    status: z.enum(["draft", "published"]),
+    shortId: z.string(),
+    published: z.record(z.string(), z.unknown()).nullable(),
+    responseLimit: z.number(),
+    isExpiry: z.date().nullable(),
+    createdAt: z.date().nullable(),
+    updatedAt: z.date().nullable(),
 });
 
-export const showAllThePublicFormsOutputModel = z.object({
+// ---- List my forms ----
+export const getAllMyFormsInputModel = z.object({
+    page: z.number().int().min(1).default(1),
+    limit: z.number().int().min(1).max(100).default(10),
+});
+export const getAllMyFormsOutputModel = z.object({
     forms: z.array(
         z.object({
             id: z.string().uuid(),
+            shortId: z.string(),
             title: z.string(),
             description: z.string().nullable(),
+            status: z.enum(["draft", "published"]),
             visibility: z.enum(["public", "unlisted"]),
-            responseLimit: z.number().nullable(),
-            published: z.record(z.string(), z.unknown()).nullable(),
-            publicSlug: z.string(),
+            isExpiry: z.date().nullable(),
             createdAt: z.date().nullable(),
-        })
+        }),
     ),
     pagination: z.object({
         page: z.number(),
@@ -92,76 +106,31 @@ export const showAllThePublicFormsOutputModel = z.object({
     }),
 });
 
-
-
-// getAllMyForms (builder - list forms owned by current user)
-export const getAllMyFormsInputModel = z.object({});
-
-export const getAllMyFormsOutputModel = z.object({
-    forms: z.array(
-        z.object({
-            id: z.string().uuid(),
-            title: z.string(),
-            description: z.string().nullable(),
-            visibility: z.enum(["public", "unlisted"]),
-            publicSlug: z.string(),
-            unlistedSlug: z.string(),
-            hasDraft: z.boolean(),
-            hasPublished: z.boolean(),
-            // Phase 8: per-form submission count, returned alongside each form
-            // so the dashboard can show "X responses" without an N+1 round-trip.
-            submissionCount: z.number(),
-            createdAt: z.date().nullable(),
-        }),
-    ),
-});
-
-
-
-// getMyFormById (builder - load one form's draft by id, ownership-checked)
+// ---- Get one form by short id ----
 export const getMyFormByIdInputModel = z.object({
-    formId: z.string().uuid().describe("uuid of the form to load for editing"),
+    shortId: z.string().describe("short id of the form to load for editing"),
 });
-
 export const getMyFormByIdOutputModel = z.object({
     id: z.string().uuid(),
     title: z.string(),
     description: z.string().nullable(),
     visibility: z.enum(["public", "unlisted"]),
+    status: z.enum(["draft", "published"]),
+    shortId: z.string(),
     draft: z.record(z.string(), z.unknown()).nullable(),
-    publicSlug: z.string(),
-    unlistedSlug: z.string(),
-    responseLimit: z.number().nullable(),
-    // Phase 9: settings exposed so the builder's settings dialog can
-    // pre-populate the current values.
+    published: z.record(z.string(), z.unknown()).nullable(),
+    responseLimit: z.number(),
     isExpiry: z.date().nullable(),
     createdAt: z.date().nullable(),
     updatedAt: z.date().nullable(),
 });
 
-// getShareInfo (builder - check if form is published, return share slug if so)
-export const getShareInfoInputModel = z.object({
-    formId: z.string().uuid().describe("uuid of the form to share"),
-});
-
-export const getShareInfoOutputModel = z.object({
-    formId: z.string().uuid(),
-    isPublished: z.boolean(),
-    publicSlug: z.string().nullable(),
-    unlistedSlug: z.string().nullable(),
-    title: z.string(),
-});
-
-
-// ---------------- Submissions + Analytics (Phase 8) ----------------
-
-// getAllFormSubmissions — paginated list of submissions for one form (owner only)
+// ---- List submissions for one form ----
 export const getAllFormSubmissionsInputModel = z.object({
-    formId: z.string().uuid().describe("uuid of the form whose submissions to list"),
+    shortId: z.string().describe("short id of the form whose submissions to list"),
     page: z.number().int().min(1).default(1),
     limit: z.number().int().min(1).max(100).default(20),
 });
-
 export const getAllFormSubmissionsOutputModel = z.object({
     submissions: z.array(
         z.object({
@@ -178,58 +147,4 @@ export const getAllFormSubmissionsOutputModel = z.object({
         hasNextPage: z.boolean(),
         hasPrevPage: z.boolean(),
     }),
-});
-
-
-// getFormAnalytics — per-form analytics
-export const getFormAnalyticsInputModel = z.object({
-    formId: z.string().uuid().describe("uuid of the form to analyze"),
-});
-
-export const getFormAnalyticsOutputModel = z.object({
-    totalSubmissions: z.number(),
-    submissionsOverTime: z.array(
-        z.object({
-            date: z.string(),
-            count: z.number(),
-        }),
-    ),
-    fieldStats: z.array(
-        z.object({
-            fieldId: z.string(),
-            fieldLabel: z.string(),
-            responseCount: z.number(),
-            responseRate: z.number(),
-        }),
-    ),
-});
-
-
-// getGlobalAnalytics — analytics across all forms owned by the current user
-export const getGlobalAnalyticsInputModel = z.object({});
-
-export const getGlobalAnalyticsOutputModel = z.object({
-    totalForms: z.number(),
-    totalSubmissions: z.number(),
-    submissionsOverTime: z.array(
-        z.object({
-            date: z.string(),
-            count: z.number(),
-        }),
-    ),
-    topForms: z.array(
-        z.object({
-            id: z.string().uuid(),
-            title: z.string(),
-            submissionCount: z.number(),
-        }),
-    ),
-    recentSubmissions: z.array(
-        z.object({
-            id: z.string().uuid(),
-            formId: z.string().uuid(),
-            formTitle: z.string(),
-            createdAt: z.date().nullable(),
-        }),
-    ),
 });

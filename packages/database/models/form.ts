@@ -49,7 +49,7 @@ export type SubmissionPayload = Record<string, unknown>;
 
 
 export const visibilityEnum = pgEnum("visibility", ["public", "unlisted"]);
-export const formStatusEnum = pgEnum("form_status", ["draft", "published", "archived"]);
+export const formStatusEnum = pgEnum("form_status", ["draft", "published"]);
 
 
 export const formTable = pgTable("form", {
@@ -62,21 +62,17 @@ export const formTable = pgTable("form", {
     description: text("description"),
 
     // configs
-
-    // for everyone
-    publicSlug: varchar("public_slug", { length: 255 }).notNull().unique(),
-
-    // for only direct link 
-    unlistedSlug: varchar("unlisted_slug", { length: 255 }).notNull().unique(),
-
-
-    visibility: visibilityEnum("visibility").default("public").notNull(),
-    responseLimit: integer("response_limit"),
+    shortId: varchar("short_id", { length: 10 }).unique().notNull(),
     status: formStatusEnum("status").default("draft").notNull(),
+
 
     // data 
     draft: jsonb("draft").$type<FormPayload>(),
     published: jsonb("published").$type<FormPayload>(),
+
+
+    visibility: visibilityEnum("visibility").default("public").notNull(),
+    responseLimit: integer("response_limit").default(0).notNull(),
 
 
     // meta 
@@ -91,6 +87,7 @@ export const formTable = pgTable("form", {
 export const submissionFormTable = pgTable("submission_form", {
     id: uuid("id").primaryKey().defaultRandom(),
     formId: uuid("form_id").references(() => formTable.id, { onDelete: "cascade" }).notNull(),
+    shortId: varchar("short_id").references(() => formTable.shortId, { onDelete: "cascade" }).notNull(),
 
     submission: jsonb("submission").$type<SubmissionPayload>(),
 

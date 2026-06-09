@@ -10,36 +10,34 @@ import {
 } from './InputBlocks';
 import { HeadingBlockView, TextBlockView, DividerBlockView } from './LayoutBlocks';
 
-// apps/web/components/form-builder/blocks/index.tsx
-// Pass onEnter through the dispatcher:
-
-// apps/web/components/form-builder/blocks/index.tsx
-// Pass onEnter through the dispatcher:
-
 interface BlockRendererProps {
     block: Block;
     onChange: (patch: Partial<Block>) => void;
-    onEnter?: () => void; // 👈 add
+    onEnter?: () => void;
+    onSlash?: () => void;
 }
 
-export function BlockRenderer({ block, onChange, onEnter }: BlockRendererProps) {
+/** Dispatches a block to its matching view component. */
+export function BlockRenderer({ block, onChange, onEnter, onSlash }: BlockRendererProps) {
+    const props = { onChange, onEnter, onSlash };
+
     switch (block.type) {
-        case 'short_answer': return <ShortAnswerBlockView block={block} onChange={onChange} onEnter={onEnter} />;
-        case 'long_answer': return <LongAnswerBlockView block={block} onChange={onChange} onEnter={onEnter} />;
-        case 'email': return <EmailBlockView block={block} onChange={onChange} onEnter={onEnter} />;
-        case 'phone': return <PhoneBlockView block={block} onChange={onChange} onEnter={onEnter} />;
-        case 'number': return <NumberBlockView block={block} onChange={onChange} onEnter={onEnter} />;
-        case 'link': return <LinkBlockView block={block} onChange={onChange} onEnter={onEnter} />;
-        case 'date': return <DateBlockView block={block} onChange={onChange} onEnter={onEnter} />;
-        case 'rating': return <RatingBlockView block={block} onChange={onChange} onEnter={onEnter} />;
-        case 'multiple_choice': return <MultipleChoiceBlockView block={block} onChange={onChange} onEnter={onEnter} />;
-        case 'checkboxes': return <CheckboxesBlockView block={block} onChange={onChange} onEnter={onEnter} />;
-        case 'dropdown': return <DropdownBlockView block={block} onChange={onChange} onEnter={onEnter} />;
-        case 'multi_select': return <MultiSelectBlockView block={block} onChange={onChange} onEnter={onEnter} />;
+        case 'short_answer': return <ShortAnswerBlockView block={block} {...props} />;
+        case 'long_answer': return <LongAnswerBlockView block={block} {...props} />;
+        case 'email': return <EmailBlockView block={block} {...props} />;
+        case 'phone': return <PhoneBlockView block={block} {...props} />;
+        case 'number': return <NumberBlockView block={block} {...props} />;
+        case 'link': return <LinkBlockView block={block} {...props} />;
+        case 'date': return <DateBlockView block={block} {...props} />;
+        case 'rating': return <RatingBlockView block={block} {...props} />;
+        case 'multiple_choice': return <MultipleChoiceBlockView block={block} {...props} />;
+        case 'checkboxes': return <CheckboxesBlockView block={block} {...props} />;
+        case 'dropdown': return <DropdownBlockView block={block} {...props} />;
+        case 'multi_select': return <MultiSelectBlockView block={block} {...props} />;
         case 'heading_1':
         case 'heading_2':
-        case 'heading_3': return <HeadingBlockView block={block} onChange={onChange} onEnter={onEnter} />;
-        case 'text': return <TextBlockView block={block} onChange={onChange} onEnter={onEnter} />;
+        case 'heading_3': return <HeadingBlockView block={block} {...props} />;
+        case 'text': return <TextBlockView block={block} {...props} />;
         case 'divider': return <DividerBlockView />;
     }
 }

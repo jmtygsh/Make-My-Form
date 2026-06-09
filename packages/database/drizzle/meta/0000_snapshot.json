@@ -1,5 +1,5 @@
 {
-  "id": "96878b2a-e720-4836-a6fe-8c6af12ff0de",
+  "id": "884f4f1a-57d4-4cf2-820c-5639a866cdb4",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -182,31 +182,11 @@
           "primaryKey": false,
           "notNull": false
         },
-        "public_slug": {
-          "name": "public_slug",
-          "type": "varchar(255)",
+        "short_id": {
+          "name": "short_id",
+          "type": "varchar(10)",
           "primaryKey": false,
           "notNull": true
-        },
-        "unlisted_slug": {
-          "name": "unlisted_slug",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "visibility": {
-          "name": "visibility",
-          "type": "visibility",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'public'"
-        },
-        "response_limit": {
-          "name": "response_limit",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
         },
         "status": {
           "name": "status",
@@ -227,6 +207,21 @@
           "type": "jsonb",
           "primaryKey": false,
           "notNull": false
+        },
+        "visibility": {
+          "name": "visibility",
+          "type": "visibility",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'public'"
+        },
+        "response_limit": {
+          "name": "response_limit",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
         },
         "is_expiry": {
           "name": "is_expiry",
@@ -273,18 +268,11 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "form_public_slug_unique": {
-          "name": "form_public_slug_unique",
+        "form_short_id_unique": {
+          "name": "form_short_id_unique",
           "nullsNotDistinct": false,
           "columns": [
-            "public_slug"
-          ]
-        },
-        "form_unlisted_slug_unique": {
-          "name": "form_unlisted_slug_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "unlisted_slug"
+            "short_id"
           ]
         }
       },
@@ -306,6 +294,12 @@
         "form_id": {
           "name": "form_id",
           "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "short_id": {
+          "name": "short_id",
+          "type": "varchar",
           "primaryKey": false,
           "notNull": true
         },
@@ -343,6 +337,19 @@
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
+        },
+        "submission_form_short_id_form_short_id_fk": {
+          "name": "submission_form_short_id_form_short_id_fk",
+          "tableFrom": "submission_form",
+          "tableTo": "form",
+          "columnsFrom": [
+            "short_id"
+          ],
+          "columnsTo": [
+            "short_id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -358,8 +365,7 @@
       "schema": "public",
       "values": [
         "draft",
-        "published",
-        "archived"
+        "published"
       ]
     },
     "public.visibility": {

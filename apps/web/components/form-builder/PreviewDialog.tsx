@@ -39,10 +39,14 @@ export function PreviewDialog({ open, onOpenChange }: PreviewDialogProps) {
 
     return createPortal(
         <div
-            className="fixed inset-0 z-60 overflow-y-auto"
-            style={{ backgroundColor: theme.bgColor, color: theme.textColor, fontFamily: theme.font, fontSize: theme.baseFontSize }}
+            className="fixed inset-0 z-[9999] overflow-y-auto"
+            style={{
+                backgroundColor: theme.bgColor,
+                color: theme.textColor,
+                fontFamily: theme.font,
+                fontSize: theme.baseFontSize,
+            }}
         >
-
             <div className="sticky top-0 z-10 flex items-center px-4 py-3">
                 <button
                     onClick={() => onOpenChange(false)}
@@ -54,7 +58,7 @@ export function PreviewDialog({ open, onOpenChange }: PreviewDialogProps) {
             </div>
 
             <FormRenderer
-                formId={formId ?? ''}
+                shortId={formId ?? ''}
                 title={title}
                 payload={payload}
                 mode="preview"
@@ -62,4 +66,4 @@ export function PreviewDialog({ open, onOpenChange }: PreviewDialogProps) {
         </div>,
         document.body,
     );
-}
+}

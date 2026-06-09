@@ -2,7 +2,12 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { arrayMove } from '@dnd-kit/sortable';
-import type { Block, BlockType, FormTheme } from './schema';
+import {
+    DEFAULT_THEME,
+    type Block,
+    type BlockType,
+    type FormTheme,
+} from './schema';
 import { createBlock, convertBlock, genId, BLOCK_META } from './field-config';
 
 interface FormBuilderState {
@@ -28,10 +33,8 @@ interface FormBuilderState {
 
     // blocks
     insertBlock: (type: BlockType, atIndex?: number) => string;
-
     insertBlockAfter: (afterBlockId: string, type: BlockType) => string;
-
-    insertEmptyTextBlockAfter: (afterBlockId: string) => string;  // 👈 ADD THIS LINE
+    insertEmptyTextBlockAfter: (afterBlockId: string) => string;
     updateBlock: (id: string, patch: Partial<Block>) => void;
     removeBlock: (id: string) => void;
     duplicateBlock: (id: string) => void;
@@ -46,45 +49,7 @@ interface FormBuilderState {
 
     // helpers
     findBlock: (id: string) => { block: Block; index: number } | null;
-
 }
-
-const DEFAULT_THEME: FormTheme = {
-    font: 'Roboto',
-    bgColor: '#ffffff',
-    textColor: '#37352F',
-    pageWidth: '700px',
-    baseFontSize: '16px',
-    logoUrl: '',
-    logoBgColor: '#1a1a2e',
-    logoWidth: '100px',
-    logoHeight: '100px',
-    logoRadius: '50px',
-    coverUrl: '',
-    coverHeight: '200px',
-    coverPosition: '50%',
-    showLogo: false,
-    showCover: false,
-    btnBgColor: '#000000',
-    btnTextColor: '#FFFFFF',
-    btnWidth: 'auto',
-    btnHeight: '36px',
-    btnAlignment: 'left',
-    btnFontSize: '16px',
-    btnCornerRadius: '8px',
-    btnVerticalMargin: '10px',
-    btnHorizontalPadding: '14px',
-    inputWidth: '320px',
-    inputBg: '#ffffff80',
-    inputPlaceholderColor: '#bbbab8',
-    inputBorderColor: '#3d3b3b',
-    inputBorderWidth: '1px',
-    inputBorderRadius: '8px',
-    inputHeight: '36px',
-    inputHorizontalPadding: '10px',
-    inputMarginBottom: '10px',
-    accentColor: '#0070D7',
-};
 
 const initialState = {
     formId: null as string | null,
@@ -101,11 +66,15 @@ export const useFormBuilderStore = create<FormBuilderState>()(
         (set, get) => ({
             ...initialState,
 
+            /* ---- theme ---- */
+
             updateTheme: (patch) =>
                 set((state) => ({
                     theme: { ...state.theme, ...patch },
                     isDirty: true,
                 })),
+
+            /* ---- lifecycle ---- */
 
             init: (formId) => {
                 const current = get();
@@ -139,7 +108,12 @@ export const useFormBuilderStore = create<FormBuilderState>()(
 
             reset: () => set({ ...initialState }),
             markSaved: () => set({ isDirty: false }),
+
+            /* ---- title ---- */
+
             setTitle: (title) => set({ title, isDirty: true }),
+
+            /* ---- blocks: insert ---- */
 
             insertBlock: (type, atIndex) => {
                 const block = createBlock(type);
@@ -162,6 +136,19 @@ export const useFormBuilderStore = create<FormBuilderState>()(
                 });
                 return block.id;
             },
+
+            insertEmptyTextBlockAfter: (afterBlockId) => {
+                const block = createBlock('text'); // empty text block = blank line
+                set((state) => {
+                    const idx = state.blocks.findIndex((b) => b.id === afterBlockId);
+                    const blocks = [...state.blocks];
+                    blocks.splice(idx === -1 ? blocks.length : idx + 1, 0, block);
+                    return { blocks, selectedBlockId: block.id, isDirty: true };
+                });
+                return block.id;
+            },
+
+            /* ---- blocks: mutate ---- */
 
             updateBlock: (id, patch) =>
                 set((state) => ({
@@ -194,7 +181,6 @@ export const useFormBuilderStore = create<FormBuilderState>()(
                     const found = get().findBlock(id);
                     if (!found || found.block.type === newType) return state;
                     const converted = convertBlock(found.block, newType);
-                    // reset width to new type's default
                     converted.width = BLOCK_META[newType].defaultWidth;
                     return {
                         blocks: state.blocks.map((b) => (b.id === id ? converted : b)),
@@ -220,6 +206,8 @@ export const useFormBuilderStore = create<FormBuilderState>()(
                     isDirty: true,
                 })),
 
+            /* ---- blocks: reorder ---- */
+
             reorderBlocks: (activeId, overId) =>
                 set((state) => {
                     const oldIndex = state.blocks.findIndex((b) => b.id === activeId);
@@ -238,24 +226,16 @@ export const useFormBuilderStore = create<FormBuilderState>()(
                     return { blocks: arrayMove(state.blocks, from, index), isDirty: true };
                 }),
 
+            /* ---- selection ---- */
+
             selectBlock: (id) => set({ selectedBlockId: id }),
+
+            /* ---- helpers ---- */
 
             findBlock: (id) => {
                 const blocks = get().blocks;
                 const index = blocks.findIndex((b) => b.id === id);
                 return index === -1 ? null : { block: blocks[index]!, index };
-            },
-
-
-            insertEmptyTextBlockAfter: (afterBlockId) => {
-                const block = createBlock('text'); // empty text block = blank space
-                set((state) => {
-                    const idx = state.blocks.findIndex((b) => b.id === afterBlockId);
-                    const blocks = [...state.blocks];
-                    blocks.splice(idx === -1 ? blocks.length : idx + 1, 0, block);
-                    return { blocks, selectedBlockId: block.id, isDirty: true };
-                });
-                return block.id;
             },
         }),
         {

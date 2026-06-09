@@ -12,4 +12,4 @@ export function fromPayload(
     const parsed = formPayloadSchema.safeParse(payload);
     if (!parsed.success) return null;
     return { title: parsed.data.name, blocks: parsed.data.blocks, theme: parsed.data.theme };
-}
+}

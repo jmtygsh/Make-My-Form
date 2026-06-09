@@ -257,7 +257,7 @@ export function AppSidebar() {
                 {workspaceExpanded && forms && forms.length > 0 && (
                   <SidebarMenuSub>
                     {forms.map((form) => {
-                      const href = `/forms/${form.id}/edit`;
+                      const href = `/forms/${form.id}/settings`;
                       return (
                         <SidebarMenuSubItem key={form.id}>
                           <SidebarMenuSubButton

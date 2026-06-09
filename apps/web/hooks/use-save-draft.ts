@@ -2,30 +2,33 @@
 'use client';
 
 import { useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { useFormBuilderStore } from '~/lib/form-builder/store';
 import { toPayload } from '~/lib/form-builder/serialize';
-import { useCreateForm, useUpdateFormData } from '~/hooks/api/form';
+import { useStoreDraftForm, useStorePublishForm } from '~/hooks/api/form';
 
-export function useSaveDraft() {
-    const { updateFormDataAsync, isUpdating } = useUpdateFormData();
-    const { createFormAsync, isCreating } = useCreateForm();
-
-    const ensureFormId = useCallback(async (): Promise<string> => {
-        const { formId, title } = useFormBuilderStore.getState();
-        if (formId) return formId;
-        const created = await createFormAsync({ title: title || 'Untitled' });
-        useFormBuilderStore.setState({ formId: created.id });
-        return created.id;
-    }, [createFormAsync]);
+/**
+ * Save-draft / publish actions for the builder header.
+ *
+ * `shortId` is the frontend-generated route id — the single identity for the
+ * form. Both actions upsert by it server-side, so the first call inserts and
+ * later calls update. Publish redirects to the form's settings page on success.
+ */
+export function useSaveDraft(shortId: string) {
+    const router = useRouter();
+    const { storeDraftAsync, isSaving } = useStoreDraftForm();
+    const { storePublishAsync, isPublishing } = useStorePublishForm();
 
     const saveDraft = useCallback(async () => {
         try {
-            const formId = await ensureFormId();
             const { title, blocks, theme, markSaved } = useFormBuilderStore.getState();
-            await updateFormDataAsync({
-                formId,
-                draft: toPayload(title, blocks, theme) as unknown as Record<string, unknown>,
+            await storeDraftAsync({
+                shortId,
+                title: title || 'Untitled',
+                description: '',
+                status: 'draft',
+                draft: toPayload(title, blocks, theme) as never,
             });
             markSaved();
             toast.success('Draft saved');
@@ -33,23 +36,26 @@ export function useSaveDraft() {
             console.error('[save-draft] failed', err);
             toast.error('Failed to save draft');
         }
-    }, [ensureFormId, updateFormDataAsync]);
+    }, [shortId, storeDraftAsync]);
 
     const publish = useCallback(async () => {
         try {
-            const formId = await ensureFormId();
             const { title, blocks, theme, markSaved } = useFormBuilderStore.getState();
-            await updateFormDataAsync({
-                formId,
-                publish: toPayload(title, blocks, theme) as unknown as Record<string, unknown>,
+            await storePublishAsync({
+                shortId,
+                title: title || 'Untitled',
+                description: '',
+                status: 'published',
+                published: toPayload(title, blocks, theme) as never,
             });
             markSaved();
             toast.success('Form published');
+            router.push(`/forms/${shortId}/settings`);
         } catch (err) {
             console.error('[publish] failed', err);
             toast.error('Failed to publish');
         }
-    }, [ensureFormId, updateFormDataAsync]);
+    }, [shortId, storePublishAsync, router]);
 
-    return { saveDraft, publish, isSaving: isUpdating || isCreating };
+    return { saveDraft, publish, isSaving: isSaving || isPublishing };
 }

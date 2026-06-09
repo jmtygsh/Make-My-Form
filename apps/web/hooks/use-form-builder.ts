@@ -7,6 +7,11 @@ import { useFormBuilderStore } from '~/lib/form-builder/store';
 import { useGetMyFormById } from '~/hooks/api/form';
 import { fromPayload } from '~/lib/form-builder/serialize';
 
+/**
+ * Initialises the builder store for a given `shortId` and hydrates it from the
+ * server. Hydrates from `draft` when present, falling back to `published` so a
+ * published-only form still loads in the editor.
+ */
 export function useFormBuilder({ formId }: { formId: string }) {
     const init = useFormBuilderStore((s) => s.init);
     const hydrateFromServer = useFormBuilderStore((s) => s.hydrateFromServer);
@@ -16,7 +21,11 @@ export function useFormBuilder({ formId }: { formId: string }) {
     }, [formId, init]);
 
     const { form, isLoading, isFetched } = useGetMyFormById(formId);
-    const parsed = useMemo(() => fromPayload(form?.draft), [form?.draft]);
+
+    const parsed = useMemo(
+        () => fromPayload(form?.draft ?? form?.published),
+        [form?.draft, form?.published],
+    );
 
     useEffect(() => {
         if (isFetched && parsed) {
