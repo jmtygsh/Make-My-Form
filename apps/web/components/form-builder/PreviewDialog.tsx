@@ -40,7 +40,7 @@ export function PreviewDialog({ open, onOpenChange }: PreviewDialogProps) {
     return createPortal(
         <div
             className="fixed inset-0 z-60 overflow-y-auto"
-            style={{ backgroundColor: theme.bgColor, color: theme.textColor, fontFamily: theme.font }}
+            style={{ backgroundColor: theme.bgColor, color: theme.textColor, fontFamily: theme.font, fontSize: theme.baseFontSize }}
         >
 
             <div className="sticky top-0 z-10 flex items-center px-4 py-3">

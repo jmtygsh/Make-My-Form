@@ -13,20 +13,41 @@ import {
     SelectValue,
 } from '~/components/ui/select';
 import { Star } from 'lucide-react';
-import type { Block } from '~/lib/form-builder/schema';
+import type { Block, FormTheme } from '~/lib/form-builder/schema';
 import type { ControllerRenderProps, FieldValues } from 'react-hook-form';
 
 interface PublicFieldInputProps {
     block: Block;
     controller: ControllerRenderProps<FieldValues, string>;
+    theme?: FormTheme;
 }
 
 /** Functional input for the public/preview form, per block type. */
-export function PublicFieldInput({ block, controller }: PublicFieldInputProps) {
+export function PublicFieldInput({ block, controller, theme }: PublicFieldInputProps) {
+    const inputStyle = theme ? {
+        backgroundColor: theme.inputBg,
+        borderColor: theme.inputBorderColor,
+        borderWidth: theme.inputBorderWidth,
+        borderRadius: theme.inputBorderRadius,
+        height: theme.inputHeight,
+        paddingLeft: theme.inputHorizontalPadding,
+        paddingRight: theme.inputHorizontalPadding,
+        width: theme.inputWidth === 'auto' ? '100%' : theme.inputWidth,
+        color: theme.textColor,
+    } : {};
+
+    const textareaStyle = theme ? {
+        ...inputStyle,
+        height: 'auto',
+        minHeight: theme.inputHeight,
+        paddingTop: '8px',
+        paddingBottom: '8px',
+    } : {};
+
     switch (block.type) {
         case 'short_answer':
             return (
-                <Input {...controller} value={controller.value ?? ''} placeholder={block.placeholder} />
+                <Input {...controller} value={controller.value ?? ''} placeholder={block.placeholder} style={inputStyle} className="public-form-input" />
             );
 
         case 'long_answer':
@@ -36,6 +57,8 @@ export function PublicFieldInput({ block, controller }: PublicFieldInputProps) {
                     value={controller.value ?? ''}
                     placeholder={block.placeholder || 'Type your answer…'}
                     rows={4}
+                    style={textareaStyle}
+                    className="public-form-input"
                 />
             );
 
@@ -46,6 +69,8 @@ export function PublicFieldInput({ block, controller }: PublicFieldInputProps) {
                     type="email"
                     value={controller.value ?? ''}
                     placeholder={block.placeholder || 'name@example.com'}
+                    style={inputStyle}
+                    className="public-form-input"
                 />
             );
 
@@ -56,6 +81,8 @@ export function PublicFieldInput({ block, controller }: PublicFieldInputProps) {
                     type="tel"
                     value={controller.value ?? ''}
                     placeholder={block.placeholder || 'Phone number'}
+                    style={inputStyle}
+                    className="public-form-input"
                 />
             );
 
@@ -66,6 +93,8 @@ export function PublicFieldInput({ block, controller }: PublicFieldInputProps) {
                     type="url"
                     value={controller.value ?? ''}
                     placeholder={block.placeholder || 'https://'}
+                    style={inputStyle}
+                    className="public-form-input"
                 />
             );
 
@@ -79,13 +108,15 @@ export function PublicFieldInput({ block, controller }: PublicFieldInputProps) {
                         controller.onChange(e.target.value === '' ? undefined : Number(e.target.value))
                     }
                     placeholder={block.placeholder}
+                    style={inputStyle}
+                    className="public-form-input"
                 />
             );
 
         case 'dropdown':
             return (
                 <Select value={controller.value ?? ''} onValueChange={controller.onChange}>
-                    <SelectTrigger className="w-full">
+                    <SelectTrigger style={inputStyle}>
                         <SelectValue placeholder={block.placeholder || 'Select an option'} />
                     </SelectTrigger>
                     <SelectContent>
@@ -176,6 +207,7 @@ export function PublicFieldInput({ block, controller }: PublicFieldInputProps) {
                     value={controller.value ?? ''}
                     min={block.minDate}
                     max={block.maxDate}
+                    style={inputStyle}
                 />
             );
 

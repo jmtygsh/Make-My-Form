@@ -25,7 +25,7 @@ export function BlockLabel({ label, required, onChange, onEnter }: BlockLabelPro
                         onEnter?.();
                     }
                 }}
-                className="w-full resize-none bg-transparent text-[15px] font-medium placeholder:text-gray-400 outline-none"
+                className="w-full resize-none bg-transparent font-medium placeholder:text-gray-400 outline-none"
                 rows={1}
             />
             {required && <span className="mt-0.5 text-red-500">*</span>}

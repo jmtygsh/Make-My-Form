@@ -54,7 +54,7 @@ export function TextBlockView({ block, onChange, onEnter }: BlockRendererProps<T
                         onEnter?.();
                     }
                 }}
-                className="w-full resize-none bg-transparent text-[15px] leading-relaxed placeholder:text-gray-300 outline-none"
+                className="w-full resize-none bg-transparent leading-relaxed placeholder:text-gray-300 outline-none"
                 rows={1}
             />
 

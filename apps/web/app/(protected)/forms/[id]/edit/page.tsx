@@ -37,6 +37,8 @@ import {
     DollarSign,
     Hexagon,
     Palette,
+    ArrowDownUp,
+    Move,
 } from 'lucide-react';
 
 const FormEditPage = () => {
@@ -46,22 +48,37 @@ const FormEditPage = () => {
     const { title: formTitle, setTitle: setFormTitle, isDirty } = useFormBuilder({ formId });
     const { saveDraft, publish, isSaving } = useSaveDraft();
     const [previewOpen, setPreviewOpen] = useState(false);
-    const [showLogo, setShowLogo] = useState(false);
-    const [showCover, setShowCover] = useState(false);
     const [showCustomize, setShowCustomize] = useState(false);
     const [logoDialogOpen, setLogoDialogOpen] = useState(false);
-    const [logoUrl, setLogoUrl] = useState('');
     const [pendingLogoUrl, setPendingLogoUrl] = useState('');
+    const [isRepositioning, setIsRepositioning] = useState(false);
 
     const [isBuilderActive, setIsBuilderActive] = useState(false);
 
     // Theme from store (real-time canvas preview)
-    const { font, bgColor, textColor, pageWidth } = useFormBuilderStore(
+    const {
+        font, bgColor, textColor, pageWidth, baseFontSize,
+        logoUrl, logoBgColor, logoWidth, logoHeight, logoRadius,
+        coverUrl, coverHeight, coverPosition, showLogo, showCover,
+        updateTheme,
+    } = useFormBuilderStore(
         useShallow((s) => ({
             font: s.theme.font,
             bgColor: s.theme.bgColor,
             textColor: s.theme.textColor,
             pageWidth: s.theme.pageWidth,
+            baseFontSize: s.theme.baseFontSize,
+            logoUrl: s.theme.logoUrl,
+            logoBgColor: s.theme.logoBgColor,
+            logoWidth: s.theme.logoWidth,
+            logoHeight: s.theme.logoHeight,
+            logoRadius: s.theme.logoRadius,
+            coverUrl: s.theme.coverUrl,
+            coverHeight: s.theme.coverHeight,
+            coverPosition: s.theme.coverPosition,
+            showLogo: s.theme.showLogo,
+            showCover: s.theme.showCover,
+            updateTheme: s.updateTheme,
         })),
     );
 
@@ -79,8 +96,8 @@ const FormEditPage = () => {
     }, [isBuilderActive]);
 
     const actions = [
-        { name: 'Add logo', icon: Hexagon, onClick: () => setShowLogo((v) => !v) },
-        { name: 'Add cover', icon: LayoutTemplate, onClick: () => setShowCover((v) => !v) },
+        { name: 'Add logo', icon: Hexagon, onClick: () => updateTheme({ showLogo: !showLogo }) },
+        { name: 'Add cover', icon: LayoutTemplate, onClick: () => updateTheme({ showCover: !showCover }) },
         { name: 'Customize', icon: Palette, onClick: () => setShowCustomize((v) => !v) },
     ];
 
@@ -103,10 +120,12 @@ const FormEditPage = () => {
                 {/* Right */}
                 <div className="flex items-center gap-4 text-sm font-medium text-gray-500">
                     <span className="text-gray-400"> {isDirty ? 'Unsaved' : 'Draft'} </span>
-                    <button className="hover:bg-gray-100 p-1.5 rounded transition-colors"><Zap className="w-4 h-4" /></button>
+
                     <button className="hover:bg-gray-100 p-1.5 rounded transition-colors"><History className="w-4 h-4" /></button>
-                    <button className="hover:bg-gray-100 p-1.5 rounded transition-colors"><Settings className="w-4 h-4" /></button>
-                    <button onClick={() => setShowCustomize((v) => !v)} className="hover:bg-gray-100 px-2 py-1.5 rounded transition-colors">Customize</button>
+                    <button className="hover:bg-gray-100 p-1.5 rounded transition-colors"
+                        onClick={() => setShowCustomize((v) => !v)}
+                    ><Settings className="w-4 h-4" /></button>
+
 
                     <button
                         onClick={() => setPreviewOpen(true)}
@@ -138,37 +157,122 @@ const FormEditPage = () => {
 
 
             {/* Main Content */}
+            <link
+                href={`https://fonts.googleapis.com/css2?family=${font.replace(' ', '+')}:wght@400;500;600;700&display=swap`}
+                rel="stylesheet"
+            />
             <main className="flex-1 overflow-y-auto pb-24" style={{ backgroundColor: bgColor, fontFamily: font }}>
                 {/* Cover Band */}
-                <div className={`w-full h-50 bg-[#fde8e4]${showCover ? '' : ' hidden'}`} />
+                {showCover && (
+                    <div
+                        className={`w-full bg-cover relative group ${isRepositioning ? 'cursor-grab active:cursor-grabbing' : ''}`}
+                        style={{
+                            height: coverHeight,
+                            backgroundColor: coverUrl ? undefined : '#fde8e4',
+                            backgroundImage: coverUrl ? `url(${coverUrl})` : undefined,
+                            backgroundPosition: `center ${coverPosition}`,
+                        }}
+                        onMouseDown={(e) => {
+                            if (!isRepositioning) return;
+                            e.preventDefault();
+                            const startY = e.clientY;
+                            const startPos = parseInt(coverPosition) || 50;
+                            const containerH = e.currentTarget.getBoundingClientRect().height;
 
-                <div className="relative mx-auto p-10" style={{ maxWidth: pageWidth, color: textColor }}>
+                            const onMove = (me: MouseEvent) => {
+                                const delta = me.clientY - startY;
+                                const pctDelta = (delta / containerH) * 100;
+                                const newPos = Math.max(0, Math.min(100, startPos + pctDelta));
+                                updateTheme({ coverPosition: `${Math.round(newPos)}%` });
+                            };
+                            const onUp = () => {
+                                window.removeEventListener('mousemove', onMove);
+                                window.removeEventListener('mouseup', onUp);
+                            };
+                            window.addEventListener('mousemove', onMove);
+                            window.addEventListener('mouseup', onUp);
+                        }}
+                    >
+                        {/* Reposition tooltip */}
+                        {isRepositioning && (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="bg-black/70 text-white text-xs font-medium px-4 py-2 rounded-md pointer-events-none">
+                                    Drag image to reposition
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Cover hover actions */}
+                        {!isRepositioning && (
+                            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+                                <button
+                                    onClick={() => setShowCustomize(true)}
+                                    className="flex items-center gap-1.5 bg-white/90 backdrop-blur-sm text-gray-700 text-xs font-medium px-3 py-1.5 rounded-md shadow-sm hover:bg-white transition-colors"
+                                >
+                                    <LayoutTemplate className="w-3.5 h-3.5" />
+                                    Change cover
+                                </button>
+                                <button
+                                    onClick={() => setIsRepositioning(true)}
+                                    className="flex items-center gap-1.5 bg-white/90 backdrop-blur-sm text-gray-700 text-xs font-medium px-3 py-1.5 rounded-md shadow-sm hover:bg-white transition-colors"
+                                >
+                                    <Move className="w-3.5 h-3.5" />
+                                    Reposition
+                                </button>
+                            </div>
+                        )}
+
+                        {/* Save position button */}
+                        {isRepositioning && (
+                            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
+                                <button
+                                    onClick={() => setIsRepositioning(false)}
+                                    className="flex items-center gap-1.5 bg-white text-gray-700 text-xs font-medium px-4 py-2 rounded-md shadow-md hover:bg-gray-50 transition-colors"
+                                >
+                                    Save position
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+
+                <div className="relative mx-auto p-10" style={{ maxWidth: pageWidth, color: textColor, fontSize: baseFontSize }}>
 
 
                     {/* Overlapping Logo Circle */}
-                    <div className={`${showLogo && showCover ? 'absolute -top-19 translate-y-1/2' : ''} flex items-center gap-2`}>
+                    <div className={`${showLogo && showCover ? 'absolute top-0 -translate-y-1/2 left-10' : ''} flex items-center gap-2`}>
 
 
                         {/* Main logo circle */}
-                        <div
-                            className={`${showLogo ? '' : 'hidden '}w-18 h-18 rounded-full flex items-center justify-center shadow-md cursor-pointer overflow-hidden`}
-                            onClick={() => {
-                                setPendingLogoUrl(logoUrl);
-                                setLogoDialogOpen(true);
-                            }}
-                            title="Click to change logo"
-                        >
-                            {logoUrl ? (
-                                <img
-                                    src={logoUrl}
-                                    alt="Logo"
-                                    className="w-full h-full object-cover rounded-full"
-                                    onError={() => setLogoUrl('')}
-                                />
-                            ) : (
-                                <Hexagon className="w-10 h-10 text-white" strokeWidth={1.5} />
-                            )}
-                        </div>
+                        {showLogo && (
+                            <div
+                                className="flex items-center justify-center shadow-md cursor-pointer overflow-hidden"
+                                style={{
+                                    width: logoWidth,
+                                    height: logoHeight,
+                                    borderRadius: logoRadius,
+                                    backgroundColor: logoBgColor,
+                                }}
+                                onClick={() => {
+                                    setPendingLogoUrl(logoUrl);
+                                    setLogoDialogOpen(true);
+                                }}
+                                title="Click to change logo"
+                            >
+                                {logoUrl ? (
+                                    <img
+                                        src={logoUrl}
+                                        alt="Logo"
+                                        className="w-full h-full object-cover"
+                                        style={{ borderRadius: logoRadius }}
+                                        onError={() => updateTheme({ logoUrl: '' })}
+                                    />
+                                ) : (
+                                    <Hexagon className="w-10 h-10 text-white" strokeWidth={1.5} />
+                                )}
+                            </div>
+                        )}
                     </div>
 
 
@@ -295,7 +399,7 @@ const FormEditPage = () => {
                             onChange={(e) => setPendingLogoUrl(e.target.value)}
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter') {
-                                    setLogoUrl(pendingLogoUrl.trim());
+                                    updateTheme({ logoUrl: pendingLogoUrl.trim(), showLogo: true });
                                     setLogoDialogOpen(false);
                                 }
                             }}
@@ -322,7 +426,7 @@ const FormEditPage = () => {
                         </Button>
                         <Button
                             onClick={() => {
-                                setLogoUrl(pendingLogoUrl.trim());
+                                updateTheme({ logoUrl: pendingLogoUrl.trim(), showLogo: true });
                                 setLogoDialogOpen(false);
                             }}
                         >

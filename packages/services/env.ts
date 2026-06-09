@@ -19,6 +19,7 @@ const envSchema = z.object({
   SMTP_SECURE: z.coerce.boolean().describe("smtp secure"),
   SMTP_USER: z.string().describe("smtp user"),
   SMTP_PASS: z.string().describe("smtp pass"),
+  NEXT_PUBLIC_UNSPLASH_ACCESS_KEY: z.string().describe("unsplash public access key")
 
 });
 

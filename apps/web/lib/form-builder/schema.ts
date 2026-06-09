@@ -197,6 +197,42 @@ export const formThemeSchema = z.object({
     bgColor: z.string().default('#ffffff'),
     textColor: z.string().default('#37352F'),
     pageWidth: z.string().default('700px'),
+    baseFontSize: z.string().default('16px'),
+    // Logo
+    logoUrl: z.string().default(''),
+    logoBgColor: z.string().default('#1a1a2e'),
+    logoWidth: z.string().default('100px'),
+    logoHeight: z.string().default('100px'),
+    logoRadius: z.string().default('50px'),
+    // Cover
+    coverUrl: z.string().default(''),
+    coverHeight: z.string().default('200px'),
+    coverPosition: z.string().default('50%'),
+    // Visibility toggles
+    showLogo: z.boolean().default(false),
+    showCover: z.boolean().default(false),
+    // Buttons
+    btnBgColor: z.string().default('#000000'),
+    btnTextColor: z.string().default('#FFFFFF'),
+    btnWidth: z.string().default('auto'),
+    btnHeight: z.string().default('36px'),
+    btnAlignment: z.enum(['left', 'center', 'right']).default('left'),
+    btnFontSize: z.string().default('16px'),
+    btnCornerRadius: z.string().default('8px'),
+    btnVerticalMargin: z.string().default('10px'),
+    btnHorizontalPadding: z.string().default('14px'),
+    // Inputs
+    inputWidth: z.string().default('320px'),
+    inputBg: z.string().default('#ffffff80'),
+    inputPlaceholderColor: z.string().default('#bbbab8'),
+    inputBorderColor: z.string().default('#3d3b3b'),
+    inputBorderWidth: z.string().default('1px'),
+    inputBorderRadius: z.string().default('8px'),
+    inputHeight: z.string().default('36px'),
+    inputHorizontalPadding: z.string().default('10px'),
+    inputMarginBottom: z.string().default('10px'),
+    // Accent
+    accentColor: z.string().default('#0070D7'),
 });
 export type FormTheme = z.infer<typeof formThemeSchema>;
 

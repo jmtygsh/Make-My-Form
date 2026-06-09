@@ -13,6 +13,36 @@ const DEFAULT_THEME: FormTheme = {
     bgColor: '#ffffff',
     textColor: '#37352F',
     pageWidth: '700px',
+    baseFontSize: '16px',
+    logoUrl: '',
+    logoBgColor: '#1a1a2e',
+    logoWidth: '100px',
+    logoHeight: '100px',
+    logoRadius: '50px',
+    coverUrl: '',
+    coverHeight: '200px',
+    coverPosition: 'center',
+    showLogo: false,
+    showCover: false,
+    btnBgColor: '#000000',
+    btnTextColor: '#FFFFFF',
+    btnWidth: 'auto',
+    btnHeight: '36px',
+    btnAlignment: 'left',
+    btnFontSize: '16px',
+    btnCornerRadius: '8px',
+    btnVerticalMargin: '10px',
+    btnHorizontalPadding: '14px',
+    inputWidth: '320px',
+    inputBg: '#ffffff80',
+    inputPlaceholderColor: '#bbbab8',
+    inputBorderColor: '#3d3b3b',
+    inputBorderWidth: '1px',
+    inputBorderRadius: '8px',
+    inputHeight: '36px',
+    inputHorizontalPadding: '10px',
+    inputMarginBottom: '10px',
+    accentColor: '#0070D7',
 };
 
 export default function PublicFormPage() {
@@ -57,7 +87,7 @@ export default function PublicFormPage() {
     return (
         <div
             className="min-h-screen"
-            style={{ backgroundColor: theme.bgColor, color: theme.textColor, fontFamily: theme.font }}
+            style={{ backgroundColor: theme.bgColor, color: theme.textColor, fontFamily: theme.font, fontSize: theme.baseFontSize }}
         >
             <FormRenderer
                 formId={form.id}
@@ -68,3 +98,5 @@ export default function PublicFormPage() {
         </div>
     );
 }
+
+
