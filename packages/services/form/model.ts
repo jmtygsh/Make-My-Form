@@ -7,7 +7,7 @@ export const insertDraftFormIntoDb = z.object({
   description: z.string().describe("Form description"),
   shortId: z.string().describe("Unique identifier for form generated on the frontend"),
   status: z.enum(["draft", "published"]).default("draft"),
-  draft: z.custom<FormPayload>(),
+  draft: z.boolean(),
 });
 export type InsertDraftFormIntoDbInputType = z.infer<typeof insertDraftFormIntoDb>;
 
@@ -17,7 +17,7 @@ export const insertPublishFormIntoDb = z.object({
   description: z.string().describe("Form description"),
   shortId: z.string().describe("Unique identifier for form generated on the frontend"),
   status: z.enum(["draft", "published"]).default("published"),
-  published: z.custom<FormPayload>(),
+  published: z.boolean(),
 });
 export type InsertPublishFormIntoDbInputType = z.infer<typeof insertPublishFormIntoDb>;
 

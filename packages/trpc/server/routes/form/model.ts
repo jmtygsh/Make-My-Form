@@ -7,7 +7,7 @@ export const storeDraftFormIntoDbInput = z.object({
   description: z.string().optional().describe("description of the form"),
   shortId: z.string().describe("short id of the form"),
   status: z.enum(["draft", "published"]).default("draft"),
-  draft: z.custom<FormPayload>(),
+  draft: z.boolean(),
 });
 export const storeDraftFormIntoDbOutput = z.object({
   id: z.string().uuid().describe("form id"),
@@ -20,7 +20,7 @@ export const storePublishFormIntoDbInput = z.object({
   description: z.string().optional().describe("description of the form"),
   shortId: z.string().describe("short id of the form"),
   status: z.enum(["draft", "published"]).default("published"),
-  published: z.custom<FormPayload>(),
+  published: z.boolean(),
 });
 export const storePublishFormIntoDbOutput = z.object({
   id: z.string().uuid().describe("form id"),
