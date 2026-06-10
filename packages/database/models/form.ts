@@ -15,8 +15,6 @@ import {
 import { usersTable } from "./user";
 
 
-// Matches the frontend schema in apps/web/lib/form-builder/schema.ts
-// Stored as jsonb in both `draft` and `published` columns.
 export type FormBlock = {
     id: string;
     type: string;
@@ -44,7 +42,6 @@ export type FormPayload = {
     blocks: FormBlock[];
 };
 
-// Submission stores a flat key-value map keyed by block id
 export type SubmissionPayload = Record<string, unknown>;
 
 
