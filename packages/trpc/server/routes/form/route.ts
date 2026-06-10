@@ -113,6 +113,18 @@ export const formRouter = router({
       return { submission_id: result.submissionId };
     }),
 
+  getMyFormById: protectedProcedure
+    .meta({ openapi: { method: "GET", path: getPath("/get-my-form-by-id"), tags: TAGS } })
+    .input(getMyFormByIdInputModel)
+    .output(getMyFormByIdOutputModel)
+    .query(async ({ ctx, input }) => {
+      const form = await formService.getMyFormById({
+        userId: ctx.user.id,
+        shortId: input.shortId,
+      });
+      return form;
+    }),
+
   getPublicFormById: publicProcedure
     .meta({ openapi: { method: "GET", path: getPath("/get-public-form-by-id"), tags: TAGS } })
     .input(getPublicFormByIdInputModel)

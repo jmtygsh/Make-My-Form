@@ -211,3 +211,23 @@ export const useGetAllFormSubmissions = (shortId: string, page: number, limit: n
     status,
   };
 };
+
+export const useGetMyFormById = (shortId: string) => {
+  const {
+    data: form,
+    error,
+    isFetched,
+    isFetching,
+    isLoading,
+    status,
+  } = trpc.form.getMyFormById.useQuery({ shortId }, { enabled: !!shortId });
+
+  return {
+    form,
+    error,
+    isFetched,
+    isFetching,
+    isLoading,
+    status,
+  };
+};

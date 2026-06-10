@@ -1,3 +1,5 @@
+// apps/web/app/(protected)/forms/[id]/settings/page.tsx
+
 "use client";
 
 import React, { useMemo, useState } from "react";

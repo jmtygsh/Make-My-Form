@@ -23,7 +23,7 @@ export default function PublicFormPage() {
 
     if (error || (isFetched && !form)) {
         return (
-            <div className="mx-auto mt-32 max-w-[640px] px-8 text-center">
+            <div className="mx-auto mt-32 max-w-640px px-8 text-center">
                 <h1 className="text-2xl font-bold text-gray-800">Form not found</h1>
                 <p className="mt-2 text-gray-500">
                     This form doesn’t exist or is no longer available.
@@ -34,7 +34,7 @@ export default function PublicFormPage() {
 
     if (form && !form.published) {
         return (
-            <div className="mx-auto mt-32 max-w-[640px] px-8 text-center">
+            <div className="mx-auto mt-32 max-w-640px px-8 text-center">
                 <h1 className="text-2xl font-bold text-gray-800">Not published yet</h1>
                 <p className="mt-2 text-gray-500">
                     This form hasn’t been published by its owner.

@@ -1,7 +1,9 @@
-"use client"
+// apps/web/components/layout/app-sidebar.tsx
 
-import * as React from "react"
-import { useRouter, usePathname } from "next/navigation"
+"use client";
+
+import * as React from "react";
+import { useRouter, usePathname } from "next/navigation";
 import {
   Asterisk,
   Search,
@@ -31,9 +33,8 @@ import {
   CreditCardIcon,
   BellIcon,
   LogOutIcon,
-  FileQuestion
-} from "lucide-react"
-
+  FileQuestion,
+} from "lucide-react";
 
 import {
   Sidebar,
@@ -50,8 +51,8 @@ import {
   SidebarMenuSubItem,
   SidebarMenuSubButton,
   useSidebar,
-} from "~/components/ui/sidebar"
-import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar"
+} from "~/components/ui/sidebar";
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -59,7 +60,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu"
+} from "~/components/ui/dropdown-menu";
 import {
   CommandDialog,
   CommandEmpty,
@@ -67,83 +68,77 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "~/components/ui/command"
+} from "~/components/ui/command";
 
-import { useMe, useLogout } from "~/hooks/api/auth/index"
-import { useGetAllMyForms } from "~/hooks/api/form"
-import { useCommandSearch } from "~/hooks/use-command-search"
-import { toast } from "sonner"
+import { useMe, useLogout } from "~/hooks/api/auth/index";
+import { useGetAllMyForms } from "~/hooks/api/form";
+import { useCommandSearch } from "~/hooks/use-command-search";
+import { toast } from "sonner";
 
 const MAIN_NAV = [
   { title: "Home", icon: Home, href: "/dashboard" },
   { title: "Search", icon: Search }, // this will trigger an command card to search
   { title: "Settings", icon: Settings, href: "/settings" },
   { title: "Upgrade plan", icon: ArrowUpCircle, href: "/pricing" },
-]
+];
 
 const PRODUCT_NAV = [
   { title: "Templates", icon: LayoutTemplate, href: "/templates" },
   { title: "Feature requests", icon: SmilePlus }, // TODO: ADD ROUTE
   { title: "Trash", icon: Trash }, // dedicated component
-]
+];
 
 const HELP_NAV = [
   { title: "Help center", icon: LifeBuoy },
   { title: "Contact support", icon: MessageCircle },
   { title: "How to guide", icon: FileQuestion },
-]
-
+];
 
 interface User {
-  email: string,
-  fullName: string,
-  id: string,
-  profileImageUrl: string
+  email: string;
+  fullName: string;
+  id: string;
+  profileImageUrl: string;
 }
-
 
 export function AppSidebar() {
   const router = useRouter();
   const pathname = usePathname();
-  const { toggleSidebar } = useSidebar()
-  const { searchOpen, setSearchOpen, openSearch } = useCommandSearch()
-  const { forms } = useGetAllMyForms()
-  const [workspaceExpanded, setWorkspaceExpanded] = React.useState(false)
+  const { toggleSidebar } = useSidebar();
+  const { searchOpen, setSearchOpen, openSearch } = useCommandSearch();
+  const { forms } = useGetAllMyForms();
+  const [workspaceExpanded, setWorkspaceExpanded] = React.useState(false);
 
-
-  const { user, isLoading } = useMe() as { user: User | undefined, isLoading: boolean }
-  const { logout } = useLogout()
+  const { user, isLoading } = useMe() as { user: User | undefined; isLoading: boolean };
+  const { logout } = useLogout();
 
   React.useEffect(() => {
     if (!isLoading && !user) {
-      router.push("/login")
+      router.push("/login");
     }
-  }, [user, isLoading, router])
+  }, [user, isLoading, router]);
 
   // Don't render the sidebar content if we're redirecting
   if (!user) return null;
 
-
   const intialName = (name?: string) => {
     if (!name) return "U";
     return name.charAt(0).toUpperCase();
-  }
+  };
 
   const logOutHandler = () => {
     try {
-      router.replace("/login")
+      router.replace("/login");
 
-      logout({})
+      logout({});
 
       router.refresh();
 
-      toast.success('Log Out Successful')
-
+      toast.success("Log Out Successful");
     } catch (error) {
-      toast.error('Failed to log out')
+      toast.error("Failed to log out");
     }
-  }
-
+  };
 
   return (
     <Sidebar className="border-r border-border">
@@ -152,21 +147,17 @@ export function AppSidebar() {
           <SidebarMenuButton size="sm" className="flex items-center gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-
                 <div className="flex items-center gap-2">
                   <Avatar className="h-7 w-7 rounded-full border border-gray-200 bg-white cursor-pointer">
                     <AvatarImage src={user?.profileImageUrl} alt={user?.fullName || "User"} />
                     <AvatarFallback className="bg-transparent text-black/70 font-normal text-xs">
                       {intialName(user?.fullName)}
                     </AvatarFallback>
-
                   </Avatar>
                   <span className="font-semibold text-[14px] text-black/70 cursor-pointer truncate">
                     {!isLoading && `${user?.fullName}`}
                   </span>
-                </div >
-
-
+                </div>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="rounded-none shadow-sm mt-2">
                 <DropdownMenuGroup>
@@ -184,7 +175,8 @@ export function AppSidebar() {
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-[12px] text-sidebar-accent-foreground"
+                <DropdownMenuItem
+                  className="text-[12px] text-sidebar-accent-foreground"
                   onClick={logOutHandler}
                 >
                   <LogOutIcon />
@@ -192,7 +184,6 @@ export function AppSidebar() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-
           </SidebarMenuButton>
           <button
             onClick={toggleSidebar}
@@ -213,13 +204,14 @@ export function AppSidebar() {
                   <SidebarMenuButton
                     onClick={() => {
                       if (item.title === "Search") {
-                        openSearch()
+                        openSearch();
                       } else if (item.href) {
-                        router.push(item.href)
+                        router.push(item.href);
                       }
                     }}
                     isActive={item.href ? pathname === item.href : false}
-                    className="text-[14px]! px-3 py-2 h-7 rounded-md cursor-pointer hover:text-primary!">
+                    className="text-[14px]! px-3 py-2 h-7 rounded-md cursor-pointer hover:text-primary!"
+                  >
                     <item.icon className="h-4 w-4" strokeWidth={2} />
                     {item.title}
                   </SidebarMenuButton>
@@ -229,30 +221,26 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-
         {/* Workspaces */}
         <SidebarGroup className="pt-6">
           <SidebarGroupLabel className="text-[12px] font-medium text-gray-500 px-3 mb-1 flex items-center justify-between">
             Workspaces
-
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton
                   onClick={() => setWorkspaceExpanded(!workspaceExpanded)}
-                  className="text-[14px]! px-3 py-2 h-7 rounded-md cursor-pointer hover:text-primary! group">
+                  className="text-[14px]! px-3 py-2 h-7 rounded-md cursor-pointer hover:text-primary! group"
+                >
                   <div className="flex items-center flex-1 min-w-0">
                     {workspaceExpanded ? (
                       <ChevronDown className="h-4 w-4 shrink-0 mr-2" strokeWidth={2} />
                     ) : (
                       <ChevronRight className="h-4 w-4 shrink-0 mr-2" strokeWidth={2} />
                     )}
-                    <span className="truncate">
-                      My workspace
-                    </span>
+                    <span className="truncate">My workspace</span>
                   </div>
-
                 </SidebarMenuButton>
                 {workspaceExpanded && forms && forms.length > 0 && (
                   <SidebarMenuSub>
@@ -265,7 +253,7 @@ export function AppSidebar() {
                             isActive={pathname === href}
                             className="text-[13px]! h-7 cursor-pointer hover:text-primary!"
                           >
-                            <span className="truncate">{form.title || 'Untitled'}</span>
+                            <span className="truncate">{form.title || "Untitled"}</span>
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                       );
@@ -279,7 +267,9 @@ export function AppSidebar() {
 
         {/* Product */}
         <SidebarGroup className="pt-6">
-          <SidebarGroupLabel className="text-[13px] font-medium text-gray-500 px-3 mb-1">Product</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-[13px] font-medium text-gray-500 px-3 mb-1">
+            Product
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="space-y-[2px]">
               {PRODUCT_NAV.map((item) => (
@@ -287,7 +277,8 @@ export function AppSidebar() {
                   <SidebarMenuButton
                     onClick={() => item.href && router.push(item.href)}
                     isActive={item.href ? pathname === item.href : false}
-                    className="text-[14px]! px-3 py-2 h-7 rounded-md cursor-pointer hover:text-primary!">
+                    className="text-[14px]! px-3 py-2 h-7 rounded-md cursor-pointer hover:text-primary!"
+                  >
                     <item.icon className="h-4 w-4" strokeWidth={2} /> {item.title}
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -298,13 +289,14 @@ export function AppSidebar() {
 
         {/* Help */}
         <SidebarGroup className="pt-6 pb-4">
-          <SidebarGroupLabel className="text-[13px] font-medium text-gray-500 px-3 mb-1">Help</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-[13px] font-medium text-gray-500 px-3 mb-1">
+            Help
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="space-y-[2px]">
               {HELP_NAV.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    className="text-[14px]! px-3 py-2 h-7 rounded-md cursor-pointer hover:text-primary!">
+                  <SidebarMenuButton className="text-[14px]! px-3 py-2 h-7 rounded-md cursor-pointer hover:text-primary!">
                     <item.icon className="h-4 w-4" strokeWidth={2} /> {item.title}
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -312,7 +304,6 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-
       </SidebarContent>
 
       <SidebarFooter className="p-4 pt-0">
@@ -332,13 +323,31 @@ export function AppSidebar() {
         <CommandList className="py-1.5!">
           <CommandEmpty>No results found.</CommandEmpty>
           <CommandGroup heading="Pages" className="py-1.5!">
-            <CommandItem className="py-1.5!" onSelect={() => { router.push("/dashboard"); setSearchOpen(false) }}>
+            <CommandItem
+              className="py-1.5!"
+              onSelect={() => {
+                router.push("/dashboard");
+                setSearchOpen(false);
+              }}
+            >
               <Home className="mr-2 h-4 w-4" /> Home
             </CommandItem>
-            <CommandItem className="py-1.5!" onSelect={() => { router.push("/settings"); setSearchOpen(false) }}>
+            <CommandItem
+              className="py-1.5!"
+              onSelect={() => {
+                router.push("/settings");
+                setSearchOpen(false);
+              }}
+            >
               <Settings className="mr-2 h-4 w-4" /> Settings
             </CommandItem>
-            <CommandItem className="py-1.5!" onSelect={() => { router.push("/templates"); setSearchOpen(false) }}>
+            <CommandItem
+              className="py-1.5!"
+              onSelect={() => {
+                router.push("/templates");
+                setSearchOpen(false);
+              }}
+            >
               <LayoutTemplate className="mr-2 h-4 w-4" /> Templates
             </CommandItem>
           </CommandGroup>
@@ -347,7 +356,10 @@ export function AppSidebar() {
               {forms.map((form) => (
                 <CommandItem
                   key={form.id}
-                  onSelect={() => { router.push(`/forms/${form.id}/edit`); setSearchOpen(false) }}
+                  onSelect={() => {
+                    router.push(`/forms/${form.id}/edit`);
+                    setSearchOpen(false);
+                  }}
                   className="py-1.5!"
                 >
                   <Asterisk className="mr-2 h-4 w-4" />
@@ -359,13 +371,13 @@ export function AppSidebar() {
         </CommandList>
       </CommandDialog>
     </Sidebar>
-  )
+  );
 }
 
 export function FloatingSidebarTrigger() {
-  const { state, toggleSidebar } = useSidebar()
+  const { state, toggleSidebar } = useSidebar();
 
-  if (state !== "collapsed") return null
+  if (state !== "collapsed") return null;
 
   return (
     <button
@@ -375,5 +387,5 @@ export function FloatingSidebarTrigger() {
     >
       <ChevronsRight className="h-4 w-4" strokeWidth={2} />
     </button>
-  )
+  );
 }

@@ -1,3 +1,4 @@
+//apps/web/components/layout/breadcrumb.tsx
 "use client";
 
 import Link from "next/link";
@@ -13,9 +14,7 @@ interface BreadcrumbProps {
   segments?: BreadcrumbSegment[];
 }
 
-const defaultSegments: BreadcrumbSegment[] = [
-  { label: "My workspace", href: "/dashboard" },
-];
+const defaultSegments: BreadcrumbSegment[] = [{ label: "My workspace", href: "/dashboard" }];
 
 /**
  * Shared breadcrumb bar rendered at the top of every protected page.

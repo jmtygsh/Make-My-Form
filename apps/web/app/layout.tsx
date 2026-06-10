@@ -3,13 +3,10 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { GlobalProviders } from "~/providers/global";
 
-
-
-
 const helveticaNeue = localFont({
   src: [
     { path: "./fonts/HelveticaNeueLTPro-Roman.7216551.woff2", weight: "400", style: "normal" },
-    { path: "./fonts/HelveticaNeueLTPro-Bd.544b940.woff2", weight: "700", style: "normal" }
+    { path: "./fonts/HelveticaNeueLTPro-Bd.544b940.woff2", weight: "700", style: "normal" },
   ],
   variable: "--font-helvetica",
 });
@@ -17,7 +14,7 @@ const helveticaNeue = localFont({
 const ppEditorialNew = localFont({
   src: [
     { path: "./fonts/PPEditorialNew-Regular.2512cb3.woff2", weight: "400", style: "normal" },
-    { path: "./fonts/PPEditorialNew-Italic.1d7842d.woff2", weight: "400", style: "italic" }
+    { path: "./fonts/PPEditorialNew-Italic.1d7842d.woff2", weight: "400", style: "italic" },
   ],
   variable: "--font-editorial",
 });
@@ -31,7 +28,8 @@ const laBelleAurore = localFont({
 
 export const metadata: Metadata = {
   title: "Make My Form | Build Beautiful Forms",
-  description: "Create, customize, and share powerful forms in minutes. Match your brand style with 50+ themes, collect responses, and impress your audience with Make My Form.",
+  description:
+    "Create, customize, and share powerful forms in minutes. Match your brand style with 50+ themes, collect responses, and impress your audience with Make My Form.",
 };
 
 export default function RootLayout({
@@ -41,10 +39,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${helveticaNeue.variable} ${ppEditorialNew.variable} ${laBelleAurore.variable} antialiased bg-[#FFFAF5] [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-primary [&::-webkit-scrollbar-thumb]:rounded-full`}>
-
+      <body
+        className={`${helveticaNeue.variable} ${ppEditorialNew.variable} ${laBelleAurore.variable} antialiased bg-[#FFFAF5] [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-primary [&::-webkit-scrollbar-thumb]:rounded-full`}
+      >
         <GlobalProviders>{children}</GlobalProviders>
-
       </body>
     </html>
   );

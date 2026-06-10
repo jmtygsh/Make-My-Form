@@ -1,5 +1,30 @@
 import { z } from "zod";
-import { FormPayload } from "../../database/models/form";
+
+const formBlockSchema = z.object({
+  id: z.string(),
+  type: z.string(),
+  width: z.number(),
+  label: z.string().optional(),
+  description: z.string().optional(),
+  required: z.boolean().optional(),
+  hidden: z.boolean().optional(),
+  placeholder: z.string().optional(),
+  options: z.array(z.object({ id: z.string(), label: z.string() })).optional(),
+  content: z.string().optional(),
+  defaultValue: z.union([z.string(), z.number()]).optional(),
+  min: z.number().optional(),
+  max: z.number().optional(),
+  minLength: z.number().optional(),
+  maxLength: z.number().optional(),
+  minDate: z.string().optional(),
+  maxDate: z.string().optional(),
+});
+
+const formPayloadSchema = z.object({
+  name: z.string(),
+  blocks: z.array(formBlockSchema),
+});
+type FormPayload = z.infer<typeof formPayloadSchema>;
 
 export const insertDraftFormIntoDb = z.object({
   userId: z.string().uuid().describe("User id"),
@@ -7,7 +32,7 @@ export const insertDraftFormIntoDb = z.object({
   description: z.string().describe("Form description"),
   shortId: z.string().describe("Unique identifier for form generated on the frontend"),
   status: z.enum(["draft", "published"]).default("draft"),
-  draft: z.boolean(),
+  draft: formPayloadSchema.describe("full form payload"),
 });
 export type InsertDraftFormIntoDbInputType = z.infer<typeof insertDraftFormIntoDb>;
 
@@ -17,7 +42,7 @@ export const insertPublishFormIntoDb = z.object({
   description: z.string().describe("Form description"),
   shortId: z.string().describe("Unique identifier for form generated on the frontend"),
   status: z.enum(["draft", "published"]).default("published"),
-  published: z.boolean(),
+  published: formPayloadSchema.describe("full form payload"),
 });
 export type InsertPublishFormIntoDbInputType = z.infer<typeof insertPublishFormIntoDb>;
 

@@ -80,7 +80,7 @@ class FormService {
       .values({ userId, title, description, shortId, status, draft })
       .onConflictDoUpdate({
         target: formTable.shortId,
-        set: { title, description, draft },
+        set: { title, description, draft, status },
       })
       .returning({
         formId: formTable.id,
@@ -216,6 +216,39 @@ class FormService {
     return { submissionId: submission.id };
   }
 
+  public async getMyFormById(payload: getMyFormByIdInputType) {
+    const { userId, shortId } = await getMyFormByIdInput.parseAsync(payload);
+
+    const [form] = await db
+      .select()
+      .from(formTable)
+      .where(
+        and(
+          eq(formTable.shortId, shortId),
+          eq(formTable.userId, userId),
+          eq(formTable.isDeleted, false),
+        ),
+      )
+      .limit(1);
+
+    if (!form) throw new Error("FORM_NOT_FOUND");
+
+    return {
+      id: form.id,
+      title: form.title,
+      description: form.description,
+      visibility: form.visibility,
+      status: form.status,
+      shortId: form.shortId,
+      draft: form.draft,
+      published: form.published,
+      responseLimit: form.responseLimit,
+      isExpiry: form.isExpiry,
+      createdAt: form.createdAt,
+      updatedAt: form.updatedAt,
+    };
+  }
+
   public async getPublicFormById(payload: getPublicFormByIdInputType) {
     const { shortId } = await getPublicFormByIdInput.parseAsync(payload);
 
@@ -234,7 +267,6 @@ class FormService {
       visibility: forms.visibility,
       status: forms.status,
       shortId: forms.shortId,
-      draft: forms.draft,
       published: forms.published,
       responseLimit: forms.responseLimit,
       isExpiry: forms.isExpiry,

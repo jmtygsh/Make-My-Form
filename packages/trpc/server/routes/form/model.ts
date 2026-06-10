@@ -1,5 +1,31 @@
+//packages/trpc/server/routes/form/model.ts
+
 import { z } from "zod";
-import { FormPayload } from "@repo/database/models/form";
+
+const formBlockSchema = z.object({
+  id: z.string(),
+  type: z.string(),
+  width: z.number(),
+  label: z.string().optional(),
+  description: z.string().optional(),
+  required: z.boolean().optional(),
+  hidden: z.boolean().optional(),
+  placeholder: z.string().optional(),
+  options: z.array(z.object({ id: z.string(), label: z.string() })).optional(),
+  content: z.string().optional(),
+  defaultValue: z.union([z.string(), z.number()]).optional(),
+  min: z.number().optional(),
+  max: z.number().optional(),
+  minLength: z.number().optional(),
+  maxLength: z.number().optional(),
+  minDate: z.string().optional(),
+  maxDate: z.string().optional(),
+});
+
+const formPayloadSchema = z.object({
+  name: z.string(),
+  blocks: z.array(formBlockSchema),
+});
 
 // ---- Draft (upsert) ----
 export const storeDraftFormIntoDbInput = z.object({
@@ -7,7 +33,7 @@ export const storeDraftFormIntoDbInput = z.object({
   description: z.string().optional().describe("description of the form"),
   shortId: z.string().describe("short id of the form"),
   status: z.enum(["draft", "published"]).default("draft"),
-  draft: z.boolean(),
+  draft: formPayloadSchema.describe("full form payload"),
 });
 export const storeDraftFormIntoDbOutput = z.object({
   id: z.string().uuid().describe("form id"),
@@ -20,7 +46,7 @@ export const storePublishFormIntoDbInput = z.object({
   description: z.string().optional().describe("description of the form"),
   shortId: z.string().describe("short id of the form"),
   status: z.enum(["draft", "published"]).default("published"),
-  published: z.boolean(),
+  published: formPayloadSchema.describe("full form payload"),
 });
 export const storePublishFormIntoDbOutput = z.object({
   id: z.string().uuid().describe("form id"),
@@ -75,7 +101,7 @@ export const getPublicFormByIdOutputModel = z.object({
   visibility: z.enum(["public", "unlisted"]),
   status: z.enum(["draft", "published"]),
   shortId: z.string(),
-  published: z.record(z.string(), z.unknown()).nullable(),
+  published: formPayloadSchema.nullable(),
   responseLimit: z.number(),
   isExpiry: z.date().nullable(),
   createdAt: z.date().nullable(),
@@ -121,8 +147,8 @@ export const getMyFormByIdOutputModel = z.object({
   visibility: z.enum(["public", "unlisted"]),
   status: z.enum(["draft", "published"]),
   shortId: z.string(),
-  draft: z.record(z.string(), z.unknown()).nullable(),
-  published: z.record(z.string(), z.unknown()).nullable(),
+  draft: formPayloadSchema.nullable(),
+  published: formPayloadSchema.nullable(),
   responseLimit: z.number(),
   isExpiry: z.date().nullable(),
   createdAt: z.date().nullable(),

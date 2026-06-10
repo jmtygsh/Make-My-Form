@@ -23,6 +23,7 @@
 `make-my-form-builder` is a **form-building SaaS** monorepo. Users authenticate, build dynamic forms from a row/field JSON schema, publish them on a public or unlisted slug, and collect submissions. The repo contains a public marketing site, an authenticated dashboard, an Express+tRPC API, and a shared service layer that wraps Postgres via Drizzle ORM.
 
 The product surface is small and well-bounded:
+
 - Auth (email + password, email verification, forgot/reset password, logout)
 - Form CRUD (title/description → draft → publish)
 - Public form rendering by slug (public or unlisted)
@@ -44,23 +45,23 @@ The product surface is small and well-bounded:
 
 ### Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Monorepo | Turborepo 2.7, pnpm 9 workspaces |
-| Language | TypeScript 5.9 (Node ≥ 18) |
-| Frontend | Next.js 16.1 (App Router), React 19.2, Tailwind v4, Radix UI, `@base-ui/react` |
-| UI Kit | shadcn/ui (new-york), Lucide icons, cmdk, sonner, vaul, embla, recharts, react-day-picker |
-| Forms (client) | react-hook-form + `@hookform/resolvers` + zod v4 |
-| Animation | `motion`, `@rive-app/react-canvas` |
-| API runtime | Node + Express 5, `tsup` for build, `tsx` for dev |
-| RPC | tRPC v11 (`@trpc/server`, `@trpc/client`, `@trpc/react-query`) + TanStack Query v5 |
-| API docs | `trpc-to-openapi` + `@scalar/express-api-reference` |
-| Database | PostgreSQL 15 (Docker), Drizzle ORM 0.45, `drizzle-kit` 0.31 |
-| Validation | Zod v4 (input/output models + env schemas) |
-| Auth | JWT (`jsonwebtoken`), HMAC-SHA256 password hashing, httpOnly cookies |
-| Email | Nodemailer (SMTP), Google OAuth client scaffolded (unused) |
-| Logging | Winston (env-aware: dev = pretty, prod = JSON) |
-| Lint/Format | ESLint 9 (per-package), Prettier 3 (`printWidth: 100`, double quotes, `trailingComma: "all"`) |
+| Layer          | Technology                                                                                    |
+| -------------- | --------------------------------------------------------------------------------------------- |
+| Monorepo       | Turborepo 2.7, pnpm 9 workspaces                                                              |
+| Language       | TypeScript 5.9 (Node ≥ 18)                                                                    |
+| Frontend       | Next.js 16.1 (App Router), React 19.2, Tailwind v4, Radix UI, `@base-ui/react`                |
+| UI Kit         | shadcn/ui (new-york), Lucide icons, cmdk, sonner, vaul, embla, recharts, react-day-picker     |
+| Forms (client) | react-hook-form + `@hookform/resolvers` + zod v4                                              |
+| Animation      | `motion`, `@rive-app/react-canvas`                                                            |
+| API runtime    | Node + Express 5, `tsup` for build, `tsx` for dev                                             |
+| RPC            | tRPC v11 (`@trpc/server`, `@trpc/client`, `@trpc/react-query`) + TanStack Query v5            |
+| API docs       | `trpc-to-openapi` + `@scalar/express-api-reference`                                           |
+| Database       | PostgreSQL 15 (Docker), Drizzle ORM 0.45, `drizzle-kit` 0.31                                  |
+| Validation     | Zod v4 (input/output models + env schemas)                                                    |
+| Auth           | JWT (`jsonwebtoken`), HMAC-SHA256 password hashing, httpOnly cookies                          |
+| Email          | Nodemailer (SMTP), Google OAuth client scaffolded (unused)                                    |
+| Logging        | Winston (env-aware: dev = pretty, prod = JSON)                                                |
+| Lint/Format    | ESLint 9 (per-package), Prettier 3 (`printWidth: 100`, double quotes, `trailingComma: "all"`) |
 
 ---
 
@@ -101,6 +102,7 @@ apps/web  ──►  @repo/trpc/client  ──►  @repo/trpc/server  ──► 
 4. **Service layer with Zod re-validation.** Every public service method runs its payload through a Zod schema (`model.ts`) with `.parseAsync(payload)` — this is the second line of defence behind the tRPC input model. Don't skip it.
 
 5. **Form payload schema.** A form is stored as a JSON tree:
+
    ```ts
    type FormPayload = {
      name: string;
@@ -112,6 +114,7 @@ apps/web  ──►  @repo/trpc/client  ──►  @repo/trpc/server  ──► 
      }[];
    };
    ```
+
    The same shape is used for `draft`, `published`, and submissions. Visibility is enum-typed (`public` | `unlisted`) and each form has two slugs (`publicSlug`, `unlistedSlug`) — exactly one is "active" depending on visibility.
 
 6. **Web route groups.** Next.js App Router uses two route groups:
@@ -134,103 +137,228 @@ apps/web  ──►  @repo/trpc/client  ──►  @repo/trpc/server  ──► 
 
 ## Project Structure
 
-```
 form-builder/
 ├── apps/
-│   ├── api/                       # Express + tRPC server (tsup build)
-│   │   └── src/
-│   │       ├── index.ts           # http.createServer bootstrap
-│   │       ├── server.ts          # Express app, /trpc, /api, /docs mounts
-│   │       └── env.ts             # zod-validated API env
-│   └── web/                       # Next.js 16 (App Router)
-│       ├── app/
-│       │   ├── (auth)/            # login, register, verify, forgot/reset password
-│       │   ├── (protected)/       # guarded by AuthGuard
-│       │   │   ├── layout.tsx
-│       │   │   └── dashboard/page.tsx
-│       │   ├── fonts/             # local woff/woff2 (Geist, HelveticaNeue, PPEditorialNew, LaBelleAurore)
-│       │   ├── globals.css
-│       │   ├── layout.tsx         # root <html>, font vars, GlobalProviders
-│       │   └── page.tsx           # marketing home (Header + Homepage + Footer)
-│       ├── components/
-│       │   ├── auth/              # login, sign-up, forgot/reset forms
-│       │   ├── form-builder/      # Core form builder canvas and mode components
-│       │   ├── layout/app-sidebar.tsx
-│       │   ├── sections/          # marketing sections (Header, Footer, Features, …)
-│       │   └── ui/                # shadcn/ui primitives (accordion → tooltip)
-│       ├── constants/Navigation.ts
-│       ├── hooks/
-│       │   ├── api/auth/index.ts  # useSignUp, useSignIn, useMe, useForgotPassword, …
-│       │   ├── use-as-ref.ts
-│       │   ├── use-lazy-ref.ts
-│       │   └── use-mobile.ts
-│       ├── lib/utils.ts           # cn() helper (clsx + tailwind-merge)
-│       ├── providers/global.tsx   # QueryClient + tRPC Provider + Toaster
-│       ├── public/
-│       │   ├── assets/            # jpg, png
-│       │   ├── company/           # logo webp (cocacola, mercedes, redbull, …)
-│       │   ├── riv/               # Rive animations (.riv)
-│       │   └── templates/
-│       │       ├── code/*.tsx     # 96 form templates
-│       │       └── *.json         # category manifests
-│       ├── trpc/
-│       │   ├── client.ts          # createTRPCReact<ServerRouter>()
-│       │   ├── create-client.ts   # http link factory (with credentials: include)
-│       │   └── server.ts          # proxy clients (api, apiStreaming)
-│       ├── env.js                 # @t3-oss/env-nextjs
-│       ├── next.config.js
-│       ├── components.json        # shadcn config (new-york)
-│       ├── eslint.config.js
-│       ├── postcss.config.mjs     # @tailwindcss/postcss
-│       └── package.json
+│ ├── api/
+│ │ ├── dist/
+│ │ │ └── index.js
+│ │ ├── src/
+│ │ │ ├── env.ts
+│ │ │ ├── index.ts
+│ │ │ └── server.ts
+│ │ ├── .env
+│ │ ├── .eslintrc.cjs
+│ │ ├── package.json
+│ │ ├── tsconfig.json
+│ │ └── tsup.config.ts
+│ └── web/
+│ ├── app/
+│ │ ├── (auth)/
+│ │ │ ├── forgot-password/page.tsx
+│ │ │ ├── login/page.tsx
+│ │ │ ├── registration/page.tsx
+│ │ │ ├── reset-password/[id]/page.tsx
+│ │ │ └── verify/page.tsx
+│ │ ├── (protected)/
+│ │ │ ├── dashboard/page.tsx
+│ │ │ ├── forms/[id]/edit/page.tsx
+│ │ │ ├── forms/[id]/settings/page.tsx
+│ │ │ ├── layout.tsx
+│ │ │ └── settings/page.tsx
+│ │ ├── (public)/
+│ │ │ └── form/[id]/page.tsx
+│ │ ├── fonts/ (woff2 files)
+│ │ ├── globals.css
+│ │ ├── layout.tsx
+│ │ └── page.tsx
+│ ├── components/
+│ │ ├── auth/
+│ │ │ ├── forgot-password-form.tsx
+│ │ │ ├── login-form.tsx
+│ │ │ ├── reset-password-form.tsx
+│ │ │ └── sign-up-form.tsx
+│ │ ├── form-builder/
+│ │ │ ├── blocks/
+│ │ │ │ ├── BlockLabel.tsx
+│ │ │ │ ├── EditablePlaceholder.tsx
+│ │ │ │ ├── index.tsx
+│ │ │ │ ├── InputBlocks.tsx
+│ │ │ │ ├── LayoutBlocks.tsx
+│ │ │ │ └── types.ts
+│ │ │ ├── BlockItem.tsx
+│ │ │ ├── BlockLabel.tsx
+│ │ │ ├── BlockList.tsx
+│ │ │ ├── ColorPicker.tsx
+│ │ │ ├── CoverImageDialog.tsx
+│ │ │ ├── CustomizeSidebar.tsx
+│ │ │ ├── FieldPicker.tsx
+│ │ │ ├── FieldSettings.tsx
+│ │ │ ├── Formbuilder.tsx
+│ │ │ ├── PreviewDialog.tsx
+│ │ │ ├── UnitInput.tsx
+│ │ │ └── WidthControl.tsx
+│ │ ├── form-renderer/
+│ │ │ ├── inputs/index.tsx
+│ │ │ └── FormRenderer.tsx
+│ │ ├── layout/
+│ │ │ ├── app-sidebar.tsx
+│ │ │ ├── breadcrumb.tsx
+│ │ │ ├── empty-state.tsx
+│ │ │ ├── form-card.tsx
+│ │ │ ├── help-button.tsx
+│ │ │ └── page-shell.tsx
+│ │ ├── sections/
+│ │ │ ├── Animate.tsx
+│ │ │ ├── Contact.tsx
+│ │ │ ├── DashedAnimation.tsx
+│ │ │ ├── Features.tsx
+│ │ │ ├── Footer.tsx
+│ │ │ ├── Header.tsx
+│ │ │ ├── Homepage.tsx
+│ │ │ ├── LegacyAnimation.tsx
+│ │ │ ├── LogoTicker.tsx
+│ │ │ ├── PowerfulFeatures.tsx
+│ │ │ └── Testimonials.tsx
+│ │ └── ui/ (30+ shadcn/ui components)
+│ ├── constants/
+│ │ ├── constants.ts
+│ │ └── Navigation.ts
+│ ├── hooks/
+│ │ ├── api/
+│ │ │ ├── auth/index.ts
+│ │ │ └── form/index.ts
+│ │ ├── use-as-ref.ts
+│ │ ├── use-block-actions.ts
+│ │ ├── use-command-search.ts
+│ │ ├── use-form-builder.ts
+│ │ ├── use-form-validation.ts
+│ │ ├── use-keyboard-shortcuts.ts
+│ │ ├── use-lazy-ref.ts
+│ │ └── use-mobile.ts
+│ ├── lib/
+│ │ ├── form-builder/
+│ │ │ ├── css-value.ts
+│ │ │ ├── field-config.ts
+│ │ │ ├── input-style.ts
+│ │ │ ├── pack-rows.ts
+│ │ │ ├── schema.ts
+│ │ │ ├── serialize.ts
+│ │ │ └── store.ts
+│ │ ├── date.ts
+│ │ ├── random.ts
+│ │ └── utils.ts
+│ ├── providers/
+│ │ └── global.tsx
+│ ├── public/
+│ │ ├── assets/
+│ │ ├── company/
+│ │ └── riv/
+│ ├── trpc/
+│ │ ├── client.ts
+│ │ ├── create-client.ts
+│ │ └── server.ts
+│ ├── .env
+│ ├── .gitignore
+│ ├── components.json
+│ ├── env.js
+│ ├── eslint.config.js
+│ ├── next.config.js
+│ ├── package.json
+│ ├── postcss.config.mjs
+│ └── tsconfig.json
 ├── packages/
-│   ├── database/                  # Drizzle ORM + Postgres
-│   │   ├── models/
-│   │   │   ├── user.ts            # usersTable, passwordResetTokensTable
-│   │   │   └── form.ts            # formTable, submissionFormTable, FormPayload, visibilityEnum
-│   │   ├── schema.ts              # re-exports models
-│   │   ├── drizzle.config.ts
-│   │   ├── env.ts
-│   │   └── index.ts               # db = drizzle(env.DATABASE_URL), re-exports drizzle-orm helpers
-│   ├── eslint-config/             # base.js, next.js, react-internal.js
-│   ├── logger/                    # Winston
-│   │   ├── env.ts
-│   │   └── index.ts
-│   ├── services/                  # Business logic (class-based)
-│   │   ├── clients/
-│   │   │   ├── google-oauth.ts    # scaffolded, unused
-│   │   │   └── nodemailer.ts      # SMTP transport
-│   │   ├── email/index.ts         # EmailService (verification + reset)
-│   │   ├── user/
-│   │   │   ├── index.ts           # UserService class
-│   │   │   └── model.ts           # Zod input models + types
-│   │   ├── form/
-│   │   │   ├── index.ts           # FormService class
-│   │   │   └── model.ts
-│   │   ├── env.ts                 # JWT_SECRET, BASE_URL, SMTP_*
-│   │   └── package.json
-│   ├── trpc/                      # Shared tRPC server + client types
-│   │   ├── server/
-│   │   │   ├── index.ts           # serverRouter (health, auth, form)
-│   │   │   ├── trpc.ts            # initTRPC + isAuthed middleware
-│   │   │   ├── context.ts         # createContext (cookie factories)
-│   │   │   ├── schema.ts          # zodUndefinedModel
-│   │   │   ├── routes/
-│   │   │   │   ├── auth/{route.ts, model.ts}
-│   │   │   │   ├── form/{route.ts, model.ts}
-│   │   │   │   └── health/route.ts
-│   │   │   ├── services/index.ts  # singletons: userService, formService
-│   │   │   └── utils/{cookie.ts, path-generator.ts}
-│   │   └── client/index.ts        # re-exports ServerRouter types + @trpc/client
-│   └── typescript-config/         # base.json, nextjs.json, node.json
-├── docker-compose.yml             # postgresdb:15 on :5432
-├── turbo.json                     # build/lint/check-types/dev/db:* tasks
-├── pnpm-workspace.yaml
+│ ├── database/
+│ │ ├── drizzle/
+│ │ │ ├── meta/\_journal.json
+│ │ │ └── 0000_harsh_aqueduct.sql
+│ │ ├── models/
+│ │ │ ├── form.ts
+│ │ │ └── user.ts
+│ │ ├── .env
+│ │ ├── .eslintrc.cjs
+│ │ ├── drizzle.config.ts
+│ │ ├── env.ts
+│ │ ├── index.ts
+│ │ ├── package.json
+│ │ ├── schema.ts
+│ │ └── tsconfig.json
+│ ├── eslint-config/
+│ │ ├── base.js
+│ │ ├── next.js
+│ │ ├── react-internal.js
+│ │ ├── .env
+│ │ ├── package.json
+│ │ └── README.md
+│ ├── logger/
+│ │ ├── .env
+│ │ ├── .eslintrc.cjs
+│ │ ├── env.ts
+│ │ ├── index.ts
+│ │ ├── package.json
+│ │ └── tsconfig.json
+│ ├── services/
+│ │ ├── clients/
+│ │ │ ├── google-oauth.ts
+│ │ │ └── nodemailer.ts
+│ │ ├── email/
+│ │ │ └── index.ts
+│ │ ├── form/
+│ │ │ ├── index.ts
+│ │ │ └── model.ts
+│ │ ├── user/
+│ │ │ ├── index.ts
+│ │ │ └── model.ts
+│ │ ├── .env
+│ │ ├── .eslintrc.cjs
+│ │ ├── env.ts
+│ │ ├── package.json
+│ │ └── tsconfig.json
+│ ├── trpc/
+│ │ ├── client/
+│ │ │ └── index.ts
+│ │ ├── server/
+│ │ │ ├── routes/
+│ │ │ │ ├── auth/
+│ │ │ │ │ ├── model.ts
+│ │ │ │ │ └── route.ts
+│ │ │ │ ├── form/
+│ │ │ │ │ ├── model.ts
+│ │ │ │ │ └── route.ts
+│ │ │ │ └── health/
+│ │ │ │ └── route.ts
+│ │ │ ├── services/
+│ │ │ │ └── index.ts
+│ │ │ ├── utils/
+│ │ │ │ ├── cookie.ts
+│ │ │ │ └── path-generator.ts
+│ │ │ ├── context.ts
+│ │ │ ├── index.ts
+│ │ │ ├── schema.ts
+│ │ │ └── trpc.ts
+│ │ ├── .env
+│ │ ├── .eslintrc.cjs
+│ │ ├── package.json
+│ │ └── tsconfig.json
+│ └── typescript-config/
+│ ├── .env
+│ ├── base.json
+│ ├── nextjs.json
+│ ├── node.json
+│ └── package.json
+├── docs/
+│ └── form-builder-migration.md
+├── .vscode/
+│ └── settings.json
+├── docker-compose.yml
+├── package.json
 ├── pnpm-lock.yaml
-├── prettier.config.js
+├── pnpm-workspace.yaml
+├── README.md
 ├── setup.sh
-└── package.json                   # name: "make-my-form-builder"
-```
+├── turbo.json
+├── agent.md
+├── prettier.config.js
+└── .gitignore
 
 ---
 
@@ -252,22 +380,22 @@ form-builder/
 
 > All commands are run from the repo root unless noted. `dotenv --` is wired in `package.json` scripts so `.env` files are loaded automatically.
 
-| Task | Command |
-|---|---|
-| Install deps | `pnpm install` |
-| Start Postgres | `docker compose up -d` (then `setup.sh` if first time) |
-| Run everything in dev | `pnpm dev` |
-| Run only the API | `pnpm dev --filter=@repo/api` (port 8000) |
-| Run only the web app | `pnpm dev --filter=web` (port 3000) |
-| Generate Drizzle migrations | `pnpm db:generate` |
-| Apply migrations | `pnpm db:migrate` |
-| Open Drizzle Studio | `pnpm dev --filter=@repo/database` |
-| Build all | `pnpm build` |
-| Lint all | `pnpm lint` |
-| Type-check all | `pnpm check-types` |
-| Format | `pnpm format` |
-| View API docs (after `pnpm dev --filter=@repo/api`) | http://localhost:8000/docs |
-| View OpenAPI JSON | http://localhost:8000/openapi.json |
+| Task                                                | Command                                                |
+| --------------------------------------------------- | ------------------------------------------------------ |
+| Install deps                                        | `pnpm install`                                         |
+| Start Postgres                                      | `docker compose up -d` (then `setup.sh` if first time) |
+| Run everything in dev                               | `pnpm dev`                                             |
+| Run only the API                                    | `pnpm dev --filter=@repo/api` (port 8000)              |
+| Run only the web app                                | `pnpm dev --filter=web` (port 3000)                    |
+| Generate Drizzle migrations                         | `pnpm db:generate`                                     |
+| Apply migrations                                    | `pnpm db:migrate`                                      |
+| Open Drizzle Studio                                 | `pnpm dev --filter=@repo/database`                     |
+| Build all                                           | `pnpm build`                                           |
+| Lint all                                            | `pnpm lint`                                            |
+| Type-check all                                      | `pnpm check-types`                                     |
+| Format                                              | `pnpm format`                                          |
+| View API docs (after `pnpm dev --filter=@repo/api`) | http://localhost:8000/docs                             |
+| View OpenAPI JSON                                   | http://localhost:8000/openapi.json                     |
 
 ### Adding a new tRPC route
 
@@ -323,14 +451,14 @@ form-builder/
 
 ### Layer boundaries
 
-| Layer | Allowed to import | Forbidden from importing |
-|---|---|---|
-| `apps/web` | `@repo/trpc/client`, `@repo/trpc/server` (types only), own components/hooks | `@repo/database`, `@repo/services` directly |
-| `apps/api` | `@repo/trpc/server`, `@repo/logger`, Express | React, Next.js, web components |
-| `packages/trpc/server` | `@repo/services`, `@repo/database` (types), `@repo/logger` | UI, Express (only inside `context.ts`) |
-| `packages/services` | `@repo/database`, `@repo/logger` | tRPC, web, api |
-| `packages/database` | `drizzle-orm`, `pg`, `dotenv`, `zod` | Everything else |
-| `packages/logger` | `winston`, `zod` | Everything else |
+| Layer                  | Allowed to import                                                           | Forbidden from importing                    |
+| ---------------------- | --------------------------------------------------------------------------- | ------------------------------------------- |
+| `apps/web`             | `@repo/trpc/client`, `@repo/trpc/server` (types only), own components/hooks | `@repo/database`, `@repo/services` directly |
+| `apps/api`             | `@repo/trpc/server`, `@repo/logger`, Express                                | React, Next.js, web components              |
+| `packages/trpc/server` | `@repo/services`, `@repo/database` (types), `@repo/logger`                  | UI, Express (only inside `context.ts`)      |
+| `packages/services`    | `@repo/database`, `@repo/logger`                                            | tRPC, web, api                              |
+| `packages/database`    | `drizzle-orm`, `pg`, `dotenv`, `zod`                                        | Everything else                             |
+| `packages/logger`      | `winston`, `zod`                                                            | Everything else                             |
 
 ### Route handler shape
 
