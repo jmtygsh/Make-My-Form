@@ -113,6 +113,7 @@ export const getAllMyFormsInputModel = z.object({
   page: z.number().int().min(1).default(1),
   limit: z.number().int().min(1).max(100).default(10),
 });
+// ---- List my forms ----
 export const getAllMyFormsOutputModel = z.object({
   forms: z.array(
     z.object({
@@ -122,8 +123,8 @@ export const getAllMyFormsOutputModel = z.object({
       description: z.string().nullable(),
       status: z.enum(["draft", "published"]),
       visibility: z.enum(["public", "unlisted"]),
-      isExpiry: z.date().nullable(),
-      createdAt: z.date().nullable(),
+      isExpiry: z.coerce.date().nullable(), // ✅ accepts Date OR ISO string
+      createdAt: z.coerce.date().nullable(), // ✅
     }),
   ),
   pagination: z.object({

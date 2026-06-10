@@ -56,7 +56,7 @@ export function BlockItem({ block }: BlockItemProps) {
       )}
     >
       {/* Left gutter toolbar: delete / add / drag */}
-      <div className="absolute -left-88px top-1.5 flex items-center gap-0.5 opacity-0 transition-opacity group-hover/block:opacity-100">
+      <div className="absolute -left-[88px] top-1.5 flex items-center gap-0.5 opacity-0 transition-opacity group-hover/block:opacity-100">
         <button
           onClick={(e) => {
             e.stopPropagation();

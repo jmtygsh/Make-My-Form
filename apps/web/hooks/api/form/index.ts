@@ -203,10 +203,10 @@ export const useGetAllMyForms = (page: number, limit: number) => {
     { page, limit },
     {
       enabled: page > 0 && limit > 0,
-      placeholderData: keepPreviousData, // keep previous page while loading next
+      placeholderData: keepPreviousData,
+      refetchOnMount: "always", // ✅ always refetch when dashboard mounts
     },
   );
-
   return { forms, error, isFetched, isFetching, isLoading, status };
 };
 

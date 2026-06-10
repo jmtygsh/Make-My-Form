@@ -36,6 +36,8 @@ import {
 } from "~/components/ui/dialog";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
+import { Undo2, Redo2 } from "lucide-react";
+import { useUndoRedo } from "~/hooks/use-undo-redo";
 
 const FormEditPage = () => {
   const params = useParams();
@@ -90,6 +92,7 @@ const FormEditPage = () => {
       showCover: s.theme.showCover,
     })),
   );
+  const { undo, redo, canUndo, canRedo } = useUndoRedo();
 
   useEffect(() => {
     if (isBuilderActive) return;
@@ -156,8 +159,21 @@ const FormEditPage = () => {
         <div className="flex items-center gap-4 text-sm font-medium text-gray-500">
           <span className="text-gray-400">{isDirty ? "Unsaved" : "Draft"}</span>
 
-          <button className="rounded p-1.5 transition-colors hover:bg-gray-100">
-            <History className="h-4 w-4" />
+          <button
+            onClick={undo}
+            disabled={!canUndo}
+            title="Undo (⌘Z)"
+            className="rounded p-1.5 transition-colors hover:bg-gray-100 disabled:opacity-40"
+          >
+            <Undo2 className="h-4 w-4" />
+          </button>
+          <button
+            onClick={redo}
+            disabled={!canRedo}
+            title="Redo (⌘⇧Z)"
+            className="rounded p-1.5 transition-colors hover:bg-gray-100 disabled:opacity-40"
+          >
+            <Redo2 className="h-4 w-4" />
           </button>
           <button
             className="rounded p-1.5 transition-colors hover:bg-gray-100"

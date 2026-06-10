@@ -297,13 +297,12 @@ class FormService {
       .limit(limit)
       .offset(offset);
 
-    if (rows[0] === undefined) throw new Error("FAILED_TO_FETCH_FORMS");
-
-    const total = rows[0].totalCount;
+    const total = rows[0]?.totalCount ?? 0;
     const totalPages = Math.ceil(total / limit);
+    const forms = rows.map(({ totalCount, ...form }) => form);
 
     return {
-      forms: rows,
+      forms,
       pagination: {
         page,
         limit,

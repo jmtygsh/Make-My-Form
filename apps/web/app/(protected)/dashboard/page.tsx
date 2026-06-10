@@ -29,10 +29,25 @@ export default function DashboardPage() {
 
   const { forms, isLoading, isFetching, error } = useGetAllMyForms(page, LIMIT);
 
-  // Local drafts (client-only; read after mount to avoid hydration mismatch).
+  // Local drafts — re-read on mount AND when the tab/window regains focus,
+  // so navigating back from the editor reflects cleared/added drafts.
   const [localDrafts, setLocalDrafts] = useState<LocalDraft[]>([]);
+
   useEffect(() => {
-    setLocalDrafts(getAllLocalDrafts());
+    const read = () => setLocalDrafts(getAllLocalDrafts());
+    read(); // initial
+
+    // re-read whenever the user comes back to this tab/page
+    window.addEventListener("focus", read);
+    document.addEventListener("visibilitychange", read);
+    // re-read when localStorage changes in another tab
+    window.addEventListener("storage", read);
+
+    return () => {
+      window.removeEventListener("focus", read);
+      document.removeEventListener("visibilitychange", read);
+      window.removeEventListener("storage", read);
+    };
   }, []);
 
   const handleCreateForm = () => {
@@ -49,13 +64,11 @@ export default function DashboardPage() {
 
   const hostedIds = useMemo(() => new Set(hostedForms.map((f) => f.shortId)), [hostedForms]);
 
-  // Local drafts NOT yet hosted.
   const localOnly = useMemo(
     () => localDrafts.filter((d) => !hostedIds.has(d.formId)),
     [localDrafts, hostedIds],
   );
 
-  // Unified list — local on top, then hosted.
   const items = useMemo(
     () => [
       ...localOnly.map((d) => ({
@@ -78,7 +91,7 @@ export default function DashboardPage() {
     [localOnly, hostedForms],
   );
 
-  if (error) {
+  if (error && localOnly.length === 0) {
     return (
       <PageShell>
         <EmptyState onCreate={handleCreateForm} />
@@ -91,8 +104,8 @@ export default function DashboardPage() {
 
   return (
     <PageShell>
+      {/* ... rest of your JSX unchanged ... */}
       <div className="flex-1 w-full max-w-6xl mx-auto px-6 py-10 md:py-16">
-        {/* Header */}
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-baseline gap-2">
             <h1
@@ -115,7 +128,6 @@ export default function DashboardPage() {
           </button>
         </div>
 
-        {/* List */}
         {showSkeletons ? (
           <div className="space-y-3">
             {Array.from({ length: 3 }).map((_, i) => (
@@ -128,9 +140,7 @@ export default function DashboardPage() {
           </div>
         ) : items.length > 0 ? (
           <div
-            className={`space-y-3 transition-opacity duration-200 ${
-              isPaging ? "opacity-60" : "opacity-100"
-            }`}
+            className={`space-y-3 transition-opacity duration-200 ${isPaging ? "opacity-60" : "opacity-100"}`}
           >
             {items.map((item) => (
               <FormCard key={item.key} form={item.form} source={item.source} />
@@ -142,7 +152,6 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Pagination (hosted only) */}
         {pagination && pagination.totalPages > 1 && (
           <div className="mt-6 flex justify-center">
             <Pagination>
@@ -158,7 +167,6 @@ export default function DashboardPage() {
                     }}
                   />
                 </PaginationItem>
-
                 {Array.from({ length: pagination.totalPages }).map((_, idx) => (
                   <PaginationItem key={idx}>
                     <PaginationLink
@@ -173,7 +181,6 @@ export default function DashboardPage() {
                     </PaginationLink>
                   </PaginationItem>
                 ))}
-
                 <PaginationItem>
                   <PaginationNext
                     href="#"
