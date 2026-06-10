@@ -106,7 +106,8 @@ export function AppSidebar() {
   const pathname = usePathname();
   const { toggleSidebar } = useSidebar();
   const { searchOpen, setSearchOpen, openSearch } = useCommandSearch();
-  const { forms } = useGetAllMyForms();
+  const { forms } = useGetAllMyForms(1, 10); // sidebar shows up to 10 forms
+  const formList = forms?.forms ?? [];
   const [workspaceExpanded, setWorkspaceExpanded] = React.useState(false);
 
   const { user, isLoading } = useMe() as { user: User | undefined; isLoading: boolean };
@@ -242,9 +243,9 @@ export function AppSidebar() {
                     <span className="truncate">My workspace</span>
                   </div>
                 </SidebarMenuButton>
-                {workspaceExpanded && forms && forms.length > 0 && (
+                {workspaceExpanded && formList.length > 0 && (
                   <SidebarMenuSub>
-                    {forms.map((form) => {
+                    {formList.map((form) => {
                       const href = `/forms/${form.id}/settings`;
                       return (
                         <SidebarMenuSubItem key={form.id}>
@@ -351,13 +352,13 @@ export function AppSidebar() {
               <LayoutTemplate className="mr-2 h-4 w-4" /> Templates
             </CommandItem>
           </CommandGroup>
-          {forms && forms.length > 0 && (
+          {formList.length > 0 && (
             <CommandGroup heading="My Forms" className="py-1.5!">
-              {forms.map((form) => (
+              {formList.map((form) => (
                 <CommandItem
                   key={form.id}
                   onSelect={() => {
-                    router.push(`/forms/${form.id}/edit`);
+                    router.push(`/forms/${form.shortId}/edit`);
                     setSearchOpen(false);
                   }}
                   className="py-1.5!"

@@ -1,46 +1,82 @@
 // apps/web/app/(protected)/dashboard/page.tsx
-
 "use client";
 
-import { Plus } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Loader2, Plus } from "lucide-react";
+import { toast } from "sonner";
+
 import { generateRandomString } from "~/lib/random";
 import { useGetAllMyForms } from "~/hooks/api/form";
+import { getAllLocalDrafts, type LocalDraft } from "~/lib/form-builder/local-drafts";
 import { PageShell } from "~/components/layout/page-shell";
 import { EmptyState } from "~/components/layout/empty-state";
 import { FormCard } from "~/components/layout/form-card";
-import { toast } from "sonner";
-
 import {
   Pagination,
   PaginationContent,
-  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
 } from "~/components/ui/pagination";
-import { useState } from "react";
+
+const LIMIT = 8;
 
 export default function DashboardPage() {
   const router = useRouter();
-
-  // Track current page
   const [page, setPage] = useState(1);
-  const limit = 8; // show 8 items per page
 
-  const { forms, isLoading, error } = useGetAllMyForms(page, limit);
+  const { forms, isLoading, isFetching, error } = useGetAllMyForms(page, LIMIT);
 
-  if (forms === undefined) return null;
+  // Local drafts (client-only; read after mount to avoid hydration mismatch).
+  const [localDrafts, setLocalDrafts] = useState<LocalDraft[]>([]);
+  useEffect(() => {
+    setLocalDrafts(getAllLocalDrafts());
+  }, []);
 
   const handleCreateForm = () => {
-    const newFormId = generateRandomString(8);
-    if (!newFormId) {
+    const newShortId = generateRandomString(8);
+    if (!newShortId) {
       toast.error("Failed to create a new form. Please try again.");
       return;
     }
-    router.push(`/forms/${newFormId}/edit`);
+    router.push(`/forms/${newShortId}/edit`);
   };
+
+  const pagination = forms?.pagination;
+  const hostedForms = forms?.forms ?? [];
+
+  const hostedIds = useMemo(() => new Set(hostedForms.map((f) => f.shortId)), [hostedForms]);
+
+  // Local drafts NOT yet hosted.
+  const localOnly = useMemo(
+    () => localDrafts.filter((d) => !hostedIds.has(d.formId)),
+    [localDrafts, hostedIds],
+  );
+
+  // Unified list — local on top, then hosted.
+  const items = useMemo(
+    () => [
+      ...localOnly.map((d) => ({
+        key: `local-${d.formId}`,
+        source: "local" as const,
+        form: {
+          id: d.formId,
+          shortId: d.formId,
+          title: d.title || "Untitled",
+          status: "draft" as const,
+          updatedAt: d.updatedAt,
+        },
+      })),
+      ...hostedForms.map((f) => ({
+        key: f.id,
+        source: "hosted" as const,
+        form: f,
+      })),
+    ],
+    [localOnly, hostedForms],
+  );
 
   if (error) {
     return (
@@ -49,6 +85,9 @@ export default function DashboardPage() {
       </PageShell>
     );
   }
+
+  const showSkeletons = isLoading;
+  const isPaging = isFetching && !isLoading;
 
   return (
     <PageShell>
@@ -63,8 +102,9 @@ export default function DashboardPage() {
               My Workspace
             </h1>
             <span className="text-sm text-gray-400 font-normal select-none">
-              {forms.pagination.totalPages || 0}
+              {(pagination?.total ?? 0) + localOnly.length}
             </span>
+            {isPaging && <Loader2 className="h-3.5 w-3.5 animate-spin text-gray-300" />}
           </div>
           <button
             onClick={handleCreateForm}
@@ -75,31 +115,51 @@ export default function DashboardPage() {
           </button>
         </div>
 
-        {/* Forms list */}
-        <div className="space-y-3">
-          {forms.forms.map((form) => (
-            <FormCard key={form.id} form={form} isLoading={isLoading} />
-          ))}
-        </div>
+        {/* List */}
+        {showSkeletons ? (
+          <div className="space-y-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <FormCard
+                key={i}
+                isLoading
+                form={{ id: "", shortId: "", title: "", status: "draft" }}
+              />
+            ))}
+          </div>
+        ) : items.length > 0 ? (
+          <div
+            className={`space-y-3 transition-opacity duration-200 ${
+              isPaging ? "opacity-60" : "opacity-100"
+            }`}
+          >
+            {items.map((item) => (
+              <FormCard key={item.key} form={item.form} source={item.source} />
+            ))}
+          </div>
+        ) : (
+          <div className="py-16 text-center text-sm text-gray-400">
+            No forms yet. Create your first one.
+          </div>
+        )}
 
-        {/* Pagination */}
-        {forms.pagination && forms.pagination.totalPages > 1 && (
+        {/* Pagination (hosted only) */}
+        {pagination && pagination.totalPages > 1 && (
           <div className="mt-6 flex justify-center">
             <Pagination>
               <PaginationContent>
-                {/* Previous */}
                 <PaginationItem>
                   <PaginationPrevious
                     href="#"
+                    aria-disabled={!pagination.hasPrevPage}
+                    className={!pagination.hasPrevPage ? "pointer-events-none opacity-50" : ""}
                     onClick={(e) => {
                       e.preventDefault();
-                      if (page > 1) setPage(page - 1);
+                      if (pagination.hasPrevPage) setPage((p) => p - 1);
                     }}
                   />
                 </PaginationItem>
 
-                {/* Page numbers */}
-                {Array.from({ length: forms.pagination.totalPages }).map((_, idx) => (
+                {Array.from({ length: pagination.totalPages }).map((_, idx) => (
                   <PaginationItem key={idx}>
                     <PaginationLink
                       href="#"
@@ -114,16 +174,14 @@ export default function DashboardPage() {
                   </PaginationItem>
                 ))}
 
-                {/* Ellipsis if many pages */}
-                {forms.pagination.totalPages > 5 && <PaginationEllipsis />}
-
-                {/* Next */}
                 <PaginationItem>
                   <PaginationNext
                     href="#"
+                    aria-disabled={!pagination.hasNextPage}
+                    className={!pagination.hasNextPage ? "pointer-events-none opacity-50" : ""}
                     onClick={(e) => {
                       e.preventDefault();
-                      if (page < forms.pagination.totalPages) setPage(page + 1);
+                      if (pagination.hasNextPage) setPage((p) => p + 1);
                     }}
                   />
                 </PaginationItem>
