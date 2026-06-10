@@ -7,24 +7,40 @@ import { useGetAllMyForms } from "~/hooks/api/form";
 import { PageShell } from "~/components/layout/page-shell";
 import { EmptyState } from "~/components/layout/empty-state";
 import { FormCard } from "~/components/layout/form-card";
+import { toast } from "sonner";
+
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "~/components/ui/pagination";
+import { useState } from "react";
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { forms, isLoading } = useGetAllMyForms();
 
-  const handleCreateForm = () => router.push(`/forms/${generateRandomString(8)}/edit`);
+  // Track current page
+  const [page, setPage] = useState(1);
+  const limit = 8; // show 8 items per page
 
-  if (isLoading) {
-    return (
-      <PageShell>
-        <div className="flex-1 flex items-center justify-center">
-          <div className="animate-pulse text-sm text-gray-400">Loading…</div>
-        </div>
-      </PageShell>
-    );
-  }
+  const { forms, isLoading, error } = useGetAllMyForms(page, limit);
 
-  if (!forms?.length) {
+  if (forms === undefined) return null;
+
+  const handleCreateForm = () => {
+    const newFormId = generateRandomString(8);
+    if (!newFormId) {
+      toast.error("Failed to create a new form. Please try again.");
+      return;
+    }
+    router.push(`/forms/${newFormId}/edit`);
+  };
+
+  if (error) {
     return (
       <PageShell>
         <EmptyState onCreate={handleCreateForm} />
@@ -35,6 +51,7 @@ export default function DashboardPage() {
   return (
     <PageShell>
       <div className="flex-1 w-full max-w-6xl mx-auto px-6 py-10 md:py-16">
+        {/* Header */}
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-baseline gap-2">
             <h1
@@ -43,7 +60,9 @@ export default function DashboardPage() {
             >
               My Workspace
             </h1>
-            <span className="text-sm text-gray-400 font-normal select-none">{forms.length}</span>
+            <span className="text-sm text-gray-400 font-normal select-none">
+              {forms.pagination.totalPages || 0}
+            </span>
           </div>
           <button
             onClick={handleCreateForm}
@@ -54,11 +73,62 @@ export default function DashboardPage() {
           </button>
         </div>
 
+        {/* Forms list */}
         <div className="space-y-3">
-          {forms.map((form) => (
-            <FormCard key={form.id} form={form} />
+          {forms.forms.map((form) => (
+            <FormCard key={form.id} form={form} isLoading={isLoading} />
           ))}
         </div>
+
+        {/* Pagination */}
+        {forms.pagination && forms.pagination.totalPages > 1 && (
+          <div className="mt-6 flex justify-center">
+            <Pagination>
+              <PaginationContent>
+                {/* Previous */}
+                <PaginationItem>
+                  <PaginationPrevious
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (page > 1) setPage(page - 1);
+                    }}
+                  />
+                </PaginationItem>
+
+                {/* Page numbers */}
+                {Array.from({ length: forms.pagination.totalPages }).map((_, idx) => (
+                  <PaginationItem key={idx}>
+                    <PaginationLink
+                      href="#"
+                      isActive={page === idx + 1}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setPage(idx + 1);
+                      }}
+                    >
+                      {idx + 1}
+                    </PaginationLink>
+                  </PaginationItem>
+                ))}
+
+                {/* Ellipsis if many pages */}
+                {forms.pagination.totalPages > 5 && <PaginationEllipsis />}
+
+                {/* Next */}
+                <PaginationItem>
+                  <PaginationNext
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (page < forms.pagination.totalPages) setPage(page + 1);
+                    }}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
+        )}
       </div>
     </PageShell>
   );
