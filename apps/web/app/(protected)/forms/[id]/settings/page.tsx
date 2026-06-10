@@ -16,7 +16,11 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { useGetMyFormById, useGetAllFormSubmissions, useUpdateFormSetting } from "~/hooks/api/form";
+import {
+  useGetMyFormById,
+  useGetAllFormSubmissions,
+  useUpdateFormSettingIntoDb,
+} from "~/hooks/api/form";
 import { fromPayload } from "~/lib/form-builder/serialize";
 import { isInputType, type Block } from "~/lib/form-builder/schema";
 import { cn } from "~/lib/utils";
@@ -65,7 +69,8 @@ export default function FormSettingsPage() {
   const [page, setPage] = useState(1);
   const { submissions, pagination } = useGetAllFormSubmissions(shortId, page, PAGE_SIZE);
 
-  const { updateSettingAsync, isUpdating } = useUpdateFormSetting();
+  const { updateFormSettingAsync, status } = useUpdateFormSettingIntoDb();
+  const isUpdating = status === "pending";
 
   const [copied, setCopied] = useState(false);
 
@@ -90,7 +95,7 @@ export default function FormSettingsPage() {
 
   const setVisibility = async (visibility: "public" | "unlisted") => {
     try {
-      await updateSettingAsync({ shortId, visibility });
+      await updateFormSettingAsync({ shortId, visibility });
       toast.success(`Set to ${visibility}`);
     } catch {
       toast.error("Failed to update visibility");
@@ -99,7 +104,7 @@ export default function FormSettingsPage() {
 
   const setResponseLimit = async (value: number) => {
     try {
-      await updateSettingAsync({ shortId, responseLimit: Math.max(0, value) });
+      await updateFormSettingAsync({ shortId, responseLimit: Math.max(0, value) });
       toast.success("Response limit saved");
     } catch {
       toast.error("Failed to update response limit");
@@ -108,7 +113,7 @@ export default function FormSettingsPage() {
 
   const setExpiry = async (value: string) => {
     try {
-      await updateSettingAsync({ shortId, isExpiry: value ? new Date(value) : null });
+      await updateFormSettingAsync({ shortId, isExpiry: value ? new Date(value) : null });
       toast.success(value ? "Expiry saved" : "Expiry cleared");
     } catch {
       toast.error("Failed to update expiry");

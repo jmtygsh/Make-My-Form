@@ -1,4 +1,5 @@
 import { trpc } from "~/trpc/client";
+import { keepPreviousData } from "@tanstack/react-query";
 
 export const useStoreDraftFormIntoDb = () => {
   const utils = trpc.useUtils();
@@ -150,6 +151,26 @@ export const useStoreFormSubmissionIntoDb = () => {
   };
 };
 
+export const useGetMyFormById = (shortId: string) => {
+  const {
+    data: form,
+    error,
+    isFetched,
+    isFetching,
+    isLoading,
+    status,
+  } = trpc.form.getMyFormById.useQuery({ shortId }, { enabled: !!shortId });
+
+  return {
+    form,
+    error,
+    isFetched,
+    isFetching,
+    isLoading,
+    status,
+  };
+};
+
 export const useGetPublicFormById = (shortId: string) => {
   const {
     data: form,
@@ -178,16 +199,15 @@ export const useGetAllMyForms = (page: number, limit: number) => {
     isFetching,
     isLoading,
     status,
-  } = trpc.form.getAllMyForms.useQuery({ page, limit }, { enabled: page > 0 && limit > 0 });
+  } = trpc.form.getAllMyForms.useQuery(
+    { page, limit },
+    {
+      enabled: page > 0 && limit > 0,
+      placeholderData: keepPreviousData, // keep previous page while loading next
+    },
+  );
 
-  return {
-    forms,
-    error,
-    isFetched,
-    isFetching,
-    isLoading,
-    status,
-  };
+  return { forms, error, isFetched, isFetching, isLoading, status };
 };
 
 export const useGetAllFormSubmissions = (shortId: string, page: number, limit: number) => {
@@ -204,26 +224,6 @@ export const useGetAllFormSubmissions = (shortId: string, page: number, limit: n
   );
   return {
     submissions,
-    error,
-    isFetched,
-    isFetching,
-    isLoading,
-    status,
-  };
-};
-
-export const useGetMyFormById = (shortId: string) => {
-  const {
-    data: form,
-    error,
-    isFetched,
-    isFetching,
-    isLoading,
-    status,
-  } = trpc.form.getMyFormById.useQuery({ shortId }, { enabled: !!shortId });
-
-  return {
-    form,
     error,
     isFetched,
     isFetching,
