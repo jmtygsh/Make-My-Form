@@ -16,7 +16,7 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            cd /var/www/my-form-builder
+            cd /var/www/Make-My-Form
 
             git pull origin main
 
