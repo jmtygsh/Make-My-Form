@@ -15,23 +15,31 @@ export default function PublicFormPage() {
   const { form, isLoading, isFetched, error } = useGetPublicFormById(shortId);
 
   if (isLoading) {
-    return <div className="mt-32 text-center text-gray-400">Loading…</div>;
+    return (
+      <div className="flex min-h-[80vh] w-full items-center justify-center">
+        <div className="text-center text-gray-400">Loading…</div>
+      </div>
+    );
   }
 
   if (error || (isFetched && !form)) {
     return (
-      <div className="mx-auto mt-32 max-w-640px px-8 text-center">
-        <h1 className="text-2xl font-bold text-gray-800">Form not found</h1>
-        <p className="mt-2 text-gray-500">This form doesn’t exist or is no longer available.</p>
+      <div className="flex min-h-[80vh] w-full items-center justify-center px-8">
+        <div className="mx-auto max-w-[640px] text-center">
+          <h1 className="text-2xl font-bold text-gray-800">Form not found</h1>
+          <p className="mt-2 text-gray-500">This form doesn’t exist or is no longer available.</p>
+        </div>
       </div>
     );
   }
 
   if (form && !form.published) {
     return (
-      <div className="mx-auto mt-32 max-w-640px px-8 text-center">
-        <h1 className="text-2xl font-bold text-gray-800">Not published yet</h1>
-        <p className="mt-2 text-gray-500">This form hasn’t been published by its owner.</p>
+      <div className="flex min-h-[80vh] w-full items-center justify-center px-8">
+        <div className="mx-auto max-w-[640px] text-center">
+          <h1 className="text-2xl font-bold text-gray-800">Not published yet</h1>
+          <p className="mt-2 text-gray-500">This form hasn’t been published by its owner.</p>
+        </div>
       </div>
     );
   }

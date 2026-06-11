@@ -105,9 +105,11 @@ export function FormRenderer({
 
   if (submitted) {
     return (
-      <div className="mx-auto mt-32 px-8 text-center" style={{ maxWidth: theme.pageWidth }}>
-        <h1 className="text-3xl font-bold">Thank you!</h1>
-        <p className="mt-2 opacity-70">Your response has been recorded.</p>
+      <div className="flex min-h-[80vh] w-full items-center justify-center px-8">
+        <div className="mx-auto text-center" style={{ maxWidth: theme.pageWidth }}>
+          <h1 className="text-3xl font-bold">Thank you!</h1>
+          <p className="mt-2 opacity-70">Your response has been recorded.</p>
+        </div>
       </div>
     );
   }
