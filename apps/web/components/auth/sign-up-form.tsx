@@ -79,6 +79,7 @@ export function SignUpForm({
                 password: data.password,
             });
 
+            router.refresh();
             toast.success("Form submitted successfully");
             router.push("/verify");
         } catch (error) {

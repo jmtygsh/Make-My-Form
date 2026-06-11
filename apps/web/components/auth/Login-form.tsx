@@ -63,9 +63,9 @@ export function LoginForm({
                 password: data.password,
             });
 
-            toast.success("Login successfully");
             router.refresh();
-            router.replace("/dashboard");
+            toast.success("Login successfully");
+            router.push("/dashboard");
         } catch (error) {
             const message = "Failed to login into your account";
             setSubmitError(message);
