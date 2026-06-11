@@ -26,7 +26,7 @@ const DashedAnimation = () => {
     // Debugging and setting the initial value
     React.useEffect(() => {
         if (rive && scrollInput) {
-            console.log("Setting input-scroll to 50");
+            // console.log("Setting input-scroll to 50");
             scrollInput.value = 99; // You can change this number to test different states
         }
     }, [rive, scrollInput]);

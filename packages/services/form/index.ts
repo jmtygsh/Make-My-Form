@@ -48,17 +48,17 @@ class FormService {
 
     const responsesUrl = `${env.FRONTEND_URL}/forms/${info.shortId}/settings`;
 
-    console.log(
-      "ownerEmail:",
-      info.ownerEmail,
-      "ownerName:",
-      info.ownerName,
-      "formTitle:",
-      info.formTitle || "Untitled form",
-      formId,
-      responsesUrl,
-      submittedAt,
-    );
+    // console.log(
+    //   "ownerEmail:",
+    //   info.ownerEmail,
+    //   "ownerName:",
+    //   info.ownerName,
+    //   "formTitle:",
+    //   info.formTitle || "Untitled form",
+    //   formId,
+    //   responsesUrl,
+    //   submittedAt,
+    // );
 
     // TODO: comment for now
     // await EmailService.sendNewResponseNotificationEmail({

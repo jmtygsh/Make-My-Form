@@ -74,7 +74,7 @@ export function LoginForm({
     }
 
     function handleGoogleLogin() {
-        console.log("submitted google");
+        console.log("submitted google Demo");
     }
 
     return (
