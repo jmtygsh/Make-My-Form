@@ -130,10 +130,9 @@ export function AppSidebar() {
   const logOutHandler = () => {
     try {
       router.replace("/login");
+      router.refresh();
 
       logout({});
-
-      router.refresh();
 
       toast.success("Log Out Successful");
     } catch (error) {

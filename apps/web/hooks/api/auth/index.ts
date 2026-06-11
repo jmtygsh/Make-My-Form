@@ -148,7 +148,7 @@ export const useLogout = () => {
   const utils = trpc.useUtils();
 
   const {
-    mutateAsync: logout,
+    mutate: logout,
     error,
     failureCount,
     isError,
