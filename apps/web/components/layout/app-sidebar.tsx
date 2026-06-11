@@ -89,9 +89,9 @@ const PRODUCT_NAV = [
 ];
 
 const HELP_NAV = [
-  { title: "Help center", icon: LifeBuoy },
-  { title: "Contact support", icon: MessageCircle },
-  { title: "How to guide", icon: FileQuestion },
+  { title: "Help center", icon: LifeBuoy, href: "/help" },
+  { title: "Contact support", icon: MessageCircle, href: "/contact" },
+  { title: "How to guide", icon: FileQuestion, href: "/guides" },
 ];
 
 interface User {
@@ -297,7 +297,11 @@ export function AppSidebar() {
             <SidebarMenu className="space-y-[2px]">
               {HELP_NAV.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton className="text-[14px]! px-3 py-2 h-7 rounded-md cursor-pointer hover:text-primary!">
+                  <SidebarMenuButton
+                    onClick={() => item.href && router.push(item.href)}
+                    isActive={item.href ? pathname === item.href : false}
+                    className="text-[14px]! px-3 py-2 h-7 rounded-md cursor-pointer hover:text-primary!"
+                  >
                     <item.icon className="h-4 w-4" strokeWidth={2} /> {item.title}
                   </SidebarMenuButton>
                 </SidebarMenuItem>

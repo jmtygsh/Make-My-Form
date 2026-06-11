@@ -1,18 +1,13 @@
 "use client";
 
 // local file import 
-import Header from "~/components/sections/Header";
-import Footer from "~/components/sections/Footer";
 import Homepage from "~/components/sections/Homepage";
-
-
+import MarketingLayout from "./(marketing)/layout";
 
 export default function Home() {
   return (
-    <div className="min-h-screen text-foreground flex flex-col">
-      < Header />
+    <MarketingLayout>
       <Homepage />
-      <Footer />
-    </div >
+    </MarketingLayout>
   );
 }

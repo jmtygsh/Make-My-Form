@@ -364,7 +364,7 @@ class FormService {
       };
     }
 
-    const total = Number(rows[0].totalCount);
+    const total = Number(rows[0]?.totalCount || 0);
     const totalPages = Math.ceil(total / limit);
 
     return {

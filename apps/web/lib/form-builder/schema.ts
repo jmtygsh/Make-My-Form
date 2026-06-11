@@ -243,6 +243,6 @@ export const DEFAULT_THEME: FormTheme = formThemeSchema.parse({});
 export const formPayloadSchema = z.object({
     name: z.string().default(''),
     blocks: z.array(blockSchema).default([]),
-    theme: formThemeSchema.default({}),
+    theme: formThemeSchema.default(DEFAULT_THEME),
 });
 export type FormPayload = z.infer<typeof formPayloadSchema>;

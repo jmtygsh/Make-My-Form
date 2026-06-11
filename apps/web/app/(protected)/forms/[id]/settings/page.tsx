@@ -84,6 +84,10 @@ export default function FormSettingsPage() {
   const [copied, setCopied] = useState(false);
   const [visibilityValue, setVisibilityValue] = useState<"public" | "unlisted">("public");
 
+  // Local state for limits
+  const [limitValue, setLimitValue] = useState<number>(0);
+  const [expiryValueLocal, setExpiryValueLocal] = useState<string>("");
+
   const origin = typeof window !== "undefined" ? window.location.origin : "";
   const publicUrl = `${origin}/form/${shortId}`;
 
@@ -116,21 +120,31 @@ export default function FormSettingsPage() {
     if (form?.visibility) {
       setVisibilityValue(form.visibility);
     }
-  }, [form?.visibility]);
+    if (form) {
+      setLimitValue(form.responseLimit ?? 0);
+      setExpiryValueLocal(form.isExpiry ? new Date(form.isExpiry).toISOString().slice(0, 16) : "");
+    }
+  }, [form]);
 
-  const setResponseLimit = async (value: number) => {
+  const updateResponseLimit = async () => {
     try {
-      await updateFormSettingAsync({ shortId, responseLimit: Math.max(0, value) });
+      await updateFormSettingAsync({
+        shortId,
+        responseLimit: Math.max(0, limitValue),
+      });
       toast.success("Response limit saved");
     } catch {
       toast.error("Failed to update response limit");
     }
   };
 
-  const setExpiry = async (value: string) => {
+  const updateExpiry = async () => {
     try {
-      await updateFormSettingAsync({ shortId, isExpiry: value ? new Date(value) : null });
-      toast.success(value ? "Expiry saved" : "Expiry cleared");
+      await updateFormSettingAsync({
+        shortId,
+        isExpiry: expiryValueLocal ? new Date(expiryValueLocal) : null,
+      });
+      toast.success("Expiry saved");
     } catch {
       toast.error("Failed to update expiry");
     }
@@ -172,8 +186,12 @@ export default function FormSettingsPage() {
 
   const isPublished = form?.status === "published";
   const total = pagination?.total ?? 0;
-  const expiryValue = form?.isExpiry ? new Date(form.isExpiry).toISOString().slice(0, 16) : "";
+
+  // Calculate if any limits have changed
+  const serverExpiry = form?.isExpiry ? new Date(form.isExpiry).toISOString().slice(0, 16) : "";
   const hasVisibilityChanges = visibilityValue !== form?.visibility;
+  const hasLimitChanges = limitValue !== (form?.responseLimit ?? 0);
+  const hasExpiryChanges = expiryValueLocal !== serverExpiry;
 
   return (
     <div className="flex flex-col gap-10 p-10">
@@ -264,20 +282,44 @@ export default function FormSettingsPage() {
           <input
             type="number"
             min={0}
-            defaultValue={form?.responseLimit ?? 0}
-            onBlur={(e) => setResponseLimit(Number(e.target.value))}
+            value={limitValue}
+            onChange={(e) => setLimitValue(Number(e.target.value))}
             className="mt-2 w-full rounded-md border border-gray-200 px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-gray-300"
           />
+          <Button
+            type="button"
+            size="sm"
+            onClick={updateResponseLimit}
+            disabled={isUpdating || !hasLimitChanges}
+            className={cn(
+              "mt-3 transition-colors",
+              hasLimitChanges && "bg-emerald-500 text-white hover:bg-emerald-600"
+            )}
+          >
+            {isUpdating ? "Updating..." : "Update limit"}
+          </Button>
         </div>
         <div>
           <h2 className="text-sm font-semibold text-gray-900">Expiry</h2>
           <p className="mt-1 text-xs text-gray-500">Stops accepting responses after</p>
           <input
             type="datetime-local"
-            defaultValue={expiryValue}
-            onBlur={(e) => setExpiry(e.target.value)}
+            value={expiryValueLocal}
+            onChange={(e) => setExpiryValueLocal(e.target.value)}
             className="mt-2 w-full rounded-md border border-gray-200 px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-gray-300"
           />
+          <Button
+            type="button"
+            size="sm"
+            onClick={updateExpiry}
+            disabled={isUpdating || !hasExpiryChanges}
+            className={cn(
+              "mt-3 transition-colors",
+              hasExpiryChanges && "bg-emerald-500 text-white hover:bg-emerald-600"
+            )}
+          >
+            {isUpdating ? "Updating..." : "Update expiry"}
+          </Button>
         </div>
       </section>
 

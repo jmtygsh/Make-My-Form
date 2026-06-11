@@ -13,6 +13,7 @@ export default function TemplatesPage() {
   const initStore = useFormBuilderStore((s) => s.init);
   const setTitle = useFormBuilderStore((s) => s.setTitle);
   const insertBlocks = useFormBuilderStore((s) => s.insertBlocks);
+  const updateTheme = useFormBuilderStore((s) => s.updateTheme);
 
   const useTemplate = (templateId: string) => {
     const tpl = TEMPLATES.find((t) => t.id === templateId);
@@ -24,6 +25,10 @@ export default function TemplatesPage() {
     initStore(shortId); // fresh form keyed by shortId
     setTitle(tpl.name); // marks dirty + persists locally
     insertBlocks(tpl.build()); // append template blocks (fresh ids)
+
+    if (tpl.theme) {
+      updateTheme(tpl.theme);
+    }
 
     router.push(`/forms/${shortId}/edit`);
   };
