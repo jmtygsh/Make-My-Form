@@ -210,7 +210,7 @@ export function SignUpForm({
                                             htmlFor="terms"
                                             className="text-sm text-foreground-muted font-normal leading-relaxed"
                                         >
-                                            I agree to the MakeMyForm's <Link href="/terms" className="text-foreground underline underline-offset-2 hover:text-primary">Terms of Use</Link> and <Link href="/privacy" className="text-foreground underline underline-offset-2 hover:text-primary">Privacy Policy</Link>.
+                                            I agree to the MakeMyForm's <Link href="#terms" className="text-foreground underline underline-offset-2 hover:text-primary">Terms of Use</Link> and <Link href="#privacy" className="text-foreground underline underline-offset-2 hover:text-primary">Privacy Policy</Link>.
                                         </label>
                                     </div>
                                     <FieldError errors={[errors.terms]} />

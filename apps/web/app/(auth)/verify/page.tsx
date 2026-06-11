@@ -153,7 +153,7 @@ function VerifyContent() {
                         </div>
                         <Button
                             className="w-full max-w-sm mt-4"
-                            onClick={() => router.push("/")}
+                            onClick={() => router.push("/dashboard")}
                         >
                             Continue to Dashboard
                         </Button>
