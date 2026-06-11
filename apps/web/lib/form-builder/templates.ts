@@ -1,18 +1,21 @@
 // apps/web/lib/form-builder/templates.ts
 import type { Block } from "./schema";
-import { createBlock } from "./field-config";
+import { createBlock, newOption } from "./field-config";
 
 export interface FormTemplate {
   id: string;
   name: string;
   description: string;
   category: string;
-  // factory so each insert gets fresh block instances
+  /** Factory → fresh block instances on every use. */
   build: () => Block[];
 }
 
-/** Helper to make a configured block quickly. */
-function block(type: Parameters<typeof createBlock>[0], patch: Partial<Block> = {}): Block {
+/** Quick helper: a configured block of `type` with overrides. */
+function block(
+  type: Parameters<typeof createBlock>[0],
+  patch: Record<string, unknown> = {},
+): Block {
   return { ...createBlock(type), ...patch } as Block;
 }
 
@@ -23,9 +26,10 @@ export const TEMPLATES: FormTemplate[] = [
     description: "Name, email and message — the essentials.",
     category: "General",
     build: () => [
-      block("short_answer", { label: "Your name", required: true } as Partial<Block>),
-      block("email", { label: "Email address", required: true } as Partial<Block>),
-      block("long_answer", { label: "Message", required: true } as Partial<Block>),
+      block("heading_2", { content: "Contact us" }),
+      block("short_answer", { label: "Your name", required: true }),
+      block("email", { label: "Email address", required: true }),
+      block("long_answer", { label: "Message", required: true }),
     ],
   },
   {
@@ -34,9 +38,10 @@ export const TEMPLATES: FormTemplate[] = [
     description: "Rating + open feedback to learn what users think.",
     category: "Feedback",
     build: () => [
-      block("rating", { label: "How would you rate us?", required: true } as Partial<Block>),
-      block("long_answer", { label: "What can we improve?" } as Partial<Block>),
-      block("email", { label: "Email (optional)" } as Partial<Block>),
+      block("heading_2", { content: "We value your feedback" }),
+      block("rating", { label: "How would you rate us?", required: true }),
+      block("long_answer", { label: "What can we improve?" }),
+      block("email", { label: "Email (optional)" }),
     ],
   },
   {
@@ -45,17 +50,33 @@ export const TEMPLATES: FormTemplate[] = [
     description: "Collect attendance and guest details.",
     category: "Events",
     build: () => [
-      block("short_answer", { label: "Full name", required: true } as Partial<Block>),
+      block("heading_2", { content: "RSVP" }),
+      block("short_answer", { label: "Full name", required: true }),
       block("multiple_choice", {
         label: "Will you attend?",
         required: true,
-        options: [
-          { id: "yes", label: "Yes" },
-          { id: "no", label: "No" },
-          { id: "maybe", label: "Maybe" },
-        ],
-      } as Partial<Block>),
-      block("number", { label: "Number of guests" } as Partial<Block>),
+        options: [newOption("Yes"), newOption("No"), newOption("Maybe")],
+      }),
+      block("number", { label: "Number of guests" }),
+    ],
+  },
+  {
+    id: "job-application",
+    name: "Job application",
+    description: "Candidate details, role and resume link.",
+    category: "HR",
+    build: () => [
+      block("heading_2", { content: "Job application" }),
+      block("short_answer", { label: "Full name", required: true }),
+      block("email", { label: "Email", required: true }),
+      block("phone", { label: "Phone" }),
+      block("dropdown", {
+        label: "Position",
+        required: true,
+        options: [newOption("Engineer"), newOption("Designer"), newOption("Product")],
+      }),
+      block("link", { label: "Resume / portfolio URL" }),
+      block("long_answer", { label: "Why are you a good fit?" }),
     ],
   },
 ];

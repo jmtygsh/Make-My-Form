@@ -11,34 +11,34 @@ import { PageShell } from "~/components/layout/page-shell";
 export default function TemplatesPage() {
   const router = useRouter();
   const initStore = useFormBuilderStore((s) => s.init);
-  const insertBlocks = useFormBuilderStore((s) => s.insertBlocks);
   const setTitle = useFormBuilderStore((s) => s.setTitle);
+  const insertBlocks = useFormBuilderStore((s) => s.insertBlocks);
 
   const useTemplate = (templateId: string) => {
     const tpl = TEMPLATES.find((t) => t.id === templateId);
     if (!tpl) return;
 
+    // brand-new form
     const shortId = generateRandomString(8);
 
-    // Prepare the store for this new form, then append template blocks.
-    initStore(shortId);
-    setTitle(tpl.name);
-    insertBlocks(tpl.build()); // ✅ append, marks dirty → persists locally
+    initStore(shortId); // fresh form keyed by shortId
+    setTitle(tpl.name); // marks dirty + persists locally
+    insertBlocks(tpl.build()); // append template blocks (fresh ids)
 
     router.push(`/forms/${shortId}/edit`);
   };
 
   return (
     <PageShell>
-      <div className="flex-1 w-full max-w-6xl mx-auto px-6 py-10 md:py-16">
+      <div className="flex-1 w-full px-6 py-10 md:py-16">
         <div className="mb-6">
           <h1 className="text-lg font-bold text-gray-900">Templates</h1>
           <p className="text-sm text-gray-500">
-            Start faster with a ready-made form. Blocks are appended into a new form.
+            Pick a template to start a brand-new form. You can edit everything after.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {TEMPLATES.map((tpl) => (
             <button
               key={tpl.id}

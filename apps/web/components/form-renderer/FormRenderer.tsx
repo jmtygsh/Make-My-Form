@@ -36,6 +36,9 @@ export function FormRenderer({
   const blocks: Block[] = parsed?.blocks ?? [];
   const theme: FormTheme = parsed?.theme ?? DEFAULT_THEME;
 
+  // Only reserve/show cover space when a cover is actually rendered.
+  const hasCover = theme.showCover && Boolean(theme.coverUrl);
+
   // Stable key so the effects below only re-run when the payload truly changes.
   const payloadKey = React.useMemo(() => JSON.stringify(payload), [payload]);
 
@@ -112,7 +115,7 @@ export function FormRenderer({
   return (
     <>
       <link
-        href={`https://fonts.googleapis.com/css2?family=${theme.font.replace(" ", "+")}:wght@400;500;600;700&display=swap`}
+        href={`https://fonts.googleapis.com/css2?family=${theme.font}:wght@400;500;600;700&display=swap`}
         rel="stylesheet"
       />
       <style>{`
@@ -122,7 +125,7 @@ export function FormRenderer({
             `}</style>
 
       {/* Cover */}
-      {theme.showCover && theme.coverUrl && (
+      {hasCover && (
         <div
           className="w-full bg-cover"
           style={{
@@ -139,15 +142,19 @@ export function FormRenderer({
         style={{
           maxWidth: theme.pageWidth,
           fontSize: theme.baseFontSize,
-          marginTop: theme.showCover ? "0" : "5rem",
-          paddingTop:
-            theme.showLogo && theme.showCover ? `calc(${theme.logoHeight} / 2 + 16px)` : undefined,
+          // Use padding (not margin) so the top spacing doesn't margin-collapse
+          // through the page wrapper and reveal the body background as a band.
+          paddingTop: hasCover
+            ? theme.showLogo
+              ? `calc(${theme.logoHeight} / 2 + 16px)`
+              : "0"
+            : "5rem",
         }}
       >
         {/* Logo */}
         {theme.showLogo && (
           <div
-            className={`${theme.showCover ? "absolute left-8 top-0 -translate-y-1/2" : "my-6"} flex items-center`}
+            className={`${hasCover ? "absolute left-8 top-0 -translate-y-1/2" : "my-6"} flex items-center`}
           >
             <div
               className="flex items-center justify-center overflow-hidden shadow-md"

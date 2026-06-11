@@ -40,6 +40,9 @@ export type FormBlock = {
 export type FormPayload = {
     name: string;
     blocks: FormBlock[];
+    // Styling settings (colors, page width, logo/cover, button + input config).
+    // Kept loose so new theme keys persist without a schema/migration change.
+    theme?: Record<string, unknown>;
 };
 
 export type SubmissionPayload = Record<string, unknown>;

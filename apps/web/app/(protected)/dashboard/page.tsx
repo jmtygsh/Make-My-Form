@@ -29,6 +29,8 @@ export default function DashboardPage() {
 
   const { forms, isLoading, isFetching, error } = useGetAllMyForms(page, LIMIT);
 
+  console.log("forms:", forms);
+
   // Local drafts — re-read on mount AND when the tab/window regains focus,
   // so navigating back from the editor reflects cleared/added drafts.
   const [localDrafts, setLocalDrafts] = useState<LocalDraft[]>([]);

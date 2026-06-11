@@ -246,9 +246,9 @@ export function AppSidebar() {
                 {workspaceExpanded && formList.length > 0 && (
                   <SidebarMenuSub>
                     {formList.map((form) => {
-                      const href = `/forms/${form.id}/settings`;
+                      const href = `/forms/${form.shortId}/settings`;
                       return (
-                        <SidebarMenuSubItem key={form.id}>
+                        <SidebarMenuSubItem key={form.shortId}>
                           <SidebarMenuSubButton
                             onClick={() => router.push(href)}
                             isActive={pathname === href}

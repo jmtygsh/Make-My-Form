@@ -159,7 +159,7 @@ export default function FormSettingsPage() {
   const expiryValue = form?.isExpiry ? new Date(form.isExpiry).toISOString().slice(0, 16) : "";
 
   return (
-    <div className="flex flex-col gap-10">
+    <div className="flex flex-col gap-10 p-10">
       {/* Share */}
       <section>
         <h2 className="text-sm font-semibold text-gray-900">Share link</h2>

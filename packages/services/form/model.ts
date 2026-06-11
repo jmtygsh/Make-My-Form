@@ -20,9 +20,16 @@ const formBlockSchema = z.object({
   maxDate: z.string().optional(),
 });
 
+// Permissive on purpose: the theme carries ~35 styling keys (colors, page
+// width, logo/cover URLs, button + input settings, etc.). Validating each key
+// here would silently strip any field not mirrored below, so we accept the
+// whole object as-is and let the client schema apply its defaults on read.
+const formThemeSchema = z.record(z.string(), z.unknown());
+
 const formPayloadSchema = z.object({
   name: z.string(),
   blocks: z.array(formBlockSchema),
+  theme: formThemeSchema.optional(),
 });
 type FormPayload = z.infer<typeof formPayloadSchema>;
 

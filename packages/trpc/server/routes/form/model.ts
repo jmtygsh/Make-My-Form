@@ -22,9 +22,16 @@ const formBlockSchema = z.object({
   maxDate: z.string().optional(),
 });
 
+// Permissive on purpose: the theme carries ~35 styling keys (colors, page
+// width, logo/cover URLs, button + input settings, etc.). Validating each key
+// here would silently strip any field not mirrored below, so we accept the
+// whole object as-is and let the client schema apply its defaults on read.
+const formThemeSchema = z.record(z.string(), z.unknown());
+
 const formPayloadSchema = z.object({
   name: z.string(),
   blocks: z.array(formBlockSchema),
+  theme: formThemeSchema.optional(),
 });
 
 // ---- Draft (upsert) ----
@@ -113,6 +120,7 @@ export const getAllMyFormsInputModel = z.object({
   page: z.number().int().min(1).default(1),
   limit: z.number().int().min(1).max(100).default(10),
 });
+
 // ---- List my forms ----
 export const getAllMyFormsOutputModel = z.object({
   forms: z.array(
@@ -123,15 +131,15 @@ export const getAllMyFormsOutputModel = z.object({
       description: z.string().nullable(),
       status: z.enum(["draft", "published"]),
       visibility: z.enum(["public", "unlisted"]),
-      isExpiry: z.coerce.date().nullable(), // ✅ accepts Date OR ISO string
-      createdAt: z.coerce.date().nullable(), // ✅
+      isExpiry: z.string().datetime().nullable(),
+      createdAt: z.string().datetime().nullable(),
     }),
   ),
   pagination: z.object({
-    page: z.number(),
-    limit: z.number(),
-    total: z.number(),
-    totalPages: z.number(),
+    page: z.number().int().min(1),
+    limit: z.number().int().min(1).max(100),
+    total: z.number().int().min(0),
+    totalPages: z.number().int().min(0),
     hasNextPage: z.boolean(),
     hasPrevPage: z.boolean(),
   }),

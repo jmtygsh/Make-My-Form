@@ -2,7 +2,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage, type StateStorage } from "zustand/middleware";
 import { arrayMove } from "@dnd-kit/sortable";
-import { DEFAULT_THEME, type Block, type BlockType, type FormTheme } from "./schema";
+import { DEFAULT_THEME, formThemeSchema, type Block, type BlockType, type FormTheme } from "./schema";
 import { createBlock, convertBlock, genId, BLOCK_META } from "./field-config";
 
 /* -------------------------------------------------------------------------- */
@@ -175,7 +175,7 @@ export const useFormBuilderStore = create<FormBuilderState>()(
                     formId,
                     title: saved.title ?? "",
                     blocks: saved.blocks ?? [],
-                    theme: saved.theme ?? DEFAULT_THEME,
+                    theme: formThemeSchema.parse(saved.theme || {}),
                     selectedBlockId: null,
                     isDirty: saved.isDirty ?? false,
                     hydrated: false,
@@ -399,6 +399,18 @@ export const useFormBuilderStore = create<FormBuilderState>()(
         hydrated: state.hydrated,
         updatedAt: state.updatedAt,
       }),
+      // Backfill the persisted theme from DEFAULT_THEME on rehydrate. Older
+      // local drafts predate newer theme fields, so without this the editor
+      // could load a partial theme (rendering empty colors as #000000 and
+      // sizes as 0, and breaking logo CSS).
+      merge: (persisted, current) => {
+        const p = (persisted ?? {}) as Partial<FormBuilderState>;
+        return {
+          ...current,
+          ...p,
+          theme: { ...DEFAULT_THEME, ...(p.theme ?? {}) },
+        };
+      },
     },
   ),
 );

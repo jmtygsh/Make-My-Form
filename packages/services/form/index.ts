@@ -289,7 +289,7 @@ class FormService {
         visibility: formTable.visibility,
         isExpiry: formTable.isExpiry,
         createdAt: formTable.createdAt,
-        totalCount: sql<number>`count(*) over()`,
+        totalCount: sql<string>`count(*) over()`,
       })
       .from(formTable)
       .where(and(eq(formTable.userId, userId), eq(formTable.isDeleted, false)))
@@ -297,9 +297,14 @@ class FormService {
       .limit(limit)
       .offset(offset);
 
-    const total = rows[0]?.totalCount ?? 0;
-    const totalPages = Math.ceil(total / limit);
-    const forms = rows.map(({ totalCount, ...form }) => form);
+    const total = Number(rows[0]?.totalCount ?? 0);
+    const totalPages = total === 0 ? 0 : Math.ceil(total / limit);
+
+    const forms = rows.map(({ totalCount, ...form }) => ({
+      ...form,
+      isExpiry: form.isExpiry?.toISOString() ?? null,
+      createdAt: form.createdAt?.toISOString() ?? null,
+    }));
 
     return {
       forms,
