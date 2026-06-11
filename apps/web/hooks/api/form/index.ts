@@ -212,7 +212,7 @@ export const useGetAllMyForms = (page: number, limit: number) => {
 
 export const useGetAllFormSubmissions = (shortId: string, page: number, limit: number) => {
   const {
-    data: submissions,
+    data,
     error,
     isFetched,
     isFetching,
@@ -223,7 +223,8 @@ export const useGetAllFormSubmissions = (shortId: string, page: number, limit: n
     { enabled: !!shortId && page > 0 && limit > 0 },
   );
   return {
-    submissions,
+    submissions: data?.submissions,
+    pagination: data?.pagination,
     error,
     isFetched,
     isFetching,

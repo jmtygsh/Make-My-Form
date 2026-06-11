@@ -350,9 +350,21 @@ class FormService {
       .limit(limit)
       .offset(offset);
 
-    if (rows[0] === undefined) throw new Error("FAILED_TO_FETCH_SUBMISSIONS");
+    if (rows.length === 0) {
+      return {
+        submissions: [],
+        pagination: {
+          page,
+          limit,
+          total: 0,
+          totalPages: 0,
+          hasNextPage: false,
+          hasPrevPage: false,
+        },
+      };
+    }
 
-    const total = rows[0].totalCount;
+    const total = Number(rows[0].totalCount);
     const totalPages = Math.ceil(total / limit);
 
     return {

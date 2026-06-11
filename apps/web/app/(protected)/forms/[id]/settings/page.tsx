@@ -2,13 +2,12 @@
 
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { toast } from "sonner";
 import {
   Copy,
   Check,
-  Globe,
   Link as LinkIcon,
   Loader2,
   Download,
@@ -21,6 +20,16 @@ import {
   useGetAllFormSubmissions,
   useUpdateFormSettingIntoDb,
 } from "~/hooks/api/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select"
+import { Button } from "~/components/ui/button";
+import { Label } from "~/components/ui/label";
+import { Switch } from "~/components/ui/switch";
 import { fromPayload } from "~/lib/form-builder/serialize";
 import { isInputType, type Block } from "~/lib/form-builder/schema";
 import { cn } from "~/lib/utils";
@@ -73,6 +82,7 @@ export default function FormSettingsPage() {
   const isUpdating = status === "pending";
 
   const [copied, setCopied] = useState(false);
+  const [visibilityValue, setVisibilityValue] = useState<"public" | "unlisted">("public");
 
   const origin = typeof window !== "undefined" ? window.location.origin : "";
   const publicUrl = `${origin}/form/${shortId}`;
@@ -101,6 +111,12 @@ export default function FormSettingsPage() {
       toast.error("Failed to update visibility");
     }
   };
+
+  useEffect(() => {
+    if (form?.visibility) {
+      setVisibilityValue(form.visibility);
+    }
+  }, [form?.visibility]);
 
   const setResponseLimit = async (value: number) => {
     try {
@@ -157,6 +173,7 @@ export default function FormSettingsPage() {
   const isPublished = form?.status === "published";
   const total = pagination?.total ?? 0;
   const expiryValue = form?.isExpiry ? new Date(form.isExpiry).toISOString().slice(0, 16) : "";
+  const hasVisibilityChanges = visibilityValue !== form?.visibility;
 
   return (
     <div className="flex flex-col gap-10 p-10">
@@ -198,30 +215,44 @@ export default function FormSettingsPage() {
           Public forms can be listed and shared widely. Unlisted forms are only reachable by direct
           link.
         </p>
-        <div className="mt-3 flex gap-2">
-          {(["public", "unlisted"] as const).map((v) => {
-            const active = form?.visibility === v;
-            return (
-              <button
-                key={v}
-                onClick={() => setVisibility(v)}
-                disabled={isUpdating || active}
-                className={cn(
-                  "inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium capitalize transition-colors",
-                  active
-                    ? "border-gray-900 bg-gray-900 text-white"
-                    : "border-gray-200 text-gray-600 hover:bg-gray-50",
-                )}
-              >
-                {v === "public" ? (
-                  <Globe className="h-3.5 w-3.5" />
-                ) : (
-                  <LinkIcon className="h-3.5 w-3.5" />
-                )}
-                {v}
-              </button>
-            );
-          })}
+        <div className="space-y-2">
+          <Select
+            value={visibilityValue}
+            onValueChange={(value) =>
+              setVisibilityValue(value as "public" | "unlisted")
+            }
+            disabled={isUpdating}
+          >
+            <SelectTrigger className="w-full max-w-xs">
+              <SelectValue placeholder="Select visibility" />
+            </SelectTrigger>
+
+            <SelectContent>
+              <SelectItem value="public">Public</SelectItem>
+              <SelectItem value="unlisted">Unlisted</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <p className="text-sm text-muted-foreground">
+            {visibilityValue === "public"
+              ? "Anyone with the link can discover and access this form."
+              : "Only people with the direct link can access this form."}
+          </p>
+        </div>
+
+        <div className="mt-3">
+          <Button
+            type="button"
+            size="sm"
+            onClick={() => setVisibility(visibilityValue)}
+            disabled={isUpdating || !hasVisibilityChanges}
+            className={cn(
+              "transition-colors",
+              hasVisibilityChanges && "bg-emerald-500 text-white hover:bg-emerald-600"
+            )}
+          >
+            {isUpdating ? "Updating..." : "Update visibility"}
+          </Button>
         </div>
       </section>
 
@@ -266,30 +297,7 @@ export default function FormSettingsPage() {
           />
         </div>
 
-        {inputBlocks.length > 0 && (
-          <div className="mt-4 flex flex-col gap-2">
-            {inputBlocks.map((b) => {
-              const answered = (submissions ?? []).filter((s) => {
-                const v = s.submission[b.id];
-                if (v === null || v === undefined || v === "") return false;
-                if (Array.isArray(v) && v.length === 0) return false;
-                return true;
-              }).length;
-              const shown = submissions?.length ?? 0;
-              return (
-                <div
-                  key={b.id}
-                  className="flex items-center justify-between rounded-md border border-gray-100 px-3 py-2 text-sm"
-                >
-                  <span className="text-gray-700">{labelByBlockId.get(b.id)}</span>
-                  <span className="text-gray-400">
-                    {answered}/{shown} answered
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        )}
+
       </section>
 
       {/* Submissions */}
