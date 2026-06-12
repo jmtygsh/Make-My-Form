@@ -12,6 +12,11 @@ export const transporter = nodemailer.createTransport({
         user: env.SMTP_USER,
         pass: env.SMTP_PASS,
     },
+    // Without these, a stalled connection (e.g. outbound 465 blocked) hangs the
+    // request indefinitely. Fail fast instead.
+    connectionTimeout: 10_000,
+    greetingTimeout: 10_000,
+    socketTimeout: 15_000,
 });
 
 /* ---------------------------------------------------------

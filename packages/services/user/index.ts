@@ -120,13 +120,12 @@ class UserService {
     // send email for verification
     const { token: verificationToken } = await this.generateUserToken({ id: userId });
 
-    // A mail-provider failure must not fail account creation — the user row is
-    // already committed, and verification can be re-requested. Log and continue.
-    try {
-      await EmailService.sendEmailVerificationEmail(email, verificationToken);
-    } catch (error) {
+    // Fire-and-forget: never block (or fail) signup on email delivery. The user
+    // row is already committed and verification can be re-requested. A slow or
+    // unreachable SMTP host must not hang the HTTP response.
+    void EmailService.sendEmailVerificationEmail(email, verificationToken).catch((error) => {
       console.error("Failed to send verification email", error);
-    }
+    });
 
 
     const { token } = await this.generateUserToken({ id: userId });
