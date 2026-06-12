@@ -120,9 +120,13 @@ class UserService {
     // send email for verification
     const { token: verificationToken } = await this.generateUserToken({ id: userId });
 
-    // send email for verification
-    await EmailService.sendEmailVerificationEmail(email, verificationToken);
-    // console.log(verificationToken)
+    // A mail-provider failure must not fail account creation — the user row is
+    // already committed, and verification can be re-requested. Log and continue.
+    try {
+      await EmailService.sendEmailVerificationEmail(email, verificationToken);
+    } catch (error) {
+      console.error("Failed to send verification email", error);
+    }
 
 
     const { token } = await this.generateUserToken({ id: userId });

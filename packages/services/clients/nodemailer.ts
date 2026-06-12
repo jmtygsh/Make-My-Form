@@ -19,7 +19,7 @@ export const transporter = nodemailer.createTransport({
 --------------------------------------------------------- */
 export const sendEmail = async (to: string, subject: string, html: string): Promise<void> => {
     await transporter.sendMail({
-        from: '"MakeMyForm" <noreply@makemyform.in>',
+        from: `"MakeMyForm" <${env.SMTP_FROM}>`,
         to,
         subject,
         html,
