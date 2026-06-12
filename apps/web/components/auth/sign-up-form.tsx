@@ -79,8 +79,7 @@ export function SignUpForm({
                 password: data.password,
             });
 
-            router.refresh();
-            toast.success("Form submitted successfully");
+            toast.success("Account created! Check your email to verify your account.");
             router.push("/verify");
         } catch (error) {
             // console.log(error);
